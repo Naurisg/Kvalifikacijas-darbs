@@ -3,7 +3,7 @@ header('Content-Type: application/json'); // Set response type to JSON
 
 // Connection to SQLite Database
 try {
-    $db = new PDO('sqlite:client_signup.db'); // Change database name if needed
+    $db = new PDO('sqlite:Datubazes/client_signup.db'); // Change database name if needed
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
     // Create the table if it doesn't exist
@@ -32,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Basic validation
     if (empty($email) || empty($name) || empty($password)) {
-        echo json_encode(["success" => false, "message" => "All fields are required."]);
+        echo json_encode(["success" => false, "message" => "Aizpildiet visus laukus."]);
         exit();
     }
 
@@ -51,9 +51,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Execute the statement
     if ($stmt->execute()) {
-        echo json_encode(["success" => true, "message" => "Registration successful!"]);
+        echo json_encode(["success" => true, "message" => "Reģistrācija veiksmīga!"]);
     } else {
-        echo json_encode(["success" => false, "message" => "There was an error during registration."]);
+        echo json_encode(["success" => false, "message" => "Notikusi kļūda, mēģiniet vēlreiz."]);
     }
 }
 ?>

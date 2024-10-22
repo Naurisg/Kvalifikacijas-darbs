@@ -17,7 +17,6 @@
     <link href="../images/favicon.png" rel="shortcut icon" type="image/x-icon">
     <link href="../images/webclip.png" rel="apple-touch-icon">
     <style>
-        /* Additional styles for layout */
         body {
             font-family: 'Inter', sans-serif;
             margin: 0;
@@ -38,27 +37,27 @@
     border-radius: 8px;
     padding: 15px;
     margin: 10px;
-    width: calc(25% - 20px); /* Adjusted for four columns */
+    width: calc(25% - 20px);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    height: 350px; /* Adjust height as needed */
+    height: 350px; 
     background-image: 
         radial-gradient(circle at 20% 30%, var(--gradient-red) 0%, rgba(255, 255, 255, 0) 60%), 
         radial-gradient(circle at 70% 80%, var(--gradient-blue) 0%, rgba(255, 255, 255, 0) 60%);
-    background-size: 150% 150%; /* Enlarge the gradient for a smoother blend */
-    background-position: center; /* Centers the gradient */
-    color: black; /* Change text color for better contrast against the gradient */
+    background-size: 150% 150%; 
+    background-position: center; 
+    color: black;
 }
 
         .filters {
             padding: 20px;
-            width: 250px; /* Increased width */
-            border: 2px solid #ccc; /* Added border */
-            border-radius: 8px; /* Rounded corners */
-            margin-right: 20px; /* Spacing between filter box and product grid */
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Added shadow for depth */
+            width: 250px; 
+            border: 2px solid #ccc; 
+            border-radius: 8px; 
+            margin-right: 20px; 
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
         }
         .filter-title {
             font-weight: bold;
@@ -66,42 +65,40 @@
         }
 
         h3 {
-    text-align: center; /* Centers the text horizontally */
+    text-align: center; 
 }
 .product-box img {
-    width: 100%; /* Full width */
-    height: 150px; /* Fixed height */
-    object-fit: cover; /* Ensure images cover the box */
-    border-radius: 5px; /* Rounded corners for a softer look */
+    width: 100%; 
+    height: 150px; 
+    object-fit: cover;
+    border-radius: 5px;
 }
 
 
 .product-box {
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* Ensures the button stays at the bottom */
-    height: 350px; /* Adjust height as needed */
+    justify-content: space-between; 
+    height: 350px; 
 }
 
 .product-box button {
-    background-color: #4CAF50; /* Change this to your desired color */
-    color: white; /* Text color */
-    border: none; /* Remove border */
-    border-radius: 5px; /* Rounded corners */
-    padding: 5px 10px; /* Smaller padding */
-    font-size: 12px; /* Font size */
-    cursor: pointer; /* Pointer on hover */
-    transition: background-color 0.3s, transform 0.2s; /* Smooth transition for background color and scale */
-    align-self: flex-start; /* Aligns the button to the left */
-    margin-top: auto; /* Pushes the button to the bottom of the box */
+    background-color: #4CAF50; 
+    color: white; 
+    border: none; 
+    border-radius: 5px; 
+    padding: 5px 10px; 
+    font-size: 12px; 
+    cursor: pointer; 
+    transition: background-color 0.3s, transform 0.2s; 
+    align-self: flex-start; 
+    margin-top: auto; 
 }
 
 .product-box button:hover {
-    background-color: #45a049; /* Darker shade on hover */
-    transform: scale(1.05); /* Slightly enlarge button on hover */
+    background-color: #45a049; 
+    transform: scale(1.05); 
 }
-
-
     </style>
     
 </head>
@@ -155,7 +152,7 @@
             </div>
 
             <div class="product-grid">
-                <!-- Example product boxes -->
+                <!-- Produktu kastes -->
                 <div class="product-box">
                     <h3>Produkts 1</h3>
                     <img src="../produkti-images/H73018.png" alt="Produkts 1" style="width: 100%; height: 150px; object-fit: cover;">
@@ -192,24 +189,24 @@
                     <p><strong>Cena: €20.00</strong></p>
                     <button>Pievienot grozam</button>
                 </div>
-                <!-- Add more product boxes as needed -->
+                <!-- Pievienot vel produktus -->
             </div>
         </div>
     </div>
 
     <script>
-        // JavaScript for search functionality
+        // JavaScript search bar
         const searchBar = document.getElementById('search-bar');
         const productBoxes = document.querySelectorAll('.product-box');
 
         searchBar.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase(); // Convert input to lowercase for case-insensitive comparison
+            const searchTerm = this.value.toLowerCase(); // Ievadito search bar parveido uz lowercase
             productBoxes.forEach(box => {
-                const productName = box.querySelector('h3').innerText.toLowerCase(); // Get the product name
+                const productName = box.querySelector('h3').innerText.toLowerCase(); // Iegūst produkta nosaukumu
                 if (productName.includes(searchTerm)) {
-                    box.style.display = ''; // Show the box if it matches
+                    box.style.display = ''; 
                 } else {
-                    box.style.display = 'none'; // Hide the box if it doesn't match
+                    box.style.display = 'none'; 
                 }
             });
         });

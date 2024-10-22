@@ -1,9 +1,9 @@
 <?php
-session_start(); // Start the session for login
+session_start(); 
 
-header('Content-Type: application/json'); // Set response type to JSON
+header('Content-Type: application/json'); 
 
-// Connection to SQLite Database
+// Savienojums ar SQLite Datubāzi
 try {
     $db = new PDO('sqlite:admin_signup.db');
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -12,18 +12,17 @@ try {
     exit();
 }
 
-// Check if form is submitted
+// Pārbauda vai login form ir iesniegta
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['Email'] ?? null;
     $password = $_POST['Password'] ?? null;
 
-    // Basic validation
+    // Pārbaude
     if (empty($email) || empty($password)) {
         echo json_encode(["success" => false, "message" => "Email and Password are required."]);
         exit();
     }
 
-    // Prepare SQL to check the user credentials
     $sql = "SELECT * FROM admin_signup WHERE email = :email";
     $stmt = $db->prepare($sql);
     $stmt->bindParam(':email', $email);
@@ -32,10 +31,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($user && password_verify($password, $user['password'])) {
-        // Check if the user is approved
+        // Pārbauda vai lietotājs ir apstiprināts
         if ($user['approved'] == 1) {
-            // If approved, redirect to the admin panel
-            $_SESSION['user_id'] = $user['id']; // Set session variable
+            // Ja ir apstiprināts parvirza uz admin paneli
+            $_SESSION['user_id'] = $user['id']; 
             echo json_encode(["success" => true, "message" => "Login successful!", "redirect" => "adminpanel.html"]);
             header("Location: admin-panelis.html");
             exit();

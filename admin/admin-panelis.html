@@ -12,6 +12,8 @@
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-bottom: 20px; 
+            display: none; /* Initially hide the tables */
         }
         table, th, td {
             border: 1px solid black;
@@ -24,48 +26,104 @@
             background-color: #f2f2f2;
         }
 
-
-        /* Logout Button Styling */
         .logout-button {
-            display: inline-block; /* Make it inline-block for padding */
-            padding: 10px 20px; /* Padding for button */
-            background-color: #dc3545; /* Bootstrap's danger color */
-            color: white; /* Text color */
-            text-decoration: none; /* No underline */
-            border-radius: 5px; /* Rounded corners */
-            transition: background-color 0.3s ease, transform 0.3s ease; /* Transition effects */
-            margin-top: 20px; /* Space above the button */
+            display: inline-block;
+            padding: 10px 20px; 
+            background-color: #dc3545;
+            color: white; 
+            text-decoration: none; 
+            border-radius: 5px; 
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            margin-top: 20px; 
         }
 
-        /* Logout Button Hover Effect */
         .logout-button:hover {
-            background-color: #c82333; /* Darker shade on hover */
-            transform: scale(1.05); /* Slightly increase size */
+            background-color: #c82333; 
+            transform: scale(1.05);
+        }
+
+        .toggle-button {
+            padding: 10px 15px;
+            margin-right: 10px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .toggle-button:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
         }
     </style>
 </head>
 <body>
 
-<h1>Admin Panel</h1>
-<table id="admin-table">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Email</th>
-            <th>Name</th>
-            <th>Privacy Policy Accepted</th>
-            <th>Approved</th>
-            <th>Created At</th>
-        </tr>
-    </thead>
-    <tbody>
-        <!-- Admin data will be inserted here -->
-    </tbody>
-</table>
-<a href="adminlogin.html" class="logout-button">Logout</a> <!-- Logout Button -->
+<section>
+    <button class="toggle-button" onclick="showTable('admin')">Admini</button>
+    <button class="toggle-button" onclick="showTable('client')">Klienti</button>
+    
+    <h2 id="admin-header" style="display: none;">Admini</h2>
+    <table id="admin-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Epasts</th>
+                <th>Vārds</th>
+                <th>Piekritis noteikumiem</th>
+                <th>Statuss</th>
+                <th>Izveidots</th>
+                <th>Rīcība</th> <!-- Added action column -->
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Admin dati -->
+        </tbody>
+    </table>
+
+    <h2 id="client-header" style="display: none;">Reģistrētie klienti</h2>
+    <table id="client-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Epasts</th>
+                <th>Vārds</th>
+                <th>Piekritis noteikumiem</th>
+                <th>Izveidots</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- klienta dati -->
+        </tbody>
+    </table>
+    
+    <a href="adminlogin.html" class="logout-button">Logout</a>
+</section>
 
 <script>
-    // Fetch the admin data from the PHP API
+    // Function to show the selected table and toggle headers
+    function showTable(table) {
+        const adminTable = document.getElementById("admin-table");
+        const clientTable = document.getElementById("client-table");
+        const adminHeader = document.getElementById("admin-header");
+        const clientHeader = document.getElementById("client-header");
+
+        if (table === 'admin') {
+            adminTable.style.display = 'table';
+            clientTable.style.display = 'none';
+            adminHeader.style.display = 'block'; // Show Admin header
+            clientHeader.style.display = 'none'; // Hide Client header
+        } else {
+            adminTable.style.display = 'none';
+            clientTable.style.display = 'table';
+            adminHeader.style.display = 'none'; // Hide Admin header
+            clientHeader.style.display = 'block'; // Show Client header
+        }
+    }
+
+    // Fetch Admin Data
     fetch('get_admins.php')
         .then(response => response.json())
         .then(data => {
@@ -92,6 +150,7 @@
     
                     tbody.appendChild(row);
                 });
+                showTable('admin'); // Show the admin table by default
             } else {
                 alert("Failed to load admin data.");
             }
@@ -99,11 +158,40 @@
         .catch(error => {
             console.error('Error fetching admin data:', error);
         });
+
+    // Fetch Client Data
+    fetch('get_clients.php')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const clients = data.clients;
+                const tbody = document.querySelector("#client-table tbody");
     
+                clients.forEach(client => {
+                    const row = document.createElement("tr");
+    
+                    row.innerHTML = `
+                        <td>${client.id}</td>
+                        <td>${client.email}</td>
+                        <td>${client.name}</td>
+                        <td>${client.accept_privacy_policy == 1 ? 'Yes' : 'No'}</td>
+                        <td>${client.created_at}</td>
+                    `;
+    
+                    tbody.appendChild(row);
+                });
+            } else {
+                alert("Failed to load client data.");
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching client data:', error);
+        });
+
     // Function to toggle the approved status
     function toggleApproved(id, currentStatus) {
         const newStatus = currentStatus === 1 ? 0 : 1;
-    
+
         // Send the updated approved status to the server
         fetch('update_approved.php', {
             method: 'POST',
@@ -120,8 +208,8 @@
             if (data.success) {
                 // Update the status in the table
                 const statusCell = document.getElementById(`approved-status-${id}`);
-                const button = statusCell.nextElementSibling.querySelector("button");
-    
+                const button = statusCell.parentElement.querySelector("button");
+
                 statusCell.textContent = newStatus === 1 ? 'Approved' : 'Pending';
                 button.textContent = newStatus === 1 ? 'Revoke Approval' : 'Approve';
                 button.setAttribute("onclick", `toggleApproved(${id}, ${newStatus})`);
@@ -133,7 +221,7 @@
             console.error('Error updating approved status:', error);
         });
     }
-    </script>
+</script>
 
 </body>
 </html>
