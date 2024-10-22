@@ -13,7 +13,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px; 
-            display: none; /* Initially hide the tables */
+            display: none; 
         }
         table, th, td {
             border: 1px solid black;
@@ -75,7 +75,7 @@
                 <th>Piekritis noteikumiem</th>
                 <th>Statuss</th>
                 <th>Izveidots</th>
-                <th>Rīcība</th> <!-- Added action column -->
+                <th>Statuss</th> 
             </tr>
         </thead>
         <tbody>
@@ -103,7 +103,6 @@
 </section>
 
 <script>
-    // Function to show the selected table and toggle headers
     function showTable(table) {
         const adminTable = document.getElementById("admin-table");
         const clientTable = document.getElementById("client-table");
@@ -113,17 +112,17 @@
         if (table === 'admin') {
             adminTable.style.display = 'table';
             clientTable.style.display = 'none';
-            adminHeader.style.display = 'block'; // Show Admin header
-            clientHeader.style.display = 'none'; // Hide Client header
+            adminHeader.style.display = 'block'; 
+            clientHeader.style.display = 'none'; 
         } else {
             adminTable.style.display = 'none';
             clientTable.style.display = 'table';
-            adminHeader.style.display = 'none'; // Hide Admin header
-            clientHeader.style.display = 'block'; // Show Client header
+            adminHeader.style.display = 'none'; 
+            clientHeader.style.display = 'block'; 
         }
     }
 
-    // Fetch Admin Data
+    
     fetch('get_admins.php')
         .then(response => response.json())
         .then(data => {
@@ -150,7 +149,7 @@
     
                     tbody.appendChild(row);
                 });
-                showTable('admin'); // Show the admin table by default
+                showTable('admin'); 
             } else {
                 alert("Failed to load admin data.");
             }
@@ -159,7 +158,6 @@
             console.error('Error fetching admin data:', error);
         });
 
-    // Fetch Client Data
     fetch('get_clients.php')
         .then(response => response.json())
         .then(data => {
@@ -188,11 +186,9 @@
             console.error('Error fetching client data:', error);
         });
 
-    // Function to toggle the approved status
     function toggleApproved(id, currentStatus) {
         const newStatus = currentStatus === 1 ? 0 : 1;
 
-        // Send the updated approved status to the server
         fetch('update_approved.php', {
             method: 'POST',
             headers: {
@@ -206,7 +202,6 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Update the status in the table
                 const statusCell = document.getElementById(`approved-status-${id}`);
                 const button = statusCell.parentElement.querySelector("button");
 
