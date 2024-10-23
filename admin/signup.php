@@ -20,7 +20,7 @@ try {
     ";
     $db->exec($createTableQuery);
 } catch (PDOException $e) {
-    echo json_encode(["success" => false, "message" => "Connection failed: " . $e->getMessage()]);
+    echo json_encode(["success" => false, "message" => "Savienojums neizdevās: " . $e->getMessage()]);
     exit();
 }
 
@@ -33,7 +33,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Pārbaude
     if (empty($email) || empty($name) || empty($password)) {
-        echo json_encode(["success" => false, "message" => "All fields are required."]);
+        echo json_encode(["success" => false, "message" => "Visi lauki ir obligāti."]);
         exit();
     }
 
@@ -50,9 +50,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Izvada paziņojumu
     if ($stmt->execute()) {
-        echo json_encode(["success" => true, "message" => "Registration successful, awaiting approval!"]);
+        echo json_encode(["success" => true, "message" => "Reģistrācija ir veiksmīga, gaida apstiprinājumu!"]);
     } else {
-        echo json_encode(["success" => false, "message" => "There was an error during registration."]);
+        echo json_encode(["success" => false, "message" => "Reģistrācijas laikā radās kļūda."]);
     }
 }
 ?>

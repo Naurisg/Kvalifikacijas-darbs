@@ -23,6 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
+    // SQL lai parbaudītu lietotāju
     $sql = "SELECT * FROM admin_signup WHERE email = :email";
     $stmt = $db->prepare($sql);
     $stmt->bindParam(':email', $email);
@@ -30,20 +31,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($user && password_verify($password, $user['password'])) {
-        // Pārbauda vai lietotājs ir apstiprināts
-        if ($user['approved'] == 1) {
-            // Ja ir apstiprināts parvirza uz admin paneli
-            $_SESSION['user_id'] = $user['id']; 
-            echo json_encode(["success" => true, "message" => "Login successful!", "redirect" => "adminpanel.html"]);
-            header("Location: admin-panelis.html");
-            exit();
+    if ($user) {
+        // parbauda vai parole ir pareiza
+        if (password_verify($password, $user['password'])) {
+            // Pārbauda vai lietotājs ir apstiprināts
+            if ($user['approved'] == 1) {
+                // ja ir apstiprināts tad novirza uz admin paneli
+                $_SESSION['user_id'] = $user['id']; 
+                echo json_encode(["success" => true, "message" => "Logins veiksmīgs!", "redirect" => "admin-panelis.php"]);
+                exit(); 
+            } else {
+                // ja nav apstiprināts parāda error message
+                echo json_encode(["success" => false, "message" => "Jūsu konts vēl nav apstiprināts."]);
+                exit();
+            }
         } else {
-            echo json_encode(["success" => false, "message" => "Your account is not approved yet."]);
+            // Ja nav pareiza parole parāda error message
+            echo json_encode(["success" => false, "message" => "Nepareiza parole. Mēģini vēlreiz."]);
             exit();
         }
     } else {
-        echo json_encode(["success" => false, "message" => "Invalid email or password."]);
+        // Ja lietotājs nav atrasts parāda error meassage
+        echo json_encode(["success" => false, "message" => "Nav atrasts konts ar šo e-pastu.."]);
         exit();
     }
 }

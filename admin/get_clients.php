@@ -16,6 +16,6 @@ try {
 
     echo json_encode(['success' => true, 'clients' => $clients]);
 } catch (PDOException $e) {
-    echo json_encode(["success" => false, "message" => "Connection failed: " . $e->getMessage()]);
+    echo json_encode(["success" => false, "message" => "Savienojums neizdevās: " . $e->getMessage()]);
 }
 ?>

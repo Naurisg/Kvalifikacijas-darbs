@@ -4631,45 +4631,45 @@ figcaption {
 
 
 
-/* Preču-kategorijas animation****************************************** */
+/* Preču-kategorijas animācijas****************************************** */
 
 .image-link {
   position: relative;
-  display: inline-block; /* Ensures the text is positioned correctly */
-  overflow: hidden; /* Ensures the text doesn't overflow */
+  display: inline-block; 
+  overflow: hidden; 
 }
 
 .image-link img {
-  display: block; /* Removes the gap below the image */
-  transition: transform 0.3s ease; /* Smooth image scaling */
+  display: block; 
+  transition: transform 0.3s ease; 
 }
 
 .hover-text {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%); /* Center the text */
-  color: white; /* Text color */
-  font-size: 16px; /* Text size */
-  opacity: 0; /* Initially hidden */
-  transition: opacity 0.3s ease; /* Smooth fade-in */
-  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
-  padding: 10px 15px; /* Adjusted padding for wider box */
-  border-radius: 5px; /* Rounded corners for the background */
-  min-width: 100px; /* Set a minimum width for the text box */
-  text-align: center; /* Center the text inside the box */
+  transform: translate(-50%, -50%); 
+  color: white; 
+  font-size: 16px; 
+  opacity: 0; 
+  transition: opacity 0.3s ease; 
+  background-color: rgba(0, 0, 0, 0.5); 
+  padding: 10px 15px; 
+  border-radius: 5px; 
+  min-width: 100px; 
+  text-align: center; 
 }
 
 .image-link:hover img {
-  transform: scale(1.1); /* Scale up the image on hover */
-  animation: pulse 1.5s infinite; /* Add pulse effect */
+  transform: scale(1.1);
+  animation: pulse 1.5s infinite; 
 }
 
 .image-link:hover .hover-text {
-  opacity: 1; /* Show text on hover */
+  opacity: 1; 
 }
 
-/* Pulse animation */
+/* Pulse animācija */
 @keyframes pulse {
   0% {
       transform: scale(1);

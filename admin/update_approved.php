@@ -20,9 +20,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bindParam(':id', $admin_id, PDO::PARAM_INT);
 
         if ($stmt->execute()) {
-            echo json_encode(["success" => true, "message" => "Approved status updated successfully."]);
+            echo json_encode(["success" => true, "message" => "Apstiprinātais statuss ir veiksmīgi atjaunināts."]);
         } else {
-            echo json_encode(["success" => false, "message" => "Failed to update approved status."]);
+            echo json_encode(["success" => false, "message" => "Neizdevās atjaunināt apstiprināto statusu."]);
         }
     } catch (PDOException $e) {
         echo json_encode(["success" => false, "message" => "Datubāzes kļūda: " . $e->getMessage()]);
