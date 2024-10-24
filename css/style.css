@@ -4681,3 +4681,36 @@ figcaption {
       transform: scale(1);
   }
 }
+
+
+
+/* Dark Mods */
+body.dark-mode {
+    background-color: #121212; 
+    color: #e0e0e0; 
+}
+
+.nav-bar.dark-mode {
+    background-color: #1f1f1f; 
+}
+
+a.nav-link.dark-mode {
+    color: #e0e0e0; 
+}
+
+.button.light {
+    background-color: #424242; 
+    color: #ffffff; 
+}
+
+.text.large.dark-mode,
+.heading.h1.dark-mode,
+.heading.h3.dark-mode,
+.paragraph-15.dark-mode {
+    color: #e0e0e0; 
+}
+
+.image-container .overlay-text {
+    background-color: rgba(255, 255, 255, 0.3); 
+    color: #000; 
+}

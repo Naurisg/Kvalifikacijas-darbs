@@ -238,7 +238,7 @@ if (!isset($_SESSION['user_id'])) {
                                     onclick="toggleApproved(${admin.id}, ${admin.approved})">
                                 ${admin.approved == 1 ? 'Noņemt piekļuvi' : 'Apstiprināt'}
                             </button>
-                            <button class="edit-button" onclick="editAdmin(${admin.id})">Labot</button>
+                            <a href="adminedit.html?id=${admin.id}" class="edit-button">Labot</a>
                         </td>
                     `;
 
