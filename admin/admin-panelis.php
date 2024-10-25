@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// funkcija kas parbauda vai lietotājs ir ielogojies pretēja gadijumā pārmet uz login page
 if (!isset($_SESSION['user_id'])) {
     header("Location: adminlogin.html");
     exit();
@@ -105,37 +104,6 @@ if (!isset($_SESSION['user_id'])) {
             }
         }
 
-        .approval-button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-            color: white; 
-        }
-
-        .approval-button.approve {
-            background: linear-gradient(45deg, #28a745, #6dd5ed); 
-        }
-
-        .approval-button.approve:hover {
-            background: linear-gradient(45deg, #218838, #5bc0de); 
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .approval-button.revoke {
-            background: linear-gradient(45deg, #dc3545, #ff6b81); 
-        }
-
-        .approval-button.revoke:hover {
-            background: linear-gradient(45deg, #c82333, #ff4c4f); 
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
         .edit-button {
             padding: 10px 20px;
             border: none;
@@ -188,6 +156,7 @@ if (!isset($_SESSION['user_id'])) {
                 <th>Vārds</th>
                 <th>Piekritis noteikumiem</th>
                 <th>Izveidots</th>
+                <th>Labot</th>
             </tr>
         </thead>
         <tbody>
@@ -216,6 +185,7 @@ if (!isset($_SESSION['user_id'])) {
         }
     }
 
+    // Admin informācija
     fetch('get_admins.php')
         .then(response => response.json())
         .then(data => {
@@ -253,38 +223,39 @@ if (!isset($_SESSION['user_id'])) {
             console.error('Error fetching admin data:', error);
         });
 
-    function editAdmin(adminId) {
-        
-        alert(`Admins ar ID: ${adminId} tiks rediģēts.`);
-    }
+//KLientu informācija
+fetch('get_clients.php')
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const clients = data.clients;
+            const tbody = document.querySelector("#client-table tbody");
 
-    fetch('get_clients.php')
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const clients = data.clients;
-                const tbody = document.querySelector("#client-table tbody");
+            clients.forEach(client => {
+                const row = document.createElement("tr");
 
-                clients.forEach(client => {
-                    const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${client.id}</td>
+                    <td>${client.email}</td>
+                    <td>${client.name}</td>
+                    <td>${client.accept_privacy_policy == 1 ? 'Jā' : 'Nē'}</td>
+                    <td>${client.created_at}</td>
+                    <td>
+                        <a href="useredit.html?id=${client.id}" class="edit-button">Labot</a>
+                    </td>
+                `;
 
-                    row.innerHTML = `
-                        <td>${client.id}</td>
-                        <td>${client.email}</td>
-                        <td>${client.name}</td>
-                        <td>${client.accept_privacy_policy == 1 ? 'Yes' : 'No'}</td>
-                        <td>${client.created_at}</td>
-                    `;
+                tbody.appendChild(row);
+            });
+        } else {
+            alert("Failed to load client data.");
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching client data:', error);
+    });
 
-                    tbody.appendChild(row);
-                });
-            } else {
-                alert("Failed to load client data.");
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching client data:', error);
-        });
+
 
     function toggleApproved(id, currentStatus) {
         const newStatus = currentStatus === 1 ? 0 : 1;
