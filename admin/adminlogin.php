@@ -47,7 +47,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         } else {
             // Ja nav pareiza parole parāda error message
-            echo json_encode(["success" => false, "message" => "Nepareiza parole. Mēģini vēlreiz."]);
+            echo json_encode(["success" => false, "message" => "Nepareizi pieteikšanās dati. Mēģini vēlreiz."]);
             exit();
         }
     } else {

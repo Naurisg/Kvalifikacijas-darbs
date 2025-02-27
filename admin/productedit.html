@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labot Produktu</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #2c3e50, #bdc3c7);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .form-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #4A4A4A;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #007bff;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        textarea {
+            height: 150px;
+            resize: vertical;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .submit-btn, .back-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .back-btn {
+            background-color: #6c757d;
+            color: white;
+            text-decoration: none;
+        }
+
+        .current-image {
+            max-width: 200px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Labot Produktu</h2>
+        <form id="editProductForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="nosaukums">Nosaukums:</label>
+                <input type="text" id="nosaukums" name="nosaukums" required>
+            </div>
+
+            <div class="form-group">
+                <label for="apraksts">Apraksts:</label>
+                <textarea id="apraksts" name="apraksts" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="kategorija">Kategorija:</label>
+                <select id="kategorija" name="kategorija" required>
+                    <option value="T-krekli">T-krekli</option>
+                    <option value="Jakas">Jakas</option>
+                    <option value="Krekli">Krekli</option>
+                    <option value="Aksesuāri">Aksesuāri</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="cena">Cena (€):</label>
+                <input type="number" id="cena" name="cena" step="0.01" required>
+            </div>
+
+            <div class="form-group">
+                <label>Pašreizējā bilde:</label>
+                <img id="currentImage" class="current-image" src="" alt="Current product image">
+                <label for="bilde">Mainīt bildi:</label>
+                <input type="file" id="bilde" name="bilde" accept="image/*">
+            </div>
+
+            <div class="button-group">
+                <a href="admin-panelis.php" class="back-btn">Atpakaļ</a>
+                <button type="submit" class="submit-btn">Saglabāt izmaiņas</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('id');
+
+        // Load existing product data
+        fetch(`get_product.php?id=${productId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('nosaukums').value = data.product.nosaukums;
+                    document.getElementById('apraksts').value = data.product.apraksts;
+                    document.getElementById('kategorija').value = data.product.kategorija;
+                    document.getElementById('cena').value = data.product.cena;
+                    document.getElementById('currentImage').src = '../uploads/' + data.product.bilde;
+                }
+            });
+
+        // Handle form submission
+        document.getElementById('editProductForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            formData.append('id', productId);
+
+            fetch('update_product.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Produkts veiksmīgi atjaunināts!');
+                    window.location.href = 'admin-panelis.php';
+                } else {
+                    alert('Kļūda: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Kļūda atjauninot produktu');
+            });
+        });
+    </script>
+</body>
+</html>
