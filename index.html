@@ -72,7 +72,7 @@
                 </a>
             </div>
             <div class="topprecesdiv">
-                <a href="precu-lapas/apavi.html" class="image-container">
+                <a href="precu-lapas/apavi.php" class="image-container">
                     <img src="images/apavi.webp" loading="lazy" alt="" class="image-74">
                     <span class="overlay-text">Apavi</span>
                 </a>
@@ -91,44 +91,23 @@
             </div>
         </div>
     </section>
-    
-    
-
     </div>
+
+    
     <div class="jaunumisection">
       <div class="container2">
-        <div class="section-top">
-          <h2 class="heading h3"><strong>Preču Jaunumi:</strong></h2>
-          <a href="precu-katalogs.html" class="button light mobile-hidden w-button">Apskatīt visus</a>
-        </div>
-        <div class="w-layout-grid grid">
-          <div class="precujaundiv"><img src="images/grippaz-gloves.webp" loading="lazy" sizes="(max-width: 479px) 42vw, (max-width: 767px) 24vw, (max-width: 991px) 22vw, (max-width: 1279px) 21vw, 24vw" srcset="images/grippaz-gloves-p-500.webp 500w, images/grippaz-gloves.webp 800w" alt="" class="image-4">
-            <p id="w-node-a6754200-0efd-1b28-e301-2dc33f191026-1c953eb0" class="paragraph-8"><strong class="bold-text">CORDLESS BRUSHLESS <br>CIRCULAR SAW 18V</strong></p>
-            <div class="jaunumupoga">
-              <a id="w-node-_5a8ae31f-98e4-649e-728d-0e39a19bd48e-1c953eb0" href="#" class="button-2 w-button">Uzzināt vairāk</a>
-            </div>
+          <div class="section-top">
+              <h2 class="heading h3"><strong>Preču Jaunumi:</strong></h2>
+              <a href="precu-katalogs.html" class="button light mobile-hidden w-button">Apskatīt visus</a>
           </div>
-          <div class="precujaundiv"><img src="images/Screenshot-2024-10-10-110032.png" loading="lazy" sizes="(max-width: 479px) 42vw, (max-width: 767px) 24vw, (max-width: 991px) 22vw, (max-width: 1279px) 21vw, 24vw" srcset="images/Screenshot-2024-10-10-110032-p-500.png 500w, images/Screenshot-2024-10-10-110032.png 551w" alt="" class="image-47">
-            <p class="paragraph-6"><strong class="bold-text-3">Brushless Cordless Impact <br>Drill Driver 18V</strong></p>
-            <div class="jaunumupoga">
-              <a id="w-node-_8362fdf5-9e45-25d8-edde-d99a47d5f7d5-1c953eb0" href="#" class="button-2 w-button">Uzzināt vairāk</a>
-            </div>
+          <div class="w-layout-grid grid" id="latest-products-container">
+              <!-- Products will be loaded here dynamically -->
           </div>
-          <div id="w-node-_2f70c92a-ecb4-cccb-9859-7fb1d541bf4b-1c953eb0" class="precujaundiv"><img src="images/Screenshot-2024-10-10-110250.png" loading="lazy" sizes="(max-width: 479px) 42vw, (max-width: 767px) 24vw, (max-width: 991px) 22vw, (max-width: 1279px) 21vw, 24vw" srcset="images/Screenshot-2024-10-10-110250-p-500.png 500w, images/Screenshot-2024-10-10-110250.png 621w" alt="" class="image-48">
-            <p class="paragraph-7"><strong>Pressure washer <br>180 bar</strong></p>
-            <div class="jaunumupoga">
-              <a id="w-node-eae7180a-5084-afeb-042a-7c194ba79d29-1c953eb0" href="#" class="button-2 w-button">Uzzināt vairāk</a>
-            </div>
-          </div>
-          <div id="w-node-_6878bfaa-8006-0502-a5bd-9b2c986559ff-1c953eb0" class="precujaundiv"><img src="images/safety-shoes-pesso-b249-s3.jpg" loading="lazy" id="w-node-cf40fa11-d7cb-e29a-310d-e62f0dcaec60-1c953eb0" sizes="(max-width: 479px) 42vw, (max-width: 767px) 24vw, (max-width: 991px) 22vw, (max-width: 1279px) 21vw, 24vw" alt="" srcset="images/safety-shoes-pesso-b249-s3-p-500.jpg 500w, images/safety-shoes-pesso-b249-s3-p-800.jpg 800w, images/safety-shoes-pesso-b249-s3.jpg 900w"  class="image-77">
-            <p class="paragraph-7"><strong>Cordelss impact<br> wrench 400NM</strong></p>
-            <div class="jaunumupoga">
-              <a id="w-node-f6625469-b612-80da-4e95-6c74eeabd423-1c953eb0" href="#" class="button-2 w-button">Uzzināt vairāk</a>
-            </div>
-          </div>
-        </div>
       </div>
-    </div>
+  </div>
+  
+
+
     <section class="kapecmussection">
       <div class="div-block-10">
         <h1><strong class="bold-text-9">Kāpēc izvēlēties tieši mūs?</strong></h1>
@@ -264,6 +243,32 @@
       // saglaba darkmode local storage
       localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
     });
+
+
+
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+    fetch('fetch_latest_products.php')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const container = document.getElementById('latest-products-container');
+                data.products.forEach(product => {
+                    container.innerHTML += `
+                        <div class="precujaundiv">
+                            <img src="${product.bilde}" loading="lazy" alt="${product.nosaukums}" class="image-4">
+                            <p class="paragraph-8"><strong class="bold-text">${product.nosaukums}</strong></p>
+                            <div class="jaunumupoga">
+                                <a href="#" class="button-2 w-button">Uzzināt vairāk</a>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+        })
+        .catch(error => console.error('Error:', error));
+});
   </script>
   
 </body>

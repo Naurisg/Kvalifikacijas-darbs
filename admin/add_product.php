@@ -119,10 +119,18 @@ if (!isset($_SESSION['user_id'])) {
                 <label for="kategorija">Kategorija:</label>
                 <select id="kategorija" name="kategorija" required>
                     <option value="">Izvēlieties kategoriju</option>
-                    <option value="T-krekli">T-krekli</option>
+                    <option value="Cimdi">Cimdi</option>
+                    <option value="Apavi">Apavi</option>
+                    <option value="Apgerbs">Apģērbs</option>
+                    <option value="Drosibas-sistemas">Drošības sistēmas</option>
+                    <option value="Gazmaskas">Gazmaskas</option>
+                    <option value="ArApgerbs">Augstas redzamības apgerbs</option>
+                    <option value="Austinas_kiveres_brilles">Austinas,kiveres,brilles</option>
+                    <option value="KrasoApgerbs">Krāsošanas apģērbs</option>
                     <option value="Jakas">Jakas</option>
-                    <option value="Krekli">Krekli</option>
-                    <option value="Aksesuāri">Aksesuāri</option>
+                    <option value="Kimijas">Ķīmijas</option>
+                    <option value="Aksesuari">Aksesuāri</option>
+                    <option value="Instrumenti">Instrumenti</option>
                 </select>
             </div>
 

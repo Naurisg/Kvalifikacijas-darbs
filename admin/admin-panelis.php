@@ -350,7 +350,8 @@ if (!isset($_SESSION['user_id'])) {
                         <td>${product.id}</td>
                         <td>${product.nosaukums}</td>
                         <td>${product.apraksts}</td>
-                        <td><img src="../uploads/${product.bilde}" width="50" height="50" alt="Product Image"></td>
+                        <td><img src="../${product.bilde}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 4px;"></td>
+
                         <td>${product.kategorija}</td>
                         <td>${product.cena}€</td>
                         <td>

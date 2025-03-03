@@ -1,8 +1,9 @@
+
 <!DOCTYPE html>
 <html lang="lv">
 <head>
     <meta charset="UTF-8">
-    <title>Cimdi | Darba Apģērbi</title>
+    <title>Apavi | Darba Apģērbi</title>
     <link rel="stylesheet" href="../css/style.css">
     <header>
     <div data-collapse="small" data-animation="default" data-duration="400" data-easing="ease" data-easing2="ease" role="banner" class="nav-bar w-nav">
@@ -148,17 +149,19 @@
             
             <div class="filter-section">
                 <h3>Izmēri</h3>
-                <label><input type="checkbox" value="S"> S</label><br>
-                <label><input type="checkbox" value="M"> M</label><br>
-                <label><input type="checkbox" value="L"> L</label><br>
-                <label><input type="checkbox" value="XL"> XL</label><br>
-                <label><input type="checkbox" value="XXL"> XXL</label>
+                <label><input type="checkbox" value="36"> 36</label><br>
+                <label><input type="checkbox" value="37"> 37</label><br>
+                <label><input type="checkbox" value="38"> 38</label><br>
+                <label><input type="checkbox" value="39"> 39</label><br>
+                <label><input type="checkbox" value="40"> 40</label><br>
+                <label><input type="checkbox" value="41"> 41</label><br>
+                <label><input type="checkbox" value="42"> 42</label>
             </div>
         </aside>
 
         <main class="products-section">
             <div class="search-container">
-                <input type="text" class="search-bar" placeholder="Meklēt cimdus...">
+                <input type="text" class="search-bar" placeholder="Meklēt apavus...">
             </div>
             <div id="products-container" class="products-grid">
                 <!-- Products will be loaded here -->
@@ -170,7 +173,7 @@
     document.addEventListener('DOMContentLoaded', function() {
     let allProducts = [];
     
-    fetch('fetch_category_products.php?category=Cimdi')
+    fetch('fetch_category_products.php?category=Apavi')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -179,11 +182,13 @@
             }
         });
 
+    // Search filter
     document.querySelector('.search-bar').addEventListener('input', (e) => {
         const searchTerm = e.target.value.toLowerCase();
         filterProducts();
     });
 
+    // Price filter
     document.querySelector('.price-range').addEventListener('input', (e) => {
         filterProducts();
     });
@@ -204,35 +209,38 @@
             `<span>€0</span> - <span>€${maxPrice}</span>`;
     }
 
-    function displayProducts(products) {
-        const container = document.getElementById('products-container');
-        container.innerHTML = '';
-        products.forEach(product => {
-            container.innerHTML += `
-                <div class="product-card">
-                    <img src="../${product.bilde}" alt="${product.nosaukums}">
-                    <div class="product-info">
-                        <h3>${product.nosaukums}</h3>
-                        <p>${product.apraksts}</p>
-                        <p class="price">€${product.cena}</p>
-                        <div class="product-buttons">
-                            <button class="add-to-cart" onclick="addToCart(${product.id})">Pievienot grozam</button>
-                            <button class="buy-now" onclick="buyNow(${product.id})">Pirkt tagad</button>
+
+            function displayProducts(products) {
+                const container = document.getElementById('products-container');
+                container.innerHTML = '';
+                products.forEach(product => {
+                    container.innerHTML += `
+                        <div class="product-card">
+                            <img src="../${product.bilde}" alt="${product.nosaukums}">
+                            <div class="product-info">
+                                <h3>${product.nosaukums}</h3>
+                                <p>${product.apraksts}</p>
+                                <p class="price">€${product.cena}</p>
+                                <div class="product-buttons">
+                                    <button class="add-to-cart" onclick="addToCart(${product.id})">Pievienot grozam</button>
+                                    <button class="buy-now" onclick="buyNow(${product.id})">Pirkt tagad</button>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-            `;
+                    `;
+                });
+            }
         });
-    }
-    });
 
-    function addToCart(productId) {
-        console.log('Adding product to cart:', productId);
-    }
+        function addToCart(productId) {
+            console.log('Adding product to cart:', productId);
+            // Add your cart logic here
+        }
 
-    function buyNow(productId) {
-        console.log('Buying product:', productId);
-    }
+        function buyNow(productId) {
+            console.log('Buying product:', productId);
+            // Add your purchase logic here
+        }
     </script>
 </body>
 </html>
