@@ -2,7 +2,7 @@
 <html lang="lv">
 <head>
     <meta charset="UTF-8">
-    <title>Ķīmijas | Darba Apģērbi</title>
+    <title>Austiņas,Ķiveres,brilles | Darba Apģērbi</title>
     <link rel="stylesheet" href="../css/style.css">
     <header>
     <div data-collapse="small" data-animation="default" data-duration="400" data-easing="ease" data-easing2="ease" role="banner" class="nav-bar w-nav">
@@ -248,34 +248,41 @@
         <aside class="filters-sidebar">
             <div class="filter-section">
                 <h3>Cenas filtrs</h3>
-                <input type="range" class="price-range" min="0" max="300" step="10">
+                <input type="range" class="price-range" min="0" max="150" step="10">
                 <div class="price-values">
-                    <span>€0</span> - <span>€300</span>
+                    <span>€0</span> - <span>€150</span>
                 </div>
             </div>
             
             <div class="filter-section">
-                <h3>Izmēri</h3>
-                <label><input type="checkbox" value="S"> S</label><br>
-                <label><input type="checkbox" value="M"> M</label><br>
-                <label><input type="checkbox" value="L"> L</label><br>
-                <label><input type="checkbox" value="XL"> XL</label><br>
-                <label><input type="checkbox" value="XXL"> XXL</label>
+                <h3>Tips</h3>
+                <label><input type="checkbox" value="Būvniecības"> Būvniecības ķiveres</label><br>
+                <label><input type="checkbox" value="Industriālās"> Industriālās ķiveres</label><br>
+                <label><input type="checkbox" value="Alpīnisma"> Alpīnisma ķiveres</label><br>
+                <label><input type="checkbox" value="Elektriķu"> Elektriķu ķiveres</label>
             </div>
 
             <div class="filter-section">
-                <h3>Aizsardzības tips</h3>
-                <label><input type="checkbox" value="Skābes"> Skābju aizsardzība</label><br>
-                <label><input type="checkbox" value="Sārmi"> Sārmu aizsardzība</label><br>
-                <label><input type="checkbox" value="Šķīdinātāji"> Šķīdinātāju aizsardzība</label><br>
-                <label><input type="checkbox" value="Universāla"> Universāla aizsardzība</label>
+                <h3>Krāsa</h3>
+                <label><input type="checkbox" value="Balta"> Balta</label><br>
+                <label><input type="checkbox" value="Dzeltena"> Dzeltena</label><br>
+                <label><input type="checkbox" value="Sarkana"> Sarkana</label><br>
+                <label><input type="checkbox" value="Zila"> Zila</label><br>
+                <label><input type="checkbox" value="Oranža"> Oranža</label>
             </div>
 
+            <div class="filter-section">
+                <h3>Papildaprīkojums</h3>
+                <label><input type="checkbox" value="Sejassargs"> Ar sejassargu</label><br>
+                <label><input type="checkbox" value="Austiņas"> Ar austiņām</label><br>
+                <label><input type="checkbox" value="Lukturis"> Ar lukturi</label><br>
+                <label><input type="checkbox" value="Ventilācija"> Ar ventilāciju</label>
+            </div>
         </aside>
 
         <main class="products-section">
             <div class="search-container">
-                <input type="text" class="search-bar" placeholder="Meklēt ķīmiskos līdzekļus...">
+                <input type="text" class="search-bar" placeholder="Meklēt ķiveres...">
             </div>
             <div id="products-container" class="products-grid">
             </div>
@@ -286,7 +293,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         let allProducts = [];
         
-        fetch('fetch_category_products.php?category=Kimijas')
+        fetch('fetch_category_products.php?category=Austinas_kiveres_brilles')
             .then(response => response.json())
             .then(data => {
                 if (data.success) {

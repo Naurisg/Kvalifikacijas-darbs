@@ -170,9 +170,13 @@
           <p class="text large">Sekojiet jaunumiem par produktiem un saņemiet jaunākos piedāvājumus!</p>
           <div class="spacer _16"></div>
           <div class="email-form center-align w-form">
-            <form id="wf-form-Subscribe-Form" name="wf-form-Subscribe-Form" data-name="Subscribe Form" method="get" class="email-form" data-wf-page-id="66f12005df0203b01c953eb0" data-wf-element-id="4b7eae9c-8abc-9b14-e6a2-0d470afd457b">
-              <div class="email-subscribe"><input class="text-field no-margin w-input" maxlength="256" name="Email-2" data-name="Email 2" placeholder="Ievadiet savu e-pastu" type="email" id="Email-2" required=""><input type="submit" data-wait="Lūdzu uzgaidiet..." class="button dark w-button" value="Abonēt"></div>
-            </form>
+            <form id="subscribe-form" name="wf-form-Subscribe-Form" data-name="Subscribe Form" method="get" class="email-form" data-wf-page-id="66f12005df0203b01c953eb0" data-wf-element-id="4b7eae9c-8abc-9b14-e6a2-0d470afd457b">
+              <div class="email-subscribe">
+                  <input class="text-field no-margin w-input" maxlength="256" name="Email-2" data-name="Email 2" placeholder="Ievadiet savu e-pastu" type="email" id="subscribe-email" required="">
+                  <input type="submit" data-wait="Lūdzu uzgaidiet..." class="button dark w-button" value="Abonēt">
+              </div>
+          </form>
+          
             <div class="form-success dark w-form-done">
               <div>You&#x27;re all signed up.</div>
             </div>
@@ -244,7 +248,28 @@
       localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
     });
 
-
+    // Abonentu js
+    document.getElementById('subscribe-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const email = document.getElementById('subscribe-email').value;
+    
+    fetch('subscribe.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'email=' + encodeURIComponent(email)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.success) {
+            alert('Paldies par abonēšanu!');
+            document.getElementById('subscribe-email').value = '';
+        } else {
+            alert('Kļūda: ' + data.message);
+        }
+    });
+});
 
 
 

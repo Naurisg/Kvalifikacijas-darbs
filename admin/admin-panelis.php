@@ -168,9 +168,12 @@ if (!isset($_SESSION['user_id'])) {
 </head>
 <body>
 <section>
+<section>
     <button class="toggle-button" onclick="showTable('admin')">Admini</button>
     <button class="toggle-button" onclick="showTable('client')">Klienti</button>
     <button class="toggle-button" onclick="showTable('product')">Produkti</button>
+    <button class="toggle-button" onclick="showTable('subscriber')">Abonenti</button>
+    
     <a href="logout.php" class="logout-button">Iziet</a>
 
     <h2 id="admin-header" style="display: none;">Admini</h2>
@@ -229,6 +232,22 @@ if (!isset($_SESSION['user_id'])) {
             <!-- produktu dati -->
         </tbody>
     </table>
+
+    <h2 id="subscriber-header" style="display: none;">Abonenti</h2>
+<table id="subscriber-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Epasts</th>
+            <th>Pievienošanās datums</th>
+            <th>Darbības</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- subscriber data will be loaded here -->
+    </tbody>
+</table>
+
 </section>
 
 <script>
@@ -449,6 +468,92 @@ if (!isset($_SESSION['user_id'])) {
     function addNewProduct() {
         window.location.href = 'add_product.php';
     }
+
+
+    // Parada abonenti tabulu
+    function showTable(table) {
+    const adminTable = document.getElementById("admin-table");
+    const clientTable = document.getElementById("client-table");
+    const productTable = document.getElementById("product-table");
+    const subscriberTable = document.getElementById("subscriber-table");
+    const adminHeader = document.getElementById("admin-header");
+    const clientHeader = document.getElementById("client-header");
+    const productHeader = document.getElementById("product-header");
+    const subscriberHeader = document.getElementById("subscriber-header");
+    const productSearch = document.getElementById("product-search");
+
+    // Paslepj visas tabulas sakuma
+    [adminTable, clientTable, productTable, subscriberTable].forEach(t => t.style.display = 'none');
+    [adminHeader, clientHeader, productHeader, subscriberHeader].forEach(h => h.style.display = 'none');
+    productSearch.style.display = 'none';
+
+    //Parada izveleto tabulu
+    if (table === 'subscriber') {
+        subscriberTable.style.display = 'table';
+        subscriberHeader.style.display = 'block';
+    } else if (table === 'admin') {
+        adminTable.style.display = 'table';
+        adminHeader.style.display = 'block';
+    } else if (table === 'client') {
+        clientTable.style.display = 'table';
+        clientHeader.style.display = 'block';
+    } else {
+        productTable.style.display = 'table';
+        productHeader.style.display = 'block';
+        productSearch.style.display = 'block';
+    }
+}
+
+// Subscriber data fetch
+fetch('get_subscribers.php')
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const subscribers = data.subscribers;
+            const tbody = document.querySelector("#subscriber-table tbody");
+
+            subscribers.forEach(subscriber => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${subscriber.id}</td>
+                    <td>${subscriber.email}</td>
+                    <td>${subscriber.created_at}</td>
+                    <td>
+                        <button class="edit-button" onclick="deleteSubscriber(${subscriber.id})">Dzēst</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+    });
+// Abonentu delete
+    function deleteSubscriber(id) {
+    if (confirm('Vai tiešām vēlaties dzēst šo abonentu?')) {
+        fetch('delete_subscriber.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: 'id=' + id
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Abonents veiksmīgi dzēsts');
+                location.reload();
+            } else {
+                alert('Kļūda dzēšot abonentu: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Kļūda dzēšot abonentu');
+        });
+    }
+}
+
+
+
 </script>
 
 </body>

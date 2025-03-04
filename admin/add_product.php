@@ -122,11 +122,11 @@ if (!isset($_SESSION['user_id'])) {
                     <option value="Cimdi">Cimdi</option>
                     <option value="Apavi">Apavi</option>
                     <option value="Apgerbs">Apģērbs</option>
-                    <option value="Drosibas-sistemas">Drošības sistēmas</option>
+                    <option value="DrosibasSistemas">Drošības sistēmas</option>
                     <option value="Gazmaskas">Gazmaskas</option>
-                    <option value="ArApgerbs">Augstas redzamības apgerbs</option>
+                    <option value="Arapgerbs">Augstas redzamības apgerbs</option>
                     <option value="Austinas_kiveres_brilles">Austinas,kiveres,brilles</option>
-                    <option value="KrasoApgerbs">Krāsošanas apģērbs</option>
+                    <option value="KrasosanasApgerbs">Krāsošanas apģērbs</option>
                     <option value="Jakas">Jakas</option>
                     <option value="Kimijas">Ķīmijas</option>
                     <option value="Aksesuari">Aksesuāri</option>
