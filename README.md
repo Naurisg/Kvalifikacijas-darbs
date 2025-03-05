@@ -13,7 +13,7 @@
 - [ ] Izdomāt/Izveidot Produkti page design un ar iespeju izvēlēties kāda preces kategorija interesē
 - [x] Izveidot kontakti/adrese page
 - [x] Par mums page
-- [ ] Izveidot opciju klientam abonēt jaunumus ar epasta adresi
+- [x] Izveidot opciju klientam abonēt jaunumus ar epasta adresi
 - [ ] Izveidot Atsauksmes page
 - [ ] Izveidot Noteikumi page??
 - [x] Pievienot footer
