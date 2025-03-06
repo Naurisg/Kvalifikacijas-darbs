@@ -6,9 +6,6 @@ if (!isset($_SESSION['user_id'])) {
 }
 ?>
 
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -150,6 +147,32 @@ if (!isset($_SESSION['user_id'])) {
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
+        .role-select {
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+    cursor: pointer;
+}
+
+.role-select:hover {
+    border-color: #007bff;
+}
+
+.delete-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.delete-btn:hover {
+    background-color: #c82333;
+}
+
+
         @media (max-width: 768px) {
             section {
                 margin: 20px;
@@ -168,7 +191,6 @@ if (!isset($_SESSION['user_id'])) {
 </head>
 <body>
 <section>
-<section>
     <button class="toggle-button" onclick="showTable('admin')">Admini</button>
     <button class="toggle-button" onclick="showTable('client')">Klienti</button>
     <button class="toggle-button" onclick="showTable('product')">Produkti</button>
@@ -177,37 +199,39 @@ if (!isset($_SESSION['user_id'])) {
     <a href="logout.php" class="logout-button">Iziet</a>
 
     <h2 id="admin-header" style="display: none;">Admini</h2>
+    <div class="search-container" id="admin-actions" style="display: none;">
+        <button class="add-button" onclick="addNewAdmin()">+Pievienot adminu</button>
+    </div>
     <table id="admin-table">
         <thead>
-            <tr>
-                <th>ID</th>
-                <th>Epasts</th>
-                <th>Vārds</th>
-                <th>Piekritis noteikumiem</th>
-                <th>Statuss</th>
-                <th>Izveidots</th>
-                <th>Statuss</th> 
-            </tr>
+        <tr>
+            <th>ID</th>
+            <th>Epasts</th>
+            <th>Vārds</th>
+            <th>Role</th>
+            <th>Apstiprināts</th>
+            <th>Izveidots</th>
+            <th>Darbības</th>
+        </tr>
         </thead>
         <tbody>
-            <!-- Admin dati -->
         </tbody>
     </table>
 
     <h2 id="client-header" style="display: none;">Reģistrētie klienti</h2>
     <table id="client-table">
         <thead>
-            <tr>
-                <th>ID</th>
-                <th>Epasts</th>
-                <th>Vārds</th>
-                <th>Piekritis noteikumiem</th>
-                <th>Izveidots</th>
-                <th>Labot</th>
-            </tr>
+        <tr>
+        <th>ID</th>
+        <th>Epasts</th>
+        <th>Vārds</th>
+        <th>Role</th>
+        <th>Apstiprināts</th>
+        <th>Izveidots</th>
+        <th>Darbības</th>
+    </tr>
         </thead>
         <tbody>
-            <!-- klienta dati -->
         </tbody>
     </table>
 
@@ -229,164 +253,122 @@ if (!isset($_SESSION['user_id'])) {
             </tr>
         </thead>
         <tbody>
-            <!-- produktu dati -->
         </tbody>
     </table>
 
     <h2 id="subscriber-header" style="display: none;">Abonenti</h2>
-<table id="subscriber-table">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Epasts</th>
-            <th>Pievienošanās datums</th>
-            <th>Darbības</th>
-        </tr>
-    </thead>
-    <tbody>
-        <!-- subscriber data will be loaded here -->
-    </tbody>
-</table>
-
+    <table id="subscriber-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Epasts</th>
+                <th>Pievienošanās datums</th>
+                <th>Darbības</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
 </section>
 
 <script>
+   document.addEventListener('DOMContentLoaded', function() {
+        showTable('admin');
+    });
+
     function showTable(table) {
         const adminTable = document.getElementById("admin-table");
         const clientTable = document.getElementById("client-table");
         const productTable = document.getElementById("product-table");
+        const subscriberTable = document.getElementById("subscriber-table");
         const adminHeader = document.getElementById("admin-header");
         const clientHeader = document.getElementById("client-header");
         const productHeader = document.getElementById("product-header");
+        const subscriberHeader = document.getElementById("subscriber-header");
         const productSearch = document.getElementById("product-search");
+        const adminActions = document.getElementById("admin-actions");
+
+        [adminTable, clientTable, productTable, subscriberTable].forEach(t => t.style.display = 'none');
+        [adminHeader, clientHeader, productHeader, subscriberHeader].forEach(h => h.style.display = 'none');
+        productSearch.style.display = 'none';
+        adminActions.style.display = 'none';
 
         if (table === 'admin') {
             adminTable.style.display = 'table';
-            clientTable.style.display = 'none';
-            productTable.style.display = 'none';
-            productSearch.style.display = 'none';
             adminHeader.style.display = 'block';
-            clientHeader.style.display = 'none';
-            productHeader.style.display = 'none';
+            adminActions.style.display = 'flex';
         } else if (table === 'client') {
-            adminTable.style.display = 'none';
             clientTable.style.display = 'table';
-            productTable.style.display = 'none';
-            productSearch.style.display = 'none';
-            adminHeader.style.display = 'none';
             clientHeader.style.display = 'block';
-            productHeader.style.display = 'none';
+        } else if (table === 'subscriber') {
+            subscriberTable.style.display = 'table';
+            subscriberHeader.style.display = 'block';
         } else {
-            adminTable.style.display = 'none';
-            clientTable.style.display = 'none';
             productTable.style.display = 'table';
-            productSearch.style.display = 'block';
-            adminHeader.style.display = 'none';
-            clientHeader.style.display = 'none';
             productHeader.style.display = 'block';
+            productSearch.style.display = 'block';
         }
     }
 
-    // Admin data fetch
-    fetch('get_admins.php')
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const admins = data.admins;
-                const tbody = document.querySelector("#admin-table tbody");
+    function addNewAdmin() {
+        window.location.href = 'add_admin.php';
+    }
 
-                admins.forEach(admin => {
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
-                        <td>${admin.id}</td>
-                        <td>${admin.email}</td>
-                        <td>${admin.name}</td>
-                        <td>${admin.accept_privacy_policy == 1 ? 'Jā' : 'Nē'}</td>
-                        <td id="approved-status-${admin.id}">${admin.approved == 1 ? 'Apstiprināts' : 'Gaida apstiprinājumu'}</td>
-                        <td>${admin.created_at}</td>
-                        <td>
-    <button class="approval-button ${admin.approved == 1 ? 'revoke' : 'approve'}"
-            onclick="toggleApproved(${admin.id}, ${admin.approved})">
-        ${admin.approved == 1 ? 'Noņemt piekļuvi' : 'Apstiprināt'}
-    </button>
-    <a href="adminedit.html?id=${admin.id}" class="edit-button">Labot</a>
-    <button class="edit-button" onclick="deleteAdmin(${admin.id})">Dzēst</button>
-</td>
+    function addNewProduct() {
+        window.location.href = 'add_product.php';
+    }
 
-                    `;
-                    tbody.appendChild(row);
-                });
-                showTable('admin');
-            } else {
-                alert("Failed to load admin data.");
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching admin data:', error);
-        });
+    function deleteProduct(id) {
+        if (confirm('Vai tiešām vēlaties dzēst šo produktu?')) {
+            fetch('delete_product.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    id: id
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Produkts veiksmīgi dzēsts');
+                    location.reload();
+                } else {
+                    alert('Kļūda dzēšot produktu: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Kļūda dzēšot produktu');
+            });
+        }
+    }
 
-    // Client data fetch
-    fetch('get_clients.php')
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const clients = data.clients;
-                const tbody = document.querySelector("#client-table tbody");
-
-                clients.forEach(client => {
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
-                        <td>${client.id}</td>
-                        <td>${client.email}</td>
-                        <td>${client.name}</td>
-                        <td>${client.accept_privacy_policy == 1 ? 'Jā' : 'Nē'}</td>
-                        <td>${client.created_at}</td>
-                        <td>
-                            <a href="useredit.html?id=${client.id}" class="edit-button">Labot</a>
-                        </td>
-                    `;
-                    tbody.appendChild(row);
-                });
-            } else {
-                alert("Failed to load client data.");
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching client data:', error);
-        });
-
-    // Product data fetch
-    fetch('get_products.php')
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const products = data.products;
-                const tbody = document.querySelector("#product-table tbody");
-
-                products.forEach(product => {
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
-                        <td>${product.id}</td>
-                        <td>${product.nosaukums}</td>
-                        <td>${product.apraksts}</td>
-                        <td><img src="../${product.bilde}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 4px;"></td>
-
-                        <td>${product.kategorija}</td>
-                        <td>${product.cena}€</td>
-                        <td>
-                            <a href="productedit.html?id=${product.id}" class="edit-button">Labot</a>
-                            <button class="edit-button" onclick="deleteProduct(${product.id})">Dzēst</button>
-                        </td>
-                    `;
-                    tbody.appendChild(row);
-                });
-            } else {
-                alert("Failed to load product data.");
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching product data:', error);
-        });
+    function deleteSubscriber(id) {
+        if (confirm('Vai tiešām vēlaties dzēst šo abonentu?')) {
+            fetch('delete_subscriber.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'id=' + id
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Abonents veiksmīgi dzēsts');
+                    location.reload();
+                } else {
+                    alert('Kļūda dzēšot abonentu: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Kļūda dzēšot abonentu');
+            });
+        }
+    }
 
     function toggleApproved(id, currentStatus) {
         const newStatus = currentStatus === 1 ? 0 : 1;
@@ -417,33 +399,6 @@ if (!isset($_SESSION['user_id'])) {
         });
     }
 
-    function deleteProduct(id) {
-        if (confirm('Vai tiešām vēlaties dzēst šo produktu?')) {
-            fetch('delete_product.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: new URLSearchParams({
-                    id: id
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                                     alert('Produkts veiksmīgi dzēsts');
-                    location.reload();
-                } else {
-                    alert('Kļūda dzēšot produktu: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Kļūda dzēšot produktu');
-            });
-        }
-    }
-
     document.getElementById('productSearchInput').addEventListener('keyup', function() {
         const searchValue = this.value.toLowerCase();
         const table = document.getElementById('product-table');
@@ -465,96 +420,190 @@ if (!isset($_SESSION['user_id'])) {
         }
     });
 
-    function addNewProduct() {
-        window.location.href = 'add_product.php';
-    }
-
-
-    // Parada abonenti tabulu
-    function showTable(table) {
-    const adminTable = document.getElementById("admin-table");
-    const clientTable = document.getElementById("client-table");
-    const productTable = document.getElementById("product-table");
-    const subscriberTable = document.getElementById("subscriber-table");
-    const adminHeader = document.getElementById("admin-header");
-    const clientHeader = document.getElementById("client-header");
-    const productHeader = document.getElementById("product-header");
-    const subscriberHeader = document.getElementById("subscriber-header");
-    const productSearch = document.getElementById("product-search");
-
-    // Paslepj visas tabulas sakuma
-    [adminTable, clientTable, productTable, subscriberTable].forEach(t => t.style.display = 'none');
-    [adminHeader, clientHeader, productHeader, subscriberHeader].forEach(h => h.style.display = 'none');
-    productSearch.style.display = 'none';
-
-    //Parada izveleto tabulu
-    if (table === 'subscriber') {
-        subscriberTable.style.display = 'table';
-        subscriberHeader.style.display = 'block';
-    } else if (table === 'admin') {
-        adminTable.style.display = 'table';
-        adminHeader.style.display = 'block';
-    } else if (table === 'client') {
-        clientTable.style.display = 'table';
-        clientHeader.style.display = 'block';
-    } else {
-        productTable.style.display = 'table';
-        productHeader.style.display = 'block';
-        productSearch.style.display = 'block';
-    }
-}
-
-// Subscriber data fetch
-fetch('get_subscribers.php')
+    // Admin ieladejas
+    fetch('get_admins.php')
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            const subscribers = data.subscribers;
-            const tbody = document.querySelector("#subscriber-table tbody");
-
-            subscribers.forEach(subscriber => {
+            const admins = data.admins;
+            const tbody = document.querySelector("#admin-table tbody");
+            admins.forEach(admin => {
                 const row = document.createElement("tr");
                 row.innerHTML = `
-                    <td>${subscriber.id}</td>
-                    <td>${subscriber.email}</td>
-                    <td>${subscriber.created_at}</td>
-                    <td>
-                        <button class="edit-button" onclick="deleteSubscriber(${subscriber.id})">Dzēst</button>
-                    </td>
-                `;
+    <td>${admin.id}</td>
+    <td>${admin.name}</td>
+    <td>${admin.email}</td>
+    <td>
+        <select onchange="updateRole(${admin.id}, this.value)" class="role-select">
+            <option value="Administrators" ${admin.role === 'Administrators' ? 'selected' : ''}>Administrators</option>
+            <option value="Moderators" ${admin.role === 'Moderators' ? 'selected' : ''}>Moderators</option>
+        </select>
+    </td>
+    <td>${admin.approved ? 'Jā' : 'Nē'}</td>
+    <td>${admin.created_at}</td>
+    <td>
+        <button 
+            onclick="updateApproved(${admin.id}, ${admin.approved ? 0 : 1})"
+            class="edit-button"
+        >
+            ${admin.approved ? 'Atsaukt apstiprinājumu' : 'Apstiprināt'}
+        </button>
+        <a href="adminedit.php?id=${admin.id}" class="edit-button">Rediģēt</a>
+        <button class="delete-btn" onclick="deleteAdmin(${admin.id})">Dzēst</button>
+    </td>
+`;
+
+
                 tbody.appendChild(row);
             });
         }
     });
-// Abonentu delete
-    function deleteSubscriber(id) {
-    if (confirm('Vai tiešām vēlaties dzēst šo abonentu?')) {
-        fetch('delete_subscriber.php', {
+
+
+
+    function updateRole(id, newRole) {
+    fetch('update_role.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            id: id,
+            role: newRole
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Veiksmīgi atjaunināts Role');
+        } else {
+            alert('Neizdevās atjaunināt');
+        }
+    });
+}
+
+
+function updateApproved(adminId, approved) {
+    const formData = new FormData();
+    formData.append('id', adminId);
+    formData.append('approved', approved);
+
+    fetch('update_approved.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            // Refresho admin tabulu
+            location.reload();
+        } else {
+            alert('Kļūda: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Kļūda atjaunojot statusu');
+    });
+}
+
+function deleteAdmin(adminId) {
+    if (confirm('Vai tiešām vēlaties dzēst šo administratoru?')) {
+        fetch('delete_admin.php', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
+                'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: 'id=' + id
+            body: 'id=' + adminId
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('Abonents veiksmīgi dzēsts');
+                alert(data.message);
                 location.reload();
             } else {
-                alert('Kļūda dzēšot abonentu: ' + data.message);
+                alert(data.message);
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Kļūda dzēšot abonentu');
+            alert('Kļūda dzēšot administratoru');
         });
     }
 }
 
 
 
-</script>
+    fetch('get_clients.php')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const clients = data.clients;
+                const tbody = document.querySelector("#client-table tbody");
+                clients.forEach(client => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${client.id}</td>
+                        <td>${client.email}</td>
+                        <td>${client.name}</td>
+                        <td>${client.accept_privacy_policy == 1 ? 'Jā' : 'Nē'}</td>
+                        <td>${client.created_at}</td>
+                        <td>
+                            <a href="adminedit.html?id=${client.id}" class="edit-button">Labot</a>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+        });
 
+    fetch('get_products.php')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const products = data.products;
+                const tbody = document.querySelector("#product-table tbody");
+                products.forEach(product => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${product.id}</td>
+                        <td>${product.nosaukums}</td>
+                        <td>${product.apraksts}</td>
+                        <td><img src="../${product.bilde}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 4px;"></td>
+                        <td>${product.kategorija}</td>
+                        <td>${product.cena}€</td>
+                        <td>
+                            <a href="productedit.html?id=${product.id}" class="edit-button">Labot</a>
+                            <button class="edit-button" onclick="deleteProduct(${product.id})">Dzēst</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+        });
+
+    fetch('get_subscribers.php')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const subscribers = data.subscribers;
+                const tbody = document.querySelector("#subscriber-table tbody");
+                subscribers.forEach(subscriber => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${subscriber.id}</td>
+                        <td>${subscriber.email}</td>
+                        <td>${subscriber.created_at}</td>
+                        <td>
+                            <button class="edit-button" onclick="deleteSubscriber(${subscriber.id})">Dzēst</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+        });
+</script>
 </body>
 </html>
+

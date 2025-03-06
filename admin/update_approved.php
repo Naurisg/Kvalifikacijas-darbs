@@ -11,7 +11,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     try {
-        $db = new PDO('sqlite:admin_signup.db');
+        $db = new PDO('sqlite:../Datubazes/admin_signup.db');
         $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
         $sql = "UPDATE admin_signup SET approved = :approved WHERE id = :id";

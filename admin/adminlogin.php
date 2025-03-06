@@ -5,7 +5,7 @@ header('Content-Type: application/json');
 
 // Savienojums ar SQLite Datubāzi
 try {
-    $db = new PDO('sqlite:admin_signup.db');
+    $db = new PDO('sqlite:../Datubazes/admin_signup.db');
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
     echo json_encode(["success" => false, "message" => "Connection failed: " . $e->getMessage()]);
