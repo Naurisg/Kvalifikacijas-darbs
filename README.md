@@ -23,6 +23,7 @@
 - [ ] salikt produktu bildes mape
 - [x] Izdomāt design krāsas mājas lapai
 - [x] Izveidot admin login
+- [ ] izveidot kad ja role ir moderators viņš neredz admin tabulu
 - [x] Izveidot moderatora reģistrešanos lapu
 - [ ] Izveidot kad logins strada ar datiem no datubāzes
 - [ ] Izveidot kad Adminam iespeja pievienot moderatorus caur majas lapu vai datubāzi
