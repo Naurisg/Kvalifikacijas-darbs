@@ -4,6 +4,20 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: adminlogin.html");
     exit();
 }
+
+$user_role = $_SESSION['user_role'] ?? '';
+$admin_id = $_SESSION['user_id'] ?? '';
+
+try {
+    $pdo = new PDO('sqlite:../Datubazes/admin_signup.db');
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $stmt = $pdo->prepare('SELECT name FROM admin_signup WHERE id = :id');
+    $stmt->execute(['id' => $admin_id]);
+    $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+    $admin_name = $admin['name'] ?? 'Admin';
+} catch (PDOException $e) {
+    $admin_name = 'Admin';
+}
 ?>
 
 <!DOCTYPE html>
@@ -191,15 +205,20 @@ if (!isset($_SESSION['user_id'])) {
 </head>
 <body>
 <section>
+    <h2> Sveiki, <?php echo htmlspecialchars($admin_name); ?>!</h2>
+    <?php if ($user_role !== 'Moderators'): ?>
     <button class="toggle-button" onclick="showTable('admin')">Admini</button>
+    <?php endif; ?>
     <button class="toggle-button" onclick="showTable('client')">Klienti</button>
     <button class="toggle-button" onclick="showTable('product')">Produkti</button>
     <button class="toggle-button" onclick="showTable('subscriber')">Abonenti</button>
     
     <a href="logout.php" class="logout-button">Iziet</a>
 
+    <?php if ($user_role !== 'Moderators'): ?>
     <h2 id="admin-header" style="display: none;">Admini</h2>
     <div class="search-container" id="admin-actions" style="display: none;">
+        <input type="text" id="adminSearchInput" class="search-input" placeholder="Meklēt pēc Epasta, Vārda vai Lomas...">
         <button class="add-button" onclick="addNewAdmin()">+Pievienot adminu</button>
     </div>
     <table id="admin-table">
@@ -208,6 +227,7 @@ if (!isset($_SESSION['user_id'])) {
             <th>ID</th>
             <th>Epasts</th>
             <th>Vārds</th>
+            <th>Role</th>
             <th>Apstiprināts</th>
             <th>Izveidots</th>
             <th>Darbības</th>
@@ -216,9 +236,11 @@ if (!isset($_SESSION['user_id'])) {
         <tbody>
         </tbody>
     </table>
+    <?php endif; ?>
 
     <h2 id="client-header" style="display: none;">Reģistrētie klienti</h2>
     <div class="search-container" id="client-actions" style="display: none;">
+        <input type="text" id="clientSearchInput" class="search-input" placeholder="Meklēt pēc Vārda vai Epasta...">
         <button class="add-button" onclick="addNewClient()">+Pievienot klientu</button>
     </div>
     <table id="client-table">
@@ -239,6 +261,21 @@ if (!isset($_SESSION['user_id'])) {
     <h2 id="product-header" style="display: none;">Produkti</h2>
     <div class="search-container" id="product-search" style="display: none;">
         <input type="text" id="productSearchInput" class="search-input" placeholder="Meklēt pēc ID, Nosaukuma, Apraksta vai Cenas...">
+        <select id="categoryFilter" class="search-input" style="width: auto; margin-left: 10px;">
+            <option value="">Visas kategorijas</option>
+            <option value="Cimdi">Cimdi</option>
+            <option value="Apavi">Apavi</option>
+            <option value="Apgerbs">Apģērbs</option>
+            <option value="DrosibasSistemas">Drošības sistēmas</option>
+            <option value="Gazmaskas">Gazmaskas</option>
+            <option value="Arapgerbs">Augstas redzamības apgerbs</option>
+            <option value="Austinas_kiveres_brilles">Austinas, kiveres, brilles</option>
+            <option value="KrasosanasApgerbs">Krāsošanas apģērbs</option>
+            <option value="Jakas">Jakas</option>
+            <option value="Kimijas">Ķīmijas</option>
+            <option value="Aksesuari">Aksesuāri</option>
+            <option value="Instrumenti">Instrumenti</option>
+        </select>
         <button class="add-button" onclick="addNewProduct()">Pievienot +</button>
     </div>
     <table id="product-table">
@@ -258,6 +295,9 @@ if (!isset($_SESSION['user_id'])) {
     </table>
 
     <h2 id="subscriber-header" style="display: none;">Abonenti</h2>
+    <div class="search-container" id="subscriber-actions" style="display: none;">
+        <input type="text" id="subscriberSearchInput" class="search-input" placeholder="Meklēt pēc Epasta...">
+    </div>
     <table id="subscriber-table">
         <thead>
             <tr>
@@ -274,45 +314,50 @@ if (!isset($_SESSION['user_id'])) {
 
 <script>
    document.addEventListener('DOMContentLoaded', function() {
-        showTable('admin');
-    });
+    const lastTable = localStorage.getItem('lastTable') || 'admin';
+    showTable(lastTable);
+});
 
-    function showTable(table) {
-        const adminTable = document.getElementById("admin-table");
-        const clientTable = document.getElementById("client-table");
-        const productTable = document.getElementById("product-table");
-        const subscriberTable = document.getElementById("subscriber-table");
-        const adminHeader = document.getElementById("admin-header");
-        const clientHeader = document.getElementById("client-header");
-        const productHeader = document.getElementById("product-header");
-        const subscriberHeader = document.getElementById("subscriber-header");
-        const productSearch = document.getElementById("product-search");
-        const adminActions = document.getElementById("admin-actions");
-        const clientActions = document.getElementById("client-actions");
+function showTable(table) {
+    localStorage.setItem('lastTable', table);
+    const adminTable = document.getElementById("admin-table");
+    const clientTable = document.getElementById("client-table");
+    const productTable = document.getElementById("product-table");
+    const subscriberTable = document.getElementById("subscriber-table");
+    const adminHeader = document.getElementById("admin-header");
+    const clientHeader = document.getElementById("client-header");
+    const productHeader = document.getElementById("product-header");
+    const subscriberHeader = document.getElementById("subscriber-header");
+    const productSearch = document.getElementById("product-search");
+    const adminActions = document.getElementById("admin-actions");
+    const clientActions = document.getElementById("client-actions");
+    const subscriberActions = document.getElementById("subscriber-actions");
 
-        [adminTable, clientTable, productTable, subscriberTable].forEach(t => t.style.display = 'none');
-        [adminHeader, clientHeader, productHeader, subscriberHeader].forEach(h => h.style.display = 'none');
-        productSearch.style.display = 'none';
-        adminActions.style.display = 'none';
-        clientActions.style.display = 'none';
+    [adminTable, clientTable, productTable, subscriberTable].forEach(t => t.style.display = 'none');
+    [adminHeader, clientHeader, productHeader, subscriberHeader].forEach(h => h.style.display = 'none');
+    productSearch.style.display = 'none';
+    adminActions.style.display = 'none';
+    clientActions.style.display = 'none';
+    subscriberActions.style.display = 'none';
 
-        if (table === 'admin') {
-            adminTable.style.display = 'table';
-            adminHeader.style.display = 'block';
-            adminActions.style.display = 'flex';
-        } else if (table === 'client') {
-            clientTable.style.display = 'table';
-            clientHeader.style.display = 'block';
-            clientActions.style.display = 'flex';
-        } else if (table === 'subscriber') {
-            subscriberTable.style.display = 'table';
-            subscriberHeader.style.display = 'block';
-        } else {
-            productTable.style.display = 'table';
-            productHeader.style.display = 'block';
-            productSearch.style.display = 'block';
-        }
+    if (table === 'admin' && '<?php echo $user_role; ?>' !== 'Moderators') {
+        adminTable.style.display = 'table';
+        adminHeader.style.display = 'block';
+        adminActions.style.display = 'flex';
+    } else if (table === 'client') {
+        clientTable.style.display = 'table';
+        clientHeader.style.display = 'block';
+        clientActions.style.display = 'flex';
+    } else if (table === 'subscriber') {
+        subscriberTable.style.display = 'table';
+        subscriberHeader.style.display = 'block';
+        subscriberActions.style.display = 'flex';
+    } else {
+        productTable.style.display = 'table';
+        productHeader.style.display = 'block';
+        productSearch.style.display = 'block';
     }
+}
 
     function addNewAdmin() {
         window.location.href = 'add_admin.php';
@@ -407,8 +452,12 @@ if (!isset($_SESSION['user_id'])) {
         });
     }
 
-    document.getElementById('productSearchInput').addEventListener('keyup', function() {
-        const searchValue = this.value.toLowerCase();
+    document.getElementById('productSearchInput').addEventListener('keyup', filterProducts);
+    document.getElementById('categoryFilter').addEventListener('change', filterProducts);
+
+    function filterProducts() {
+        const searchValue = document.getElementById('productSearchInput').value.toLowerCase();
+        const categoryValue = document.getElementById('categoryFilter').value.toLowerCase();
         const table = document.getElementById('product-table');
         const rows = table.getElementsByTagName('tr');
 
@@ -419,6 +468,29 @@ if (!isset($_SESSION['user_id'])) {
 
             for (let j = 0; j < cells.length - 1; j++) {
                 const cellText = cells[j].textContent.toLowerCase();
+                if (cellText.includes(searchValue) && (categoryValue === "" || cells[4].textContent.toLowerCase() === categoryValue)) {
+                    found = true;
+                    break;
+                }
+            }
+            row.style.display = found ? '' : 'none';
+        }
+    }
+
+    document.getElementById('clientSearchInput').addEventListener('keyup', filterClients);
+
+    function filterClients() {
+        const searchValue = document.getElementById('clientSearchInput').value.toLowerCase();
+        const table = document.getElementById('client-table');
+        const rows = table.getElementsByTagName('tr');
+
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            const cells = row.getElementsByTagName('td');
+            let found = false;
+
+            for (let j = 1; j < 3; j++) { // Search in email and name columns
+                const cellText = cells[j].textContent.toLowerCase();
                 if (cellText.includes(searchValue)) {
                     found = true;
                     break;
@@ -426,7 +498,53 @@ if (!isset($_SESSION['user_id'])) {
             }
             row.style.display = found ? '' : 'none';
         }
-    });
+    }
+
+    document.getElementById('adminSearchInput').addEventListener('keyup', filterAdmins);
+
+    function filterAdmins() {
+        const searchValue = document.getElementById('adminSearchInput').value.toLowerCase();
+        const table = document.getElementById('admin-table');
+        const rows = table.getElementsByTagName('tr');
+
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            const cells = row.getElementsByTagName('td');
+            let found = false;
+
+            for (let j = 1; j < 4; j++) { // Search in email, name, and role columns
+                const cellText = cells[j].textContent.toLowerCase();
+                if (cellText.includes(searchValue)) {
+                    found = true;
+                    break;
+                }
+            }
+            row.style.display = found ? '' : 'none';
+        }
+    }
+
+    document.getElementById('subscriberSearchInput').addEventListener('keyup', filterSubscribers);
+
+    function filterSubscribers() {
+        const searchValue = document.getElementById('subscriberSearchInput').value.toLowerCase();
+        const table = document.getElementById('subscriber-table');
+        const rows = table.getElementsByTagName('tr');
+
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            const cells = row.getElementsByTagName('td');
+            let found = false;
+
+            for (let j = 1; j < 2; j++) { // Search in email column
+                const cellText = cells[j].textContent.toLowerCase();
+                if (cellText.includes(searchValue)) {
+                    found = true;
+                    break;
+                }
+            }
+            row.style.display = found ? '' : 'none';
+        }
+    }
 
     // Admin ieladejas
     fetch('get_admins.php')
@@ -439,16 +557,22 @@ if (!isset($_SESSION['user_id'])) {
                 const row = document.createElement("tr");
                 row.innerHTML = `
     <td>${admin.id}</td>
-    <td>${admin.name}</td>
     <td>${admin.email}</td>
-    <td>${admin.accept_privacy_policy ? 'Jā' : 'Nē'}</td>
+    <td>${admin.name}</td>
+    <td>
+        <select class="role-select" onchange="updateRole(${admin.id}, this.value)">
+            <option value="admin" ${admin.role === 'admin' ? 'selected' : ''}>Admin</option>
+            <option value="moderator" ${admin.role === 'moderator' ? 'selected' : ''}>Moderator</option>
+        </select>
+    </td>
+    <td>${admin.approved ? 'Jā' : 'Nē'}</td>
     <td>${admin.created_at}</td>
     <td>
         <button 
-            onclick="updateApproved(${admin.id}, ${admin.accept_privacy_policy ? 0 : 1})"
+            onclick="updateApproved(${admin.id}, ${admin.approved ? 0 : 1})"
             class="edit-button"
         >
-            ${admin.accept_privacy_policy ? 'Atsaukt apstiprinājumu' : 'Apstiprināt'}
+            ${admin.approved ? 'Atsaukt apstiprinājumu' : 'Apstiprināt'}
         </button>
         <a href="adminedit.php?id=${admin.id}" class="edit-button">Rediģēt</a>
         <button class="delete-btn" onclick="deleteAdmin(${admin.id})">Dzēst</button>
@@ -545,10 +669,10 @@ function deleteAdmin(adminId) {
                     <td>${client.id}</td>
                     <td>${client.email}</td>
                     <td>${client.name}</td>
-                    <td>${client.accept_privacy_policy == 1 ? 'Jā' : 'Nē'}</td>
+                    <td>${client.approved ? 'Jā' : 'Nē'}</td>
                     <td>${client.created_at}</td>
                     <td>
-                        <a href="adminedit.html?id=${client.id}" class="edit-button">Labot</a>
+                        <a href="useredit.php?id=${client.id}" class="edit-button">Rediģēt</a>
                         <form method='POST' action='delete_client.php' style='display:inline;' onsubmit='return confirm("Vai esi drošs, ka vēlies dzēst šo klientu?");'>
                             <input type='hidden' name='client_id' value='${client.id}'>
                             <button type='submit' class='delete-btn'>Dzēst</button>
