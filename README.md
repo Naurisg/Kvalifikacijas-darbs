@@ -11,6 +11,7 @@
 - [x] Izveidot aprakstu "Kāpēc izvēlēties tieši mūs?"
 - [x] Izveidot sadarbības partneru sadaļu sākuma lapā
 - [ ] Izdomāt/Izveidot Produkti page design un ar iespeju izvēlēties kāda preces kategorija interesē
+- [x] Izveidot kad var izveidot klientu profilu no admin-paneļa.
 - [x] Izveidot kontakti/adrese page
 - [x] Par mums page
 - [x] Izveidot opciju klientam abonēt jaunumus ar epasta adresi
@@ -22,6 +23,7 @@
 - [ ] salikt produktu bildes mape
 - [x] Izdomāt design krāsas mājas lapai
 - [x] Izveidot admin login
+- [ ] izveidot kad ja role ir moderators viņš neredz admin tabulu
 - [x] Izveidot moderatora reģistrešanos lapu
 - [ ] Izveidot kad logins strada ar datiem no datubāzes
 - [ ] Izveidot kad Adminam iespeja pievienot moderatorus caur majas lapu vai datubāzi
