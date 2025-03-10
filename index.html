@@ -281,11 +281,16 @@
                 const container = document.getElementById('latest-products-container');
                 data.products.forEach(product => {
                     container.innerHTML += `
-                        <div class="precujaundiv">
-                            <img src="${product.bilde}" loading="lazy" alt="${product.nosaukums}" class="image-4">
-                            <p class="paragraph-8"><strong class="bold-text">${product.nosaukums}</strong></p>
-                            <div class="jaunumupoga">
-                                <a href="#" class="button-2 w-button">Uzzināt vairāk</a>
+                        <div class="product-card">
+                            <img src="${product.bilde}" loading="lazy" alt="${product.nosaukums}">
+                            <div class="product-info">
+                                <h3>${product.nosaukums}</h3>
+                                <p>${product.apraksts}</p>
+                                <p class="price">€${product.cena}</p>
+                                <div class="product-buttons">
+                                    <button class="add-to-cart" onclick="event.stopPropagation(); addToCart(${product.id})">Pievienot grozam</button>
+                                    <button class="buy-now" onclick="event.stopPropagation(); buyNow(${product.id})">Pirkt tagad</button>
+                                </div>
                             </div>
                         </div>
                     `;

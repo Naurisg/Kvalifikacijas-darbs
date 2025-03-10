@@ -208,7 +208,6 @@ if (!isset($_SESSION['user_id'])) {
             <th>ID</th>
             <th>Epasts</th>
             <th>Vārds</th>
-            <th>Role</th>
             <th>Apstiprināts</th>
             <th>Izveidots</th>
             <th>Darbības</th>
@@ -219,13 +218,15 @@ if (!isset($_SESSION['user_id'])) {
     </table>
 
     <h2 id="client-header" style="display: none;">Reģistrētie klienti</h2>
+    <div class="search-container" id="client-actions" style="display: none;">
+        <button class="add-button" onclick="addNewClient()">+Pievienot klientu</button>
+    </div>
     <table id="client-table">
         <thead>
         <tr>
         <th>ID</th>
         <th>Epasts</th>
         <th>Vārds</th>
-        <th>Role</th>
         <th>Apstiprināts</th>
         <th>Izveidots</th>
         <th>Darbības</th>
@@ -287,11 +288,13 @@ if (!isset($_SESSION['user_id'])) {
         const subscriberHeader = document.getElementById("subscriber-header");
         const productSearch = document.getElementById("product-search");
         const adminActions = document.getElementById("admin-actions");
+        const clientActions = document.getElementById("client-actions");
 
         [adminTable, clientTable, productTable, subscriberTable].forEach(t => t.style.display = 'none');
         [adminHeader, clientHeader, productHeader, subscriberHeader].forEach(h => h.style.display = 'none');
         productSearch.style.display = 'none';
         adminActions.style.display = 'none';
+        clientActions.style.display = 'none';
 
         if (table === 'admin') {
             adminTable.style.display = 'table';
@@ -300,6 +303,7 @@ if (!isset($_SESSION['user_id'])) {
         } else if (table === 'client') {
             clientTable.style.display = 'table';
             clientHeader.style.display = 'block';
+            clientActions.style.display = 'flex';
         } else if (table === 'subscriber') {
             subscriberTable.style.display = 'table';
             subscriberHeader.style.display = 'block';
@@ -312,6 +316,10 @@ if (!isset($_SESSION['user_id'])) {
 
     function addNewAdmin() {
         window.location.href = 'add_admin.php';
+    }
+
+    function addNewClient() {
+        window.location.href = 'add_client.php';
     }
 
     function addNewProduct() {
@@ -433,33 +441,23 @@ if (!isset($_SESSION['user_id'])) {
     <td>${admin.id}</td>
     <td>${admin.name}</td>
     <td>${admin.email}</td>
-    <td>
-        <select onchange="updateRole(${admin.id}, this.value)" class="role-select">
-            <option value="Administrators" ${admin.role === 'Administrators' ? 'selected' : ''}>Administrators</option>
-            <option value="Moderators" ${admin.role === 'Moderators' ? 'selected' : ''}>Moderators</option>
-        </select>
-    </td>
-    <td>${admin.approved ? 'Jā' : 'Nē'}</td>
+    <td>${admin.accept_privacy_policy ? 'Jā' : 'Nē'}</td>
     <td>${admin.created_at}</td>
     <td>
         <button 
-            onclick="updateApproved(${admin.id}, ${admin.approved ? 0 : 1})"
+            onclick="updateApproved(${admin.id}, ${admin.accept_privacy_policy ? 0 : 1})"
             class="edit-button"
         >
-            ${admin.approved ? 'Atsaukt apstiprinājumu' : 'Apstiprināt'}
+            ${admin.accept_privacy_policy ? 'Atsaukt apstiprinājumu' : 'Apstiprināt'}
         </button>
         <a href="adminedit.php?id=${admin.id}" class="edit-button">Rediģēt</a>
         <button class="delete-btn" onclick="deleteAdmin(${admin.id})">Dzēst</button>
     </td>
 `;
-
-
                 tbody.appendChild(row);
             });
         }
     });
-
-
 
     function updateRole(id, newRole) {
     fetch('update_role.php', {
@@ -536,27 +534,37 @@ function deleteAdmin(adminId) {
 
 
     fetch('get_clients.php')
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const clients = data.clients;
-                const tbody = document.querySelector("#client-table tbody");
-                clients.forEach(client => {
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
-                        <td>${client.id}</td>
-                        <td>${client.email}</td>
-                        <td>${client.name}</td>
-                        <td>${client.accept_privacy_policy == 1 ? 'Jā' : 'Nē'}</td>
-                        <td>${client.created_at}</td>
-                        <td>
-                            <a href="adminedit.html?id=${client.id}" class="edit-button">Labot</a>
-                        </td>
-                    `;
-                    tbody.appendChild(row);
-                });
-            }
-        });
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const clients = data.clients;
+            const tbody = document.querySelector("#client-table tbody");
+            clients.forEach(client => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${client.id}</td>
+                    <td>${client.email}</td>
+                    <td>${client.name}</td>
+                    <td>${client.accept_privacy_policy == 1 ? 'Jā' : 'Nē'}</td>
+                    <td>${client.created_at}</td>
+                    <td>
+                        <a href="adminedit.html?id=${client.id}" class="edit-button">Labot</a>
+                        <form method='POST' action='delete_client.php' style='display:inline;' onsubmit='return confirm("Vai esi drošs, ka vēlies dzēst šo klientu?");'>
+                            <input type='hidden' name='client_id' value='${client.id}'>
+                            <button type='submit' class='delete-btn'>Dzēst</button>
+                        </form>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        } else {
+            alert('Kļūda ielādējot klientus: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Kļūda ielādējot klientus');
+    });
 
     fetch('get_products.php')
         .then(response => response.json())
