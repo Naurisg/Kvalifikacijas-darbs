@@ -186,6 +186,19 @@ try {
     background-color: #c82333;
 }
 
+        .logo {
+            position: absolute;
+            left: 0;
+            width: 100px;
+            height: auto;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
 
         @media (max-width: 768px) {
             section {
@@ -205,13 +218,17 @@ try {
 </head>
 <body>
 <section>
-    <h2> Sveiki, <?php echo htmlspecialchars($admin_name); ?>!</h2>
+    <div class="header-container">
+        <img src="../images/Logo.png" alt="Logo" class="logo">
+        <h2>Sveiki, <?php echo htmlspecialchars($admin_name); ?>!</h2>
+    </div>
     <?php if ($user_role !== 'Moderators'): ?>
     <button class="toggle-button" onclick="showTable('admin')">Admini</button>
     <?php endif; ?>
     <button class="toggle-button" onclick="showTable('client')">Klienti</button>
     <button class="toggle-button" onclick="showTable('product')">Produkti</button>
     <button class="toggle-button" onclick="showTable('subscriber')">Abonenti</button>
+    <button class="toggle-button" onclick="showTable('contact')">Kontakti</button>
     
     <a href="logout.php" class="logout-button">Iziet</a>
 
@@ -310,6 +327,25 @@ try {
         <tbody>
         </tbody>
     </table>
+
+    <h2 id="contact-header" style="display: none;">Kontakti</h2>
+    <div class="search-container" id="contact-actions" style="display: none;">
+        <input type="text" id="contactSearchInput" class="search-input" placeholder="Meklēt pēc Vārda, Uzvārda vai Epasta...">
+    </div>
+    <table id="contact-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Vārds</th>
+                <th>Uzvārds</th>
+                <th>Epasts</th>
+                <th>Ziņa</th>
+                <th>Darbības</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
 </section>
 
 <script>
@@ -324,21 +360,25 @@ function showTable(table) {
     const clientTable = document.getElementById("client-table");
     const productTable = document.getElementById("product-table");
     const subscriberTable = document.getElementById("subscriber-table");
+    const contactTable = document.getElementById("contact-table");
     const adminHeader = document.getElementById("admin-header");
     const clientHeader = document.getElementById("client-header");
     const productHeader = document.getElementById("product-header");
     const subscriberHeader = document.getElementById("subscriber-header");
+    const contactHeader = document.getElementById("contact-header");
     const productSearch = document.getElementById("product-search");
     const adminActions = document.getElementById("admin-actions");
     const clientActions = document.getElementById("client-actions");
     const subscriberActions = document.getElementById("subscriber-actions");
+    const contactActions = document.getElementById("contact-actions");
 
-    [adminTable, clientTable, productTable, subscriberTable].forEach(t => t.style.display = 'none');
-    [adminHeader, clientHeader, productHeader, subscriberHeader].forEach(h => h.style.display = 'none');
+    [adminTable, clientTable, productTable, subscriberTable, contactTable].forEach(t => t.style.display = 'none');
+    [adminHeader, clientHeader, productHeader, subscriberHeader, contactHeader].forEach(h => h.style.display = 'none');
     productSearch.style.display = 'none';
     adminActions.style.display = 'none';
     clientActions.style.display = 'none';
     subscriberActions.style.display = 'none';
+    contactActions.style.display = 'none';
 
     if (table === 'admin' && '<?php echo $user_role; ?>' !== 'Moderators') {
         adminTable.style.display = 'table';
@@ -352,6 +392,10 @@ function showTable(table) {
         subscriberTable.style.display = 'table';
         subscriberHeader.style.display = 'block';
         subscriberActions.style.display = 'flex';
+    } else if (table === 'contact') {
+        contactTable.style.display = 'table';
+        contactHeader.style.display = 'block';
+        contactActions.style.display = 'flex';
     } else {
         productTable.style.display = 'table';
         productHeader.style.display = 'block';
@@ -536,6 +580,29 @@ function showTable(table) {
             let found = false;
 
             for (let j = 1; j < 2; j++) { // Search in email column
+                const cellText = cells[j].textContent.toLowerCase();
+                if (cellText.includes(searchValue)) {
+                    found = true;
+                    break;
+                }
+            }
+            row.style.display = found ? '' : 'none';
+        }
+    }
+
+    document.getElementById('contactSearchInput').addEventListener('keyup', filterContacts);
+
+    function filterContacts() {
+        const searchValue = document.getElementById('contactSearchInput').value.toLowerCase();
+        const table = document.getElementById('contact-table');
+        const rows = table.getElementsByTagName('tr');
+
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            const cells = row.getElementsByTagName('td');
+            let found = false;
+
+            for (let j = 1; j < 4; j++) { // Search in name, surname, and email columns
                 const cellText = cells[j].textContent.toLowerCase();
                 if (cellText.includes(searchValue)) {
                     found = true;
@@ -735,6 +802,54 @@ function deleteAdmin(adminId) {
                 });
             }
         });
+
+    fetch('get_contacts.php')
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const contacts = data.contacts;
+            const tbody = document.querySelector("#contact-table tbody");
+            contacts.forEach(contact => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${contact.id}</td>
+                    <td>${contact.name}</td>
+                    <td>${contact.surname}</td>
+                    <td>${contact.email}</td>
+                    <td>${contact.message}</td>
+                    <td>
+                        <button class="edit-button" onclick="deleteContact(${contact.id})">Dzēst</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+    });
+
+function deleteContact(contactId) {
+    if (confirm('Vai tiešām vēlaties dzēst šo kontaktu?')) {
+        fetch('delete_contact.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'id=' + contactId
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Kļūda dzēšot kontaktu');
+        });
+    }
+}
 </script>
 </body>
 </html>
