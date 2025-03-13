@@ -533,7 +533,7 @@ function showTable(table) {
             const cells = row.getElementsByTagName('td');
             let found = false;
 
-            for (let j = 1; j < 3; j++) { // Search in email and name columns
+            for (let j = 1; j < 3; j++) { 
                 const cellText = cells[j].textContent.toLowerCase();
                 if (cellText.includes(searchValue)) {
                     found = true;
@@ -556,7 +556,7 @@ function showTable(table) {
             const cells = row.getElementsByTagName('td');
             let found = false;
 
-            for (let j = 1; j < 4; j++) { // Search in email, name, and role columns
+            for (let j = 1; j < 4; j++) { 
                 const cellText = cells[j].textContent.toLowerCase();
                 if (cellText.includes(searchValue)) {
                     found = true;
@@ -579,7 +579,7 @@ function showTable(table) {
             const cells = row.getElementsByTagName('td');
             let found = false;
 
-            for (let j = 1; j < 2; j++) { // Search in email column
+            for (let j = 1; j < 2; j++) { 
                 const cellText = cells[j].textContent.toLowerCase();
                 if (cellText.includes(searchValue)) {
                     found = true;
