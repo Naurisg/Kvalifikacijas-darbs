@@ -50,17 +50,17 @@
           <a href="logo-uzdruka.html" class="nav-link w-nav-link">Logo uzdruka</a>
           <a href="par-mums.html" class="nav-link w-nav-link">Par mums</a>
           <a href="kontakti.html" class="nav-link w-nav-link">Kontakti</a>
-          <a href="log-in.html" class="nav-link w-nav-link">
+          <a href="log-in.php" class="nav-link w-nav-link header-login-link">
             <img src="images/login.png" alt="Login" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;">
             Login
           </a>
-        
-          <a id="nightModeToggle" class="nav-link w-nav-link" >
+          <a href="user-account.php" class="nav-link w-nav-link profile-link" style="display: none;">
+            <img src="images/profile-user.png" alt="Profile" style="width: 24px; height: 24px;">
+          </a>
+          <a id="nightModeToggle" class="nav-link w-nav-link">
             <img src="images/night-mode.png" alt="Night Mode" style="width: 24px; height: 24px;">
           </a>
         </div>
-        
-
       </nav>
       <a href="grozs.html" class="w-inline-block"><img src="images/Grozs.png" loading="eager" width="40" height="40" alt=""></a>
       <div class="menu-button w-nav-button"><img src="images/Menu-Icon.svg" loading="lazy" width="24" alt="" class="menu-icon"></div>
@@ -318,6 +318,22 @@
         })
         .catch(error => console.error('Error:', error));
 });
+
+    // Check if user is logged in and update header
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('check-login-status.php')
+        .then(response => response.json())
+        .then(data => {
+          if (data.loggedIn) {
+            document.querySelector('.header-login-link').textContent = 'Log Out';
+            document.querySelector('.header-login-link').href = 'log-out.php';
+            document.querySelector('.profile-link').style.display = 'inline-block';
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+    });
   </script>
   
 </body>

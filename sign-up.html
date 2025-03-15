@@ -44,7 +44,7 @@
         <input data-wait="Mazliet uzgaidiet.." type="submit" class="w-users-userformbutton button w-button" value="Reģistrēties">
         <div class="w-users-userformfooter form-card-footer">
           <span>Vai jums jau ir konts?</span>
-          <a href="log-in.html">Log In</a>
+          <a href="log-in.php">Log In</a>
         </div>
       </form>
     </div>
@@ -71,7 +71,7 @@
           notification.textContent = data.message;
           notification.style.display = 'block';
           setTimeout(() => {
-            window.location.href = 'log-in.html'; // Redirect after 3 seconds
+            window.location.href = 'log-in.php'; // Redirect after 3 seconds
           }, 3000);
         } else {
           notification.style.backgroundColor = '#f44336'; // Error color

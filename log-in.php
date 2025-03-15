@@ -18,10 +18,13 @@
 <body>
   <div class="w-users-userformpagewrap full-page-wrapper">
     <div class="w-users-userloginformwrapper admin-form-card">
-      <form data-wf-user-form-type="login" data-wf-user-form-redirect="/precu-katalogs" method="post">
+      <form id="loginForm" method="post">
         <div class="w-users-userformheader form-card-header">
           <h2 class="heading h3">login</h2>
-        </div><input maxlength="256" placeholder="Your email" name="Email" id="wf-log-in-email" class="text-field w-input" type="email" autocomplete="username" required="" data-wf-user-form-input-type="email"><input maxlength="256" placeholder="Your password" name="Password" id="wf-log-in-password" class="text-field w-input" type="password" required="" data-wf-user-form-input-type="password"><input type="submit" data-wait="Please wait..." class="w-users-userformbutton button w-button" value="Log In">
+        </div>
+        <input maxlength="256" placeholder="Your email" name="Email" id="wf-log-in-email" class="text-field w-input" type="email" autocomplete="username" required="" data-wf-user-form-input-type="email">
+        <input maxlength="256" placeholder="Your password" name="Password" id="wf-log-in-password" class="text-field w-input" type="password" required="" data-wf-user-form-input-type="password">
+        <input type="submit" data-wait="Please wait..." class="w-users-userformbutton button w-button" value="Log In">
         <div class="w-users-userformfooter form-card-footer"><span>Nav izveidots konts?</span>
           <a href="sign-up.html">Reģistrēties</a>
         </div>
@@ -34,5 +37,46 @@
   </div>
   <script src="https://d3e54v103j8qbb.cloudfront.net/js/jquery-3.5.1.min.dc5e7f18c8.js?site=66f12005df0203b01c953e53" type="text/javascript" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
   <script src="js/script.js" type="text/javascript"></script>
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', function(event) {
+      event.preventDefault(); // Prevent default form submission
+
+      const formData = new FormData(this); // Gather form data
+
+      fetch('process-login.php', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          window.location.href = 'index.html'; // Redirect to index.html on success
+        } else {
+          const errorDiv = document.querySelector('.w-users-userformerrorstate');
+          const errorMsg = document.querySelector('.user-form-error-msg');
+          errorMsg.textContent = data.message;
+          errorDiv.style.display = 'block';
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    });
+
+    // Check if user is logged in and update header
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('check-login-status.php')
+        .then(response => response.json())
+        .then(data => {
+          if (data.loggedIn) {
+            document.querySelector('.header-login-link').textContent = 'Log Out';
+            document.querySelector('.header-login-link').href = 'log-out.php';
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+    });
+  </script>
 </body>
 </html>

@@ -1,3 +1,55 @@
+<?php
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+$user_id = $_SESSION['user_id'];
+$db = new SQLite3('Datubazes/client_signup.db');
+
+$query = $db->prepare('SELECT email, name, password FROM clients WHERE id = :id');
+$query->bindValue(':id', $user_id, SQLITE3_INTEGER);
+$result = $query->execute()->fetchArray(SQLITE3_ASSOC);
+
+$email = $result['email'];
+$name = $result['name'];
+$hashed_password = $result['password'];
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $new_name = $_POST['name'];
+    $old_password = $_POST['old_password'];
+    $new_password = $_POST['new_password'];
+
+    if (!empty($new_password)) {
+        if (password_verify($old_password, $hashed_password)) {
+            $update_query = $db->prepare('UPDATE clients SET name = :name, password = :password WHERE id = :id');
+            $update_query->bindValue(':name', $new_name, SQLITE3_TEXT);
+            $update_query->bindValue(':password', password_hash($new_password, PASSWORD_DEFAULT), SQLITE3_TEXT);
+            $update_query->bindValue(':id', $user_id, SQLITE3_INTEGER);
+            $update_query->execute();
+            $success_message = "Your account was updated successfully.";
+        } else {
+            $error_message = "Old password is incorrect.";
+        }
+    } else {
+        $update_query = $db->prepare('UPDATE clients SET name = :name WHERE id = :id');
+        $update_query->bindValue(':name', $new_name, SQLITE3_TEXT);
+        $update_query->bindValue(':id', $user_id, SQLITE3_INTEGER);
+        $update_query->execute();
+        $success_message = "Your account was updated successfully.";
+    }
+
+    // Reload the updated user information
+    $query = $db->prepare('SELECT email, name, password FROM clients WHERE id = :id');
+    $query->bindValue(':id', $user_id, SQLITE3_INTEGER);
+    $result = $query->execute()->fetchArray(SQLITE3_ASSOC);
+
+    $email = $result['email'];
+    $name = $result['name'];
+    $hashed_password = $result['password'];
+}
+?>
 <!DOCTYPE html>
 <html data-wf-page="66f12005df0203b01c953ed5" data-wf-site="66f12005df0203b01c953e53">
 <head>
@@ -41,19 +93,31 @@
         <h2 class="heading h3">Lietotāja informācija:</h2>
       </div>
       <div>
-        <form class="account-info-wrapper" method="post" data-wf-user-form-type="userAccount"><label for="" class="field-label">E-pasts</label><input placeholder="" id="wf-user-account-email" disabled="" name="Email" class="text-field w-input w-input-disabled" type="email" autocomplete="username" required="" data-wf-user-form-input-type="email"><label for="wf-user-account-name" class="field-label">Vārds</label><input class="text-field w-input" maxlength="256" name="" data-name="field" data-wf-user-field="wf-user-field-name" placeholder="" fieldtype="" type="text" id="wf-user-account-name" required="">
+        <?php if (isset($success_message)): ?>
+          <div class="w-users-userformsuccessstate w-form-success">
+            <p><?php echo $success_message; ?></p>
+          </div>
+        <?php endif; ?>
+        <?php if (isset($error_message)): ?>
+          <div class="w-users-userformerrorstate w-form-fail">
+            <div class="user-form-error-msg"><?php echo $error_message; ?></div>
+          </div>
+        <?php endif; ?>
+        <form class="account-info-wrapper" method="post" data-wf-user-form-type="userAccount">
+          <label for="" class="field-label">E-pasts</label>
+          <input placeholder="" id="wf-user-account-email" disabled="" name="Email" class="text-field w-input w-input-disabled" type="email" autocomplete="username" required="" data-wf-user-form-input-type="email" value="<?php echo htmlspecialchars($email); ?>">
+          <label for="wf-user-account-name" class="field-label">Vārds</label>
+          <input class="text-field w-input" maxlength="256" name="name" data-name="field" data-wf-user-field="wf-user-field-name" placeholder="" fieldtype="" type="text" id="wf-user-account-name" required="" value="<?php echo htmlspecialchars($name); ?>">
           <div class="spacer _16"></div>
           <h3 class="field-label">Paroles iestatījumi</h3>
-          <a href="reset-password.html">Attiestatīt paroli</a>
+          <label for="old_password" class="field-label">Vecā parole</label>
+          <input class="text-field w-input" maxlength="256" name="old_password" placeholder="" type="password" id="old_password">
+          <label for="new_password" class="field-label">Jaunā parole</label>
+          <input class="text-field w-input" maxlength="256" name="new_password" placeholder="" type="password" id="new_password">
           <div class="spacer _24"></div>
-          <h3 class="field-label no-margin">Citi iestatījumi</h3><label id="w-node-_62b23e3845c1a6d0f6be4e4900000000001b-1c953ed5" class="w-checkbox checkbox-field"><input class="w-checkbox-input check-box" name="Checkbox" data-name="Checkbox" data-wf-user-field="wf-user-field-accept-communications" placeholder="" type="checkbox" id="wf-user-account-accept-communications" required="" checked=""><span class="checkbox-label w-form-label" for="Checkbox">Es piekrītu saņemt jaunumu e-pastus.</span></label><input data-wait="Saglabā..." type="submit" class="w-users-useraccountformsavebutton small-button w-button" value="Saglabāt"><input type="reset" id="w-node-_62b23e3845c1a6d0f6be4e49000000000020-1c953ed5" class="w-users-useraccountformcancelbutton small-button light w-button" value="Atcelt">
+          <input data-wait="Saglabā..." type="submit" class="w-users-useraccountformsavebutton small-button w-button" value="Saglabāt">
+          <a href="index.html" id="w-node-_62b23e3845c1a6d0f6be4e49000000000020-1c953ed5" class="w-users-useraccountformcancelbutton small-button light w-button">Atpakaļ</a>
         </form>
-        <div tabindex="-1" id="w-node-_62b23e3845c1a6d0f6be4e49000000000021-1c953ed5" class="w-users-userformsuccessstate w-form-success">
-          <p>Your account was updated successfully.</p>
-        </div>
-        <div id="w-node-_62b23e3845c1a6d0f6be4e49000000000024-1c953ed5" style="display:none" data-wf-user-form-error="true" class="w-users-userformerrorstate w-form-fail">
-          <div class="user-form-error-msg" wf-account-update-form-general-error-error="There was an error updating your account. Please try again, or contact us if you continue to have problems.">There was an error updating your account. Please try again, or contact us if you continue to have problems.</div>
-        </div>
       </div>
     </div>
   </div>
