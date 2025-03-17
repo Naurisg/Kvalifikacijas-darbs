@@ -32,7 +32,7 @@
 - [x] Izveidot kad admins vai moderators var pievienot jaunus produktus
 - [ ] pievienot visus produktu aprakstus
 - [ ] Salikt produktus
-- [ ] Pievienot klienta login
+- [x] Pievienot klienta login
 - [ ] Pielikt opciju pievienot grozam
 - [ ] Pievienot opciju nopirkt preci
 - [ ] Pievienot search bar pie produktiem iekš jau kādas no kategorijām
