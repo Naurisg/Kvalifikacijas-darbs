@@ -17,6 +17,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $apraksts = $_POST['apraksts'];
         $kategorija = $_POST['kategorija'];
         $cena = $_POST['cena'];
+        $quantity = $_POST['quantity'];
+        $sizes = isset($_POST['sizes']) ? implode(',', $_POST['sizes']) : null;
 
         // Handle image upload if new image is provided
         if (isset($_FILES['bilde']) && $_FILES['bilde']['error'] === 0) {
@@ -39,25 +41,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 }
 
                 $sql = "UPDATE products SET nosaukums = :nosaukums, apraksts = :apraksts, 
-                        kategorija = :kategorija, cena = :cena, bilde = :bilde 
+                        kategorija = :kategorija, cena = :cena, quantity = :quantity, sizes = :sizes, bilde = :bilde 
                         WHERE id = :id";
                 $params = [
                     ':nosaukums' => $nosaukums,
                     ':apraksts' => $apraksts,
                     ':kategorija' => $kategorija,
                     ':cena' => $cena,
+                    ':quantity' => $quantity,
+                    ':sizes' => $sizes,
                     ':bilde' => $fileName,
                     ':id' => $productId
                 ];
             }
         } else {
             $sql = "UPDATE products SET nosaukums = :nosaukums, apraksts = :apraksts, 
-                    kategorija = :kategorija, cena = :cena WHERE id = :id";
+                    kategorija = :kategorija, cena = :cena, quantity = :quantity, sizes = :sizes WHERE id = :id";
             $params = [
                 ':nosaukums' => $nosaukums,
                 ':apraksts' => $apraksts,
                 ':kategorija' => $kategorija,
                 ':cena' => $cena,
+                ':quantity' => $quantity,
+                ':sizes' => $sizes,
                 ':id' => $productId
             ];
         }

@@ -36,10 +36,15 @@
         </div>
         <input placeholder="Your email" id="wf-sign-up-email" maxlength="256" name="Email" class="text-field w-input" type="email" autocomplete="username" required="">
         <input class="text-field w-input" maxlength="256" name="field" data-name="field" placeholder="Vārds" type="text" id="wf-sign-up-name" required="">
-        <input placeholder="Your password" id="wf-sign-up-password" maxlength="256" name="Password" class="text-field w-input" type="password" required="">
+        <div style="position: relative;">
+          <input placeholder="Your password" id="wf-sign-up-password" maxlength="256" name="Password" class="text-field w-input" type="password" required="">
+          <span id="toggle-password" style="cursor: pointer; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);">
+            <img src="images/eye-icon.png" alt="Show Password" id="eye-icon" style="width: 20px; height: 20px;">
+          </span>
+        </div>
         <label class="w-checkbox checkbox-field">
           <input class="w-checkbox-input check-box" name="Checkbox" type="checkbox" id="wf-sign-up-accept-privacy" required="">
-          <span class="checkbox-label w-form-label" for="Checkbox">Piekrītu mājas lapas noteikumiem.</span>
+          <span class="checkbox-label w-form-label" for="Checkbox">Apstiprinu kad dati ir pareizi!</span>
         </label>
         <input data-wait="Mazliet uzgaidiet.." type="submit" class="w-users-userformbutton button w-button" value="Reģistrēties">
         <div class="w-users-userformfooter form-card-footer">
@@ -84,6 +89,19 @@
         notification.textContent = 'There was an error during registration.';
         notification.style.display = 'block';
       });
+    });
+
+    // Add "show password" toggle functionality
+    document.getElementById('toggle-password').addEventListener('click', function() {
+      const passwordField = document.getElementById('wf-sign-up-password');
+      const eyeIcon = document.getElementById('eye-icon');
+      if (passwordField.type === 'password') {
+        passwordField.type = 'text';
+        eyeIcon.src = 'images/eye-close.png'; // Change to "eye-slash" icon
+      } else {
+        passwordField.type = 'password';
+        eyeIcon.src = 'images/eye-icon.png'; // Change back to "eye" icon
+      }
     });
   </script>
 </body>

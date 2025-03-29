@@ -11,7 +11,8 @@ try {
     $db = new PDO('sqlite:../Datubazes/products.db');
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
-    // Create products table if it doesn't exist
+    // Add missing columns if they don't exist
+    $db->exec('PRAGMA foreign_keys = OFF;'); // Disable foreign key constraints temporarily
     $db->exec('CREATE TABLE IF NOT EXISTS products (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         nosaukums TEXT,
@@ -19,13 +20,25 @@ try {
         bilde TEXT,
         kategorija TEXT,
         cena DECIMAL(10,2),
+        quantity INTEGER DEFAULT 0,
+        sizes TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )');
+    // Check if the `quantity` column exists, and add it if it doesn't
+    $columns = $db->query("PRAGMA table_info(products)")->fetchAll(PDO::FETCH_COLUMN, 1);
+    if (!in_array('quantity', $columns)) {
+        $db->exec('ALTER TABLE products ADD COLUMN quantity INTEGER DEFAULT 0');
+    }
+    if (!in_array('sizes', $columns)) {
+        $db->exec('ALTER TABLE products ADD COLUMN sizes TEXT');
+    }
 
     $nosaukums = $_POST['nosaukums'];
     $apraksts = $_POST['apraksts'];
     $kategorija = $_POST['kategorija'];
     $cena = $_POST['cena'];
+    $quantity = $_POST['quantity'];
+    $sizes = isset($_POST['sizes']) ? implode(',', $_POST['sizes']) : null;
 
     // Handle file upload
     $target_dir = "../images/products/";
@@ -40,14 +53,16 @@ try {
     if (move_uploaded_file($file['tmp_name'], $target_file)) {
         $bilde_path = "images/products/" . $fileName;
         
-        $stmt = $db->prepare('INSERT INTO products (nosaukums, apraksts, bilde, kategorija, cena) VALUES (:nosaukums, :apraksts, :bilde, :kategorija, :cena)');
+        $stmt = $db->prepare('INSERT INTO products (nosaukums, apraksts, bilde, kategorija, cena, quantity, sizes) VALUES (:nosaukums, :apraksts, :bilde, :kategorija, :cena, :quantity, :sizes)');
         
         $stmt->execute([
             ':nosaukums' => $nosaukums,
             ':apraksts' => $apraksts,
             ':bilde' => $bilde_path,
             ':kategorija' => $kategorija,
-            ':cena' => $cena
+            ':cena' => $cena,
+            ':quantity' => $quantity,
+            ':sizes' => $sizes
         ]);
         
         echo json_encode(["success" => true, "message" => "Product added successfully"]);

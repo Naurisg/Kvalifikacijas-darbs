@@ -4603,9 +4603,11 @@ figcaption {
   padding: 10px; /* Padding around text */
   border-radius: 5px; /* Rounded corners */
   font-size: 16px; /* Font size */
+  font-weight: bold; /* Make text bold */
   transition: opacity 0.3s; /* Fade effect */
   opacity: 0; /* Initially hidden */
 }
+
 
 /* Show overlay text on hover */
 .image-container:hover .overlay-text {
@@ -4694,10 +4696,6 @@ a.nav-link.dark-mode {
     color: #e0e0e0; 
 }
 
-.image-container .overlay-text {
-    background-color: rgba(255, 255, 255, 0.3); 
-    color: #000; 
-}
 
 .product-card {
   background: white;

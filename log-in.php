@@ -23,7 +23,12 @@
           <h2 class="heading h3">login</h2>
         </div>
         <input maxlength="256" placeholder="Your email" name="Email" id="wf-log-in-email" class="text-field w-input" type="email" autocomplete="username" required="" data-wf-user-form-input-type="email">
-        <input maxlength="256" placeholder="Your password" name="Password" id="wf-log-in-password" class="text-field w-input" type="password" required="" data-wf-user-form-input-type="password">
+        <div style="position: relative;">
+          <input maxlength="256" placeholder="Your password" name="Password" id="wf-log-in-password" class="text-field w-input" type="password" required="" data-wf-user-form-input-type="password">
+          <span id="toggle-password" style="cursor: pointer; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);">
+            <img src="images/eye-icon.png" alt="Show Password" id="eye-icon" style="width: 20px; height: 20px;">
+          </span>
+        </div>
         <input type="submit" data-wait="Please wait..." class="w-users-userformbutton button w-button" value="Log In">
         <div class="w-users-userformfooter form-card-footer"><span>Nav izveidots konts?</span>
           <a href="sign-up.html">Reģistrēties</a>
@@ -61,6 +66,19 @@
       .catch(error => {
         console.error('Error:', error);
       });
+    });
+
+    // Add "show password" toggle functionality
+    document.getElementById('toggle-password').addEventListener('click', function() {
+      const passwordField = document.getElementById('wf-log-in-password');
+      const eyeIcon = document.getElementById('eye-icon');
+      if (passwordField.type === 'password') {
+        passwordField.type = 'text';
+        eyeIcon.src = 'images/eye-close.png'; // Change to "eye-slash" icon
+      } else {
+        passwordField.type = 'password';
+        eyeIcon.src = 'images/eye-icon.png'; // Change back to "eye" icon
+      }
     });
 
     // Check if user is logged in and update header

@@ -304,6 +304,8 @@ try {
                 <th>Bilde</th>
                 <th>Kategorija</th>
                 <th>Cena</th>
+                <th>Skaits</th>
+                <th>Izmēri</th>
                 <th>Darbības</th>
             </tr>
         </thead>
@@ -772,6 +774,8 @@ function deleteAdmin(adminId) {
                         <td><img src="../${product.bilde}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 4px;"></td>
                         <td>${product.kategorija}</td>
                         <td>${product.cena}€</td>
+                        <td>${product.quantity}</td>
+                        <td>${product.sizes || 'Nav norādīts'}</td>
                         <td>
                             <a href="productedit.html?id=${product.id}" class="edit-button">Labot</a>
                             <button class="edit-button" onclick="deleteProduct(${product.id})">Dzēst</button>

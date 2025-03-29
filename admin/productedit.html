@@ -125,6 +125,18 @@
             </div>
 
             <div class="form-group">
+                <label for="quantity">Daudzums:</label>
+                <input type="number" id="quantity" name="quantity" min="1" required>
+            </div>
+
+            <div class="form-group" id="sizes-section" style="display: none;">
+                <label>Izmēri:</label>
+                <div id="sizes-container">
+                    <!-- Checkboxes will be dynamically populated based on the selected category -->
+                </div>
+            </div>
+
+            <div class="form-group">
                 <label>Pašreizējā bilde:</label>
                 <img id="currentImage" class="current-image" src="" alt="Current product image">
                 <label for="bilde">Mainīt bildi:</label>
@@ -142,7 +154,49 @@
         const urlParams = new URLSearchParams(window.location.search);
         const productId = urlParams.get('id');
 
-        // Load existing product data
+        const categoryElement = document.getElementById('kategorija');
+        const sizesSection = document.getElementById('sizes-section');
+        const sizesContainer = document.getElementById('sizes-container');
+
+        const sizesForCategories = {
+            cimdi: ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'],
+            apavi: ['36', '37', '38', '39', '40', '41', '42', '43', '44', '45'],
+            apgerbs: ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL'],
+            drosibas_sistemas: ['S', 'M', 'L', 'XL', '2XL'],
+            gazmaskas: ['Standarta', 'Liela', 'Maza'],
+            arapgerbs: ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'],
+            jakas: ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL'],
+            krasosanasapgerbs: ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL']
+        };
+
+        categoryElement.addEventListener('change', function () {
+            const selectedCategory = this.value.toLowerCase();
+            sizesContainer.innerHTML = ''; // Clear previous checkboxes
+
+            if (sizesForCategories[selectedCategory]) {
+                sizesSection.style.display = 'block';
+                sizesForCategories[selectedCategory].forEach(size => {
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.name = 'sizes[]';
+                    checkbox.value = size;
+                    checkbox.id = `size-${size}`;
+
+                    const label = document.createElement('label');
+                    label.htmlFor = `size-${size}`;
+                    label.textContent = size;
+
+                    const wrapper = document.createElement('div');
+                    wrapper.appendChild(checkbox);
+                    wrapper.appendChild(label);
+
+                    sizesContainer.appendChild(wrapper);
+                });
+            } else {
+                sizesSection.style.display = 'none';
+            }
+        });
+
         fetch(`get_product.php?id=${productId}`)
             .then(response => response.json())
             .then(data => {
@@ -152,13 +206,37 @@
                     document.getElementById('kategorija').value = data.product.kategorija;
                     document.getElementById('cena').value = data.product.cena;
                     document.getElementById('currentImage').src = '../uploads/' + data.product.bilde;
+                    document.getElementById('quantity').value = data.product.quantity;
+
+                    const selectedCategory = data.product.kategorija.toLowerCase();
+                    if (sizesForCategories[selectedCategory]) {
+                        sizesSection.style.display = 'block';
+                        sizesForCategories[selectedCategory].forEach(size => {
+                            const checkbox = document.createElement('input');
+                            checkbox.type = 'checkbox';
+                            checkbox.name = 'sizes[]';
+                            checkbox.value = size;
+                            checkbox.id = `size-${size}`;
+                            if (data.product.sizes && data.product.sizes.split(',').includes(size)) {
+                                checkbox.checked = true;
+                            }
+
+                            const label = document.createElement('label');
+                            label.htmlFor = `size-${size}`;
+                            label.textContent = size;
+
+                            const wrapper = document.createElement('div');
+                            wrapper.appendChild(checkbox);
+                            wrapper.appendChild(label);
+
+                            sizesContainer.appendChild(wrapper);
+                        });
+                    }
                 }
             });
 
-        // Handle form submission
-        document.getElementById('editProductForm').addEventListener('submit', function(e) {
+        document.getElementById('editProductForm').addEventListener('submit', function (e) {
             e.preventDefault();
-            
             const formData = new FormData(this);
             formData.append('id', productId);
 
