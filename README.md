@@ -25,13 +25,14 @@
 - [x] Izveidot admin login
 - [ ] izveidot kad ja role ir moderators viņš neredz admin tabulu
 - [x] Izveidot moderatora reģistrešanos lapu
-- [ ] Izveidot kad logins strada ar datiem no datubāzes
-- [ ] Izveidot kad Adminam iespeja pievienot moderatorus caur majas lapu vai datubāzi
+- [x] Izveidot kad lietotājs var rediģēt savu profilu
+- [x] Izveidot kad logins strada ar datiem no datubāzes
+- [x] Izveidot kad Adminam iespeja pievienot moderatorus caur majas lapu vai datubāzi
 - [x] Izveidot kad admins vai mods var rediģēt/dzēst produktus
 - [x] Izveidot kad admins vai moderators var pievienot jaunus produktus
 - [ ] pievienot visus produktu aprakstus
 - [ ] Salikt produktus
-- [ ] Pievienot klienta login
+- [x] Pievienot klienta login
 - [ ] Pielikt opciju pievienot grozam
 - [ ] Pievienot opciju nopirkt preci
 - [ ] Pievienot search bar pie produktiem iekš jau kādas no kategorijām
