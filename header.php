@@ -1,4 +1,22 @@
 <?php
+// Pārbauda vai lietotājs ir ielogojies.
+echo '<script>
+document.addEventListener("DOMContentLoaded", function() {
+  fetch("check-login-status.php")
+    .then(response => response.json())
+    .then(data => {
+      if (data.loggedIn) {
+        document.querySelector(".header-login-link").textContent = "Log Out";
+        document.querySelector(".header-login-link").href = "log-out.php";
+        document.querySelector(".profile-link").style.display = "inline-block";
+        document.querySelector(".cart-link").style.display = "inline-block";
+      }
+    })
+    .catch(error => {
+      console.error("Error:", error);
+    });
+});
+</script>';
 ?>
 <!DOCTYPE html>
 <html lang="lv">
@@ -38,41 +56,110 @@
     ::-webkit-scrollbar-thumb:hover {
       background: #555;
     }
+
+    /* Sidebar styles */
+    #sidebar {
+      display: none;
+      position: fixed;
+      top: 0;
+      right: 0; /* Change to right side */
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      overflow: auto;
+    }
+
+    #sidebar .content {
+      background-color: white;
+      width: 300px;
+      height: 100%;
+      padding: 20px;
+      box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5); /* Adjust shadow for right side */
+      position: absolute;
+      right: 0; /* Ensure content aligns to the right */
+    }
+
+    #sidebar .close-btn {
+      font-size: 24px;
+      cursor: pointer;
+      color: black;
+      margin-bottom: 20px;
+      display: block;
+    }
   </style>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const menuButton = document.getElementById("menuButton");
+      const sidebar = document.getElementById("sidebar");
+      const closeBtn = document.getElementById("closeSidebar");
+
+      menuButton.addEventListener("click", function () {
+        sidebar.style.display = "block";
+      });
+
+      closeBtn.addEventListener("click", function () {
+        sidebar.style.display = "none";
+      });
+
+      // Show menu button only if logged in
+      fetch("check-login-status.php")
+        .then(response => response.json())
+        .then(data => {
+          if (data.loggedIn) {
+            menuButton.style.display = "inline-block";
+          } else {
+            menuButton.style.display = "none";
+          }
+        })
+        .catch(error => {
+          console.error("Error:", error);
+        });
+    });
+  </script>
 </head>
 <body>
+  <div id="sidebar">
+    <div class="content">
+      <span id="closeSidebar" class="close-btn">&times; Aizvērt</span>
+      <!-- Sidebar content -->
+      <div style="display: flex; flex-direction: column; gap: 15px;">
+        <a href="grozs.php" class="nav-link w-nav-link">
+          <img src="images/Grozs.png" alt="Cart" style="width: 24px; height: 24px; margin-right: 10px;"> Grozs
+        </a>
+        <a href="user-account.php" class="nav-link w-nav-link profile-link" style="display: none;">
+          <img src="images/profile-user.png" alt="Profile" style="width: 24px; height: 24px; margin-right: 10px;"> Profils
+        </a>
+        <a id="nightModeToggle" class="nav-link w-nav-link">
+          <img src="images/night-mode.png" alt="Night Mode" style="width: 24px; height: 24px; margin-right: 10px;"> Tumšais režīms
+        </a>
+      </div>
+    </div>
+  </div>
   <div data-collapse="small" data-animation="default" data-duration="400" data-easing="ease" data-easing2="ease" role="banner" class="nav-bar w-nav">
     <div class="nav-container w-container">
       <div class="logo-div">
-        <a href="index.html" aria-current="page" class="nav-logo w-inline-block w--current">
+        <a href="index.php" aria-current="page" class="nav-logo w-inline-block w--current">
           <img src="images/Logo.png" width="125" sizes="(max-width: 479px) 50vw, 125px" srcset="images/Logo-p-500.png 500w, images/Logo-p-800.png 800w, images/Logo.png 960w" alt="" class="logo">
         </a>
       </div>
       <nav role="navigation" class="navbar w-nav-menu">
         <div class="search-banner"></div>
         <div class="nav-menu">
-          <a href="precu-katalogs.html" class="nav-link w-nav-link">Preču Katalogs</a>
-          <a href="logo-uzdruka.html" class="nav-link w-nav-link">Logo uzdruka</a>
-          <a href="par-mums.html" class="nav-link w-nav-link">Par mums</a>
-          <a href="kontakti.html" class="nav-link w-nav-link">Kontakti</a>
+          <a href="index.php" class="nav-link w-nav-link">Sākums</a>
+          <a href="precu-katalogs.php" class="nav-link w-nav-link">Preču Katalogs</a>
+          <a href="logo-uzdruka.php" class="nav-link w-nav-link">Logo uzdruka</a>
+          <a href="par-mums.php" class="nav-link w-nav-link">Par mums</a>
+          <a href="kontakti.php" class="nav-link w-nav-link">Kontakti</a>
           <a href="log-in.php" class="nav-link w-nav-link header-login-link">
             <img src="images/login.png" alt="Login" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;">
             Login
           </a>
-          <a href="user-account.php" class="nav-link w-nav-link profile-link" style="display: none;">
-            <img src="images/profile-user.png" alt="Profile" style="width: 24px; height: 24px;">
-          </a>
-          <a id="nightModeToggle" class="nav-link w-nav-link">
-            <img src="images/night-mode.png" alt="Night Mode" style="width: 24px; height: 24px;">
+          <a id="menuButton" class="nav-link w-nav-link" style="display: none;">
+            <img src="images/menu.png" alt="Menu" style="width: 24px; height: 24px;">
           </a>
         </div>
       </nav>
-      <a href="grozs.php" class="w-inline-block cart-link" style="display: none;">
-        <img src="images/Grozs.png" loading="eager" width="40" height="40" alt="">
-      </a>
-      <div class="menu-button w-nav-button">
-        <img src="images/Menu-Icon.svg" loading="lazy" width="24" alt="" class="menu-icon">
-      </div>
     </div>
   </div>
 </body>

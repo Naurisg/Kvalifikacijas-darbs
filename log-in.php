@@ -55,7 +55,7 @@
       .then(response => response.json())
       .then(data => {
         if (data.success) {
-          window.location.href = 'index.html'; // Redirect to index.html on success
+          window.location.href = 'index.php'; // Pārved atpakaļ uz index.php pec veiksmigas ielogošanas
         } else {
           const errorDiv = document.querySelector('.w-users-userformerrorstate');
           const errorMsg = document.querySelector('.user-form-error-msg');

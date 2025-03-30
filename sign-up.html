@@ -61,9 +61,17 @@
     const notification = document.getElementById('notification');
 
     form.addEventListener('submit', function(event) {
-      event.preventDefault(); // Prevent default form submission
+      event.preventDefault();
 
-      const formData = new FormData(form); // Gather form data
+      const passwordField = document.getElementById('wf-sign-up-password');
+      if (passwordField.value.length < 8) {
+        notification.style.backgroundColor = '#f44336'; // Error color
+        notification.textContent = 'Parolei jābūt vismaz 8 cipariem vai burtiem garai!';
+        notification.style.display = 'block';
+        return; // Stop form submission
+      }
+
+      const formData = new FormData(form);
 
       fetch('register.php', {
         method: 'POST',
@@ -72,12 +80,20 @@
       .then(response => response.json())
       .then(data => {
         if (data.success) {
+          let countdown = 3; // Start countdown from 3
           notification.style.backgroundColor = '#4CAF50'; // Success color
-          notification.textContent = data.message;
+          notification.textContent = `Reģistrācija veiksmīga! Jūs tiksiet pārvirzīts pēc ${countdown} sekundēm.`;
           notification.style.display = 'block';
-          setTimeout(() => {
-            window.location.href = 'log-in.php'; // Redirect after 3 seconds
-          }, 3000);
+
+          const interval = setInterval(() => {
+            countdown--;
+            if (countdown > 0) {
+              notification.textContent = `Reģistrācija veiksmīga! Jūs tiksiet pārvirzīts pēc ${countdown} sekundēm.`;
+            } else {
+              clearInterval(interval);
+              window.location.href = 'log-in.php'; // Redirect after countdown
+            }
+          }, 1000); // Update every second
         } else {
           notification.style.backgroundColor = '#f44336'; // Error color
           notification.textContent = data.message;
@@ -86,7 +102,7 @@
       })
       .catch(error => {
         notification.style.backgroundColor = '#f44336'; // Error color
-        notification.textContent = 'There was an error during registration.';
+        notification.textContent = 'Lietotājs ar šādu e-pastu jau eksistē!';
         notification.style.display = 'block';
       });
     });

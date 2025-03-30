@@ -39,43 +39,16 @@
   </style>
 </head>
 <body>
-  <div data-collapse="small" data-animation="default" data-duration="400" data-easing="ease" data-easing2="ease" role="banner" class="nav-bar w-nav">
-    <div class="nav-container w-container">
-      <div class="logo-div">
-        <a href="index.php" aria-current="page" class="nav-logo w-inline-block w--current"><img src="images/Logo.png" width="125" sizes="(max-width: 479px) 50vw, 125px" srcset="images/Logo-p-500.png 500w, images/Logo-p-800.png 800w, images/Logo.png 960w" alt="" class="logo"></a>
-      </div>
-      <nav role="navigation" class="navbar w-nav-menu">
-        <div class="search-banner"></div>
-        <div class="nav-menu">
-          <a href="precu-katalogs.html" class="nav-link w-nav-link">Preču Katalogs</a>
-          <a href="logo-uzdruka.html" class="nav-link w-nav-link">Logo uzdruka</a>
-          <a href="par-mums.html" class="nav-link w-nav-link">Par mums</a>
-          <a href="kontakti.html" class="nav-link w-nav-link">Kontakti</a>
-          <a href="log-in.php" class="nav-link w-nav-link header-login-link">
-            <img src="images/login.png" alt="Login" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;">
-            Login
-          </a>
-          <a href="user-account.php" class="nav-link w-nav-link profile-link" style="display: none;">
-            <img src="images/profile-user.png" alt="Profile" style="width: 24px; height: 24px;">
-          </a>
-          <a id="nightModeToggle" class="nav-link w-nav-link">
-            <img src="images/night-mode.png" alt="Night Mode" style="width: 24px; height: 24px;">
-          </a>
-        </div>
-      </nav>
-      <a href="grozs.php" class="w-inline-block cart-link" style="display: none;">
-        <img src="images/Grozs.png" loading="eager" width="40" height="40" alt="">
-      </a>
-      <div class="menu-button w-nav-button"><img src="images/Menu-Icon.svg" loading="lazy" width="24" alt="" class="menu-icon"></div>
-    </div>
-  </div>
+  <?php
+  include 'header.php';
+  ?>
   <div class="page-wrapper">
     <div id="" class="sakumssection light-color-gradient">
       <div class="container2">
         <div class="w-layout-grid sakumsgrid">
           <div id="w-node-accfd924-78f6-ecf1-4abb-37edf78b5e65-1c953eb0" class="text-box">
             <h1 class="heading h1">VissDarbam</h1>
-            <p class="text large"><strong class="bold-text-5">Jūsu azsardzība- mūsu rūpes</strong></p>
+            <p class="text large"><strong class="bold-text-5">Jūsu azsardzība- mūsu rūpes</strong></p>
             <div class="spacer _16"></div>
             <a href="precu-katalogs.html" class="button w-button">Preču Katalogs</a>
           </div>
@@ -217,7 +190,7 @@
       <div class="w-layout-grid footer-grid">
         <div id="w-node-b8d7be4a-ce45-83ab-5947-02d204c8bff0-cf3fcb86" class="footerlogobloks">
           <a data-ix="logo" href="index.html" aria-current="page" class="footer-logo w-nav-brand w--current"><img src="images/Logo.png" width="130" sizes="130px" srcset="images/Logo-p-500.png 500w, images/Logo-p-800.png 800w, images/Logo.png 960w" alt=""></a>
-          <p class="text small"><strong>Piedāvājam piegādi tajā pašā dienā </strong><br><strong>Tālruņa numurs: </strong>29 702 132<br><strong>Epasts:</strong> vissdarbam@gmail.com<br><strong>Adrese:</strong> Brīvības iela 56, Liepāja, LV-3401<br><br></p>
+          <p class="text small"><strong>Piedāvājam piegādi tajā pašā dienā </strong><br><strong>Tālruņa numurs: </strong>29 702 132<br><strong>Epasts:</strong> vissdarbam@gmail.com<br><strong>Adrese:</strong> Brīvības iela 56, Liepāja, LV-3401<br><br></p>
         </div>
         <div class="footer-links-container">
           <h5 class="footer-header">Mājas lapa</h5>
