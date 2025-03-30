@@ -35,7 +35,7 @@
 - [x] Pievienot klienta login
 - [ ] Pielikt opciju pievienot grozam
 - [ ] Pievienot opciju nopirkt preci
-- [ ] Pievienot search bar pie produktiem iekš jau kādas no kategorijām
+- [x] Pievienot search bar pie produktiem iekš jau kādas no kategorijām
 - [ ] Pievienot dark mode
 - [ ] uztaisīt lai darkmode paliek pēc refresh
 - [ ] pievienotas preces grozam nepazud pēc page reload
