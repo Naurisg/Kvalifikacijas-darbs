@@ -36,6 +36,50 @@
     ::-webkit-scrollbar-thumb:hover {
       background: #555;
     }
+
+    .product-buttons button {
+      background-color: transparent;
+      border: 1px solid black; 
+      color: black;
+      padding: 5px 10px;
+      font-size: 12px; 
+      cursor: pointer;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .product-buttons button:hover {
+      background-color: black;
+      color: white;
+    }
+
+    .product-buttons .buy-now {
+      background-color: black; 
+      color: white;
+      border: 1px solid black;
+      padding: 5px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .product-buttons .buy-now:hover {
+      background-color: white; 
+      color: black;
+    }
+
+    .product-buttons .add-to-cart {
+      background-color: transparent;
+      border: none;
+      color: black;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 5px;
+      transition: color 0.3s ease;
+    }
+
+    .product-buttons .add-to-cart:hover {
+      color: gray;
+    }
   </style>
 </head>
 <body>
@@ -50,7 +94,7 @@
             <h1 class="heading h1">VissDarbam</h1>
             <p class="text large"><strong class="bold-text-5">Jūsu azsardzība- mūsu rūpes</strong></p>
             <div class="spacer _16"></div>
-            <a href="precu-katalogs.html" class="button w-button">Preču Katalogs</a>
+            <a href="precu-katalogs.php" class="button w-button">Preču Katalogs</a>
           </div>
         </div>
       </div>
@@ -93,10 +137,10 @@
       <div class="container2">
           <div class="section-top">
               <h2 class="heading h3"><strong>Preču Jaunumi:</strong></h2>
-              <a href="precu-katalogs.html" class="button light mobile-hidden w-button">Apskatīt visus</a>
+              <a href="precu-katalogs.php" class="button light mobile-hidden w-button">Apskatīt visus</a>
           </div>
           <div class="w-layout-grid grid" id="latest-products-container">
-              <!-- Products will be loaded here dynamically -->
+              <!-- Produkti tiks ielādēti šeit dynamically -->
           </div>
       </div>
   </div>
@@ -183,7 +227,7 @@
       </div>
     </div>
   </div>
-  <!-- Back to Top Button -->
+  <!-- Atpakaļ uz augšu poga -->
   <button id="backToTop" style="display: none;">↑</button>
   <div class="footer">
     <div class="footer-container w-container">
@@ -285,7 +329,9 @@
                                 <p>${product.apraksts}</p>
                                 <p class="price">€${product.cena}</p>
                                 <div class="product-buttons">
-                                    <button class="add-to-cart" onclick="event.stopPropagation(); addToCart(${product.id})">Pievienot grozam</button>
+                                    <button class="add-to-cart" onclick="event.stopPropagation(); addToCart(${product.id})">
+                                      <i class="fas fa-shopping-cart"></i>
+                                    </button>
                                     <button class="buy-now" onclick="event.stopPropagation(); buyNow(${product.id})">Pirkt tagad</button>
                                 </div>
                             </div>
@@ -297,7 +343,6 @@
         .catch(error => console.error('Error:', error));
 });
 
-    // Check if user is logged in and update header
     document.addEventListener('DOMContentLoaded', function() {
       fetch('check-login-status.php')
         .then(response => response.json())

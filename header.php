@@ -17,6 +17,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 </script>';
+$current_page = basename($_SERVER['PHP_SELF']);
 ?>
 <!DOCTYPE html>
 <html lang="lv">
@@ -57,12 +58,11 @@ document.addEventListener("DOMContentLoaded", function() {
       background: #555;
     }
 
-    /* Sidebar styles */
     #sidebar {
       display: none;
       position: fixed;
       top: 0;
-      right: 0; /* Change to right side */
+      right: 0;
       width: 100%;
       height: 100%;
       background-color: rgba(0, 0, 0, 0.8);
@@ -75,9 +75,9 @@ document.addEventListener("DOMContentLoaded", function() {
       width: 300px;
       height: 100%;
       padding: 20px;
-      box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5); /* Adjust shadow for right side */
+      box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
       position: absolute;
-      right: 0; /* Ensure content aligns to the right */
+      right: 0; 
     }
 
     #sidebar .close-btn {
@@ -86,6 +86,20 @@ document.addEventListener("DOMContentLoaded", function() {
       color: black;
       margin-bottom: 20px;
       display: block;
+    }
+
+    .active-page {
+      background-color: black;
+      color: white;
+      border-radius: 5px;
+      padding: 5px 10px;
+      border: 2px solid white;
+    }
+
+    .active-page:hover {
+      background-color: white;
+      color: black;
+      border: 2px solid black;
     }
   </style>
   <script>
@@ -102,7 +116,7 @@ document.addEventListener("DOMContentLoaded", function() {
         sidebar.style.display = "none";
       });
 
-      // Show menu button only if logged in
+      // Parada menu pogu ja ir ielogojies
       fetch("check-login-status.php")
         .then(response => response.json())
         .then(data => {
@@ -122,7 +136,7 @@ document.addEventListener("DOMContentLoaded", function() {
   <div id="sidebar">
     <div class="content">
       <span id="closeSidebar" class="close-btn">&times; Aizvērt</span>
-      <!-- Sidebar content -->
+      <!-- Sidebar kontents -->
       <div style="display: flex; flex-direction: column; gap: 15px;">
         <a href="grozs.php" class="nav-link w-nav-link">
           <img src="images/Grozs.png" alt="Cart" style="width: 24px; height: 24px; margin-right: 10px;"> Grozs
@@ -146,14 +160,14 @@ document.addEventListener("DOMContentLoaded", function() {
       <nav role="navigation" class="navbar w-nav-menu">
         <div class="search-banner"></div>
         <div class="nav-menu">
-          <a href="index.php" class="nav-link w-nav-link">Sākums</a>
-          <a href="precu-katalogs.php" class="nav-link w-nav-link">Preču Katalogs</a>
-          <a href="logo-uzdruka.php" class="nav-link w-nav-link">Logo uzdruka</a>
-          <a href="par-mums.php" class="nav-link w-nav-link">Par mums</a>
-          <a href="kontakti.php" class="nav-link w-nav-link">Kontakti</a>
-          <a href="log-in.php" class="nav-link w-nav-link header-login-link">
+          <a href="index.php" class="nav-link w-nav-link <?php echo $current_page == 'index.php' ? 'active-page' : ''; ?>">Sākums</a>
+          <a href="precu-katalogs.php" class="nav-link w-nav-link <?php echo $current_page == 'precu-katalogs.php' ? 'active-page' : ''; ?>">Preču Katalogs</a>
+          <a href="logo-uzdruka.php" class="nav-link w-nav-link <?php echo $current_page == 'logo-uzdruka.php' ? 'active-page' : ''; ?>">Logo uzdruka</a>
+          <a href="par-mums.php" class="nav-link w-nav-link <?php echo $current_page == 'par-mums.php' ? 'active-page' : ''; ?>">Par mums</a>
+          <a href="kontakti.php" class="nav-link w-nav-link <?php echo $current_page == 'kontakti.php' ? 'active-page' : ''; ?>">Kontakti</a>
+          <a href="log-in.php" class="nav-link w-nav-link header-login-link <?php echo $current_page == 'log-in.php' ? 'active-page' : ''; ?>">
             <img src="images/login.png" alt="Login" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;">
-            Login
+            Ienākt
           </a>
           <a id="menuButton" class="nav-link w-nav-link" style="display: none;">
             <img src="images/menu.png" alt="Menu" style="width: 24px; height: 24px;">
