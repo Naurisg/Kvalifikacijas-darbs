@@ -105,7 +105,7 @@
         <h1 class="heading-8"><strong class="bold-text-10">Top kategorijas:</strong></h1>
         <div class="w-layout-grid grid-6">
             <div class="topprecesdiv">
-                <a href="precu-lapas/cimdi.html" class="image-container">
+                <a href="precu-lapas/cimdi.php" class="image-container">
                     <img src="images/cimdi2.png" loading="lazy" alt="" class="image-73">
                     <span class="overlay-text">Cimdi</span>
                 </a>
@@ -117,13 +117,13 @@
                 </a>
             </div>
             <div class="topprecesdiv">
-                <a href="precu-lapas/apgerbi.html" class="image-container">
+                <a href="precu-lapas/apgerbi.php" class="image-container">
                     <img src="images/artwork.png" loading="lazy" alt="" class="image-75">
                     <span class="overlay-text">Apģērbi</span>
                 </a>
             </div>
             <div class="topprecesdiv">
-                <a href="precu-lapas/jakas.html" class="image-container">
+                <a href="precu-lapas/jakas.php" class="image-container">
                     <img src="images/fleecejakas.kategorias.png" loading="lazy" alt="" class="image-76">
                     <span class="overlay-text">Jakas</span>
                 </a>
@@ -343,21 +343,6 @@
         .catch(error => console.error('Error:', error));
 });
 
-    document.addEventListener('DOMContentLoaded', function() {
-      fetch('check-login-status.php')
-        .then(response => response.json())
-        .then(data => {
-          if (data.loggedIn) {
-            document.querySelector('.header-login-link').textContent = 'Log Out';
-            document.querySelector('.header-login-link').href = 'log-out.php';
-            document.querySelector('.profile-link').style.display = 'inline-block';
-            document.querySelector('.cart-link').style.display = 'inline-block';
-          }
-        })
-        .catch(error => {
-          console.error('Error:', error);
-        });
-    });
 
     // Back to Top Button functionality
     const backToTopButton = document.getElementById('backToTop');

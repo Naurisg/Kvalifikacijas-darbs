@@ -205,8 +205,16 @@
                     document.getElementById('apraksts').value = data.product.apraksts;
                     document.getElementById('kategorija').value = data.product.kategorija;
                     document.getElementById('cena').value = data.product.cena;
-                    document.getElementById('currentImage').src = '../uploads/' + data.product.bilde;
                     document.getElementById('quantity').value = data.product.quantity;
+
+                    // Correctly set the old image path
+                    if (data.product.bilde) {
+                        document.getElementById('currentImage').src = '../' + data.product.bilde;
+                        document.getElementById('currentImage').alt = data.product.nosaukums;
+                    } else {
+                        document.getElementById('currentImage').src = '';
+                        document.getElementById('currentImage').alt = 'Nav pieejama bilde';
+                    }
 
                     const selectedCategory = data.product.kategorija.toLowerCase();
                     if (sizesForCategories[selectedCategory]) {
@@ -233,6 +241,10 @@
                         });
                     }
                 }
+            })
+            .catch(error => {
+                console.error('Error fetching product data:', error);
+                alert('Kļūda ielādējot produkta datus.');
             });
 
         document.getElementById('editProductForm').addEventListener('submit', function (e) {

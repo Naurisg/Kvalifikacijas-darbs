@@ -1,33 +1,12 @@
+<?php
+  include '../header.php';
+?>
 <!DOCTYPE html>
 <html lang="lv">
 <head>
     <meta charset="UTF-8">
     <title>Apavi | Darba Apģērbi</title>
     <link rel="stylesheet" href="../css/style.css">
-    <header>
-    <div data-collapse="small" data-animation="default" data-duration="400" data-easing="ease" data-easing2="ease" role="banner" class="nav-bar w-nav">
-        <div class="nav-container w-container">
-            <div class="logo-div">
-                <a href="../index.html" class="nav-logo w-inline-block">
-                    <img src="../images/Logo.png" width="125" sizes="(max-width: 479px) 50vw, 125px" srcset="../images/Logo-p-500.png 500w, ../images/Logo-p-800.png 800w, ../images/Logo.png 960w" alt="" class="logo">
-                </a>
-            </div>
-            <nav role="navigation" class="navbar w-nav-menu">
-                <div class="search-banner"></div>
-                <div class="nav-menu">
-                    <a href="../index.html" class="nav-link w-nav-link">Sākums</a>
-                    <a href="../precu-katalogs.html" class="nav-link w-nav-link w--current">Preču Katalogs</a>
-                    <a href="../logo-uzdruka.html" class="nav-link w-nav-link">Logo uzdruka</a>
-                    <a href="../par-mums.html" class="nav-link w-nav-link">Par mums</a>
-                    <a href="../kontakti.html" class="nav-link w-nav-link">Kontakti</a>
-                </div>
-            </nav>
-            <a href="../grozs.html" class="w-inline-block">
-                <img src="../images/Grozs.png" loading="eager" width="40" height="40" alt="">
-            </a>
-        </div>
-    </div>
-</header>
     <style>
        .shop-container {
     display: flex;
@@ -210,36 +189,90 @@
 
 .modal-product-details {
     display: flex;
-    gap: 30px;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: flex-start;
 }
 
 .modal-product-details img {
-    width: 400px;
-    height: 400px;
+    width: 300px;
+    height: 300px;
     object-fit: contain;
+    border-radius: 8px;
     background: #f5f5f5;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .modal-product-info {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
-.modal-description {
-    margin: 20px 0;
-    font-size: 16px;
-    line-height: 1.6;
-    white-space: pre-line;
-}
-
-.modal-price {
+.modal-product-info h2 {
     font-size: 24px;
     font-weight: bold;
-    margin: 20px 0;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.modal-product-info p {
+    font-size: 16px;
+    line-height: 1.5;
+    color: #555;
+}
+
+.modal-product-info .modal-price {
+    font-size: 20px;
+    font-weight: bold;
+    color: #27ae60;
+}
+
+.modal-product-info label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.modal-product-info select,
+.modal-product-info input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
 }
 
 .modal-buttons {
     display: flex;
-    gap: 15px;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.modal-buttons button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.modal-buttons .add-to-cart {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.modal-buttons .buy-now {
+    background-color: #2196F3;
+    color: white;
+}
+
+.modal-buttons button:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
 }
     </style>
 </head>
@@ -256,17 +289,17 @@
             
             <div class="filter-section">
                 <h3>Izmēri</h3>
-                <label><input type="checkbox" value="36"> 36</label><br>
-                <label><input type="checkbox" value="37"> 37</label><br>
-                <label><input type="checkbox" value="38"> 38</label><br>
-                <label><input type="checkbox" value="39"> 39</label><br>
-                <label><input type="checkbox" value="40"> 40</label><br>
-                <label><input type="checkbox" value="41"> 41</label><br>
-                <label><input type="checkbox" value="42"> 42</label><br>
-                <label><input type="checkbox" value="43"> 43</label><br>
-                <label><input type="checkbox" value="44"> 44</label><br>
-                <label><input type="checkbox" value="45"> 45</label><br>
-                <label><input type="checkbox" value="46"> 46</label>
+                <label><input type="checkbox" class="size-filter" value="36"> 36</label><br>
+                <label><input type="checkbox" class="size-filter" value="37"> 37</label><br>
+                <label><input type="checkbox" class="size-filter" value="38"> 38</label><br>
+                <label><input type="checkbox" class="size-filter" value="39"> 39</label><br>
+                <label><input type="checkbox" class="size-filter" value="40"> 40</label><br>
+                <label><input type="checkbox" class="size-filter" value="41"> 41</label><br>
+                <label><input type="checkbox" class="size-filter" value="42"> 42</label><br>
+                <label><input type="checkbox" class="size-filter" value="43"> 43</label><br>
+                <label><input type="checkbox" class="size-filter" value="44"> 44</label><br>
+                <label><input type="checkbox" class="size-filter" value="45"> 45</label><br>
+                <label><input type="checkbox" class="size-filter" value="46"> 46</label>
             </div>
         </aside>
 
@@ -301,15 +334,22 @@
             filterProducts();
         });
 
+        document.querySelectorAll('.size-filter').forEach(checkbox => {
+            checkbox.addEventListener('change', () => filterProducts());
+        });
+
         function filterProducts() {
             const searchTerm = document.querySelector('.search-bar').value.toLowerCase();
             const maxPrice = parseFloat(document.querySelector('.price-range').value);
+            const selectedSizes = Array.from(document.querySelectorAll('.size-filter:checked')).map(cb => cb.value);
 
             const filteredProducts = allProducts.filter(product => {
                 const matchesSearch = product.nosaukums.toLowerCase().includes(searchTerm) ||
-                                    product.apraksts.toLowerCase().includes(searchTerm);
+                                      product.apraksts.toLowerCase().includes(searchTerm);
                 const matchesPrice = parseFloat(product.cena) <= maxPrice;
-                return matchesSearch && matchesPrice;
+                const matchesSize = selectedSizes.length === 0 || 
+                                    selectedSizes.some(size => product.sizes && product.sizes.split(',').includes(size));
+                return matchesSearch && matchesPrice && matchesSize;
             });
 
             displayProducts(filteredProducts);
@@ -362,6 +402,18 @@
                     <h2>${product.nosaukums}</h2>
                     <p class="modal-description">${product.apraksts}</p>
                     <p class="modal-price">€${product.cena}</p>
+                    <p><strong>Pieejamie izmēri:</strong> ${product.sizes ? product.sizes.replace(/,/g, ', ') : 'Nav pieejami'}</p>
+                    <p><strong>Pieejamais daudzums:</strong> ${product.quantity}</p>
+                    <div>
+                        <label for="size-select">Izvēlieties izmēru:</label>
+                        <select id="size-select">
+                            ${product.sizes ? product.sizes.split(',').map(size => `<option value="${size}">${size}</option>`).join('') : '<option disabled>Nav pieejami</option>'}
+                        </select>
+                    </div>
+                    <div>
+                        <label for="quantity-input">Daudzums:</label>
+                        <input type="number" id="quantity-input" min="1" max="${product.quantity}" value="1">
+                    </div>
                     <div class="modal-buttons">
                         <button class="add-to-cart" onclick="addToCart(${product.id})">Pievienot grozam</button>
                         <button class="buy-now" onclick="buyNow(${product.id})">Pirkt tagad</button>
@@ -381,7 +433,35 @@
     });
 
     function addToCart(productId) {
-        console.log('Adding product to cart:', productId);
+        const selectedSize = document.getElementById('size-select').value || 'Nav norādīts';
+        const quantityInput = document.getElementById('quantity-input');
+        const quantity = parseInt(quantityInput.value, 10) || 1;
+        const maxQuantity = parseInt(quantityInput.max, 10);
+
+        if (quantity > maxQuantity) {
+            alert(`Maksimālais pieejamais daudzums ir ${maxQuantity}.`);
+            return;
+        }
+
+        fetch('/Vissdarbam/grozs/add_to_cart.php', { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ id: productId, size: selectedSize, quantity: quantity }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Produkts pievienots grozam!');
+            } else {
+                alert(data.message || 'Kļūda pievienojot produktu grozam.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Kļūda pievienojot produktu grozam.');
+        });
     }
 
     function buyNow(productId) {

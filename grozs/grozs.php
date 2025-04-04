@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'header.php';
+include '../header.php'; 
 
 if (!isset($_SESSION['user_id'])) {
     echo '<p>Lūdzu, piesakieties, lai apskatītu savu grozu.</p>';
@@ -8,8 +8,8 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 try {
-    // Load cart from clients table
-    $clientDb = new PDO('sqlite:Datubazes/client_signup.db');
+
+    $clientDb = new PDO('sqlite:../Datubazes/client_signup.db'); 
     $clientDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     $stmt = $clientDb->prepare('SELECT cart FROM clients WHERE id = :user_id');
@@ -17,7 +17,7 @@ try {
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
     $cart = $result['cart'] ? json_decode($result['cart'], true) : [];
-    $_SESSION['cart'] = $cart; // Sync session cart with database
+    $_SESSION['cart'] = $cart;
 } catch (PDOException $e) {
     echo '<p>Kļūda ielādējot grozu: ' . htmlspecialchars($e->getMessage()) . '</p>';
     exit();
@@ -31,9 +31,9 @@ try {
   <meta content="Jūsu Grozs" property="og:title">
   <meta content="Jūsu Grozs" property="twitter:title">
   <meta content="width=device-width, initial-scale=1" name="viewport">
-  <link href="css/normalize.css" rel="stylesheet" type="text/css">
-  <link href="css/main.css" rel="stylesheet" type="text/css">
-  <link href="css/style.css" rel="stylesheet" type="text/css">
+  <link href="../css/normalize.css" rel="stylesheet" type="text/css"> 
+  <link href="../css/main.css" rel="stylesheet" type="text/css">
+  <link href="../css/style.css" rel="stylesheet" type="text/css">
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin="anonymous">
   <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js" type="text/javascript"></script>
@@ -44,8 +44,8 @@ try {
       }
     });
   </script>
-  <link href="images/favicon.png" rel="shortcut icon" type="image/x-icon">
-  <link href="images/webclip.png" rel="apple-touch-icon">
+  <link href="../images/favicon.png" rel="shortcut icon" type="image/x-icon"> <!-- Adjusted paths -->
+  <link href="../images/webclip.png" rel="apple-touch-icon">
   <meta name="robots" content="noindex">
   <style>
     .cart-container {
@@ -108,6 +108,11 @@ try {
       color: #555;
     }
 
+    .cart-item-details .size, .cart-item-details .quantity {
+      font-size: 14px;
+      color: #777;
+    }
+
     .cart-empty {
       text-align: center;
       font-size: 18px;
@@ -140,10 +145,12 @@ try {
       <ul class="cart-list">
         <?php foreach ($cart as $index => $product): ?>
           <li class="cart-item">
-            <img src="/Vissdarbam/<?php echo htmlspecialchars($product['bilde']); ?>" alt="<?php echo htmlspecialchars($product['nosaukums']); ?>" width="100">
+            <img src="../<?php echo htmlspecialchars($product['bilde']); ?>" alt="<?php echo htmlspecialchars($product['nosaukums']); ?>" width="100"> <!-- Adjusted paths -->
             <div class="cart-item-details">
               <h3><?php echo htmlspecialchars($product['nosaukums']); ?></h3>
               <p>Cena: €<?php echo htmlspecialchars($product['cena']); ?></p>
+              <p class="size">Izmērs: <?php echo htmlspecialchars($product['size'] ?? 'Nav norādīts'); ?></p>
+              <p class="quantity">Daudzums: <?php echo htmlspecialchars($product['quantity'] ?? 1); ?></p>
             </div>
             <button class="remove-button" onclick="removeFromCart(<?php echo $index; ?>)">Noņemt</button>
           </li>
@@ -157,8 +164,8 @@ try {
     <div class="footer-container w-container">
       <div class="w-layout-grid footer-grid">
         <div id="w-node-b8d7be4a-ce45-83ab-5947-02d204c8bff0-cf3fcb86" class="footerlogobloks">
-          <a data-ix="logo" href="index.html" class="footer-logo w-nav-brand">
-            <img src="images/Logo.png" width="130" sizes="130px" srcset="images/Logo-p-500.png 500w, images/Logo-p-800.png 800w, images/Logo.png 960w" alt="">
+          <a data-ix="logo" href="../index.html" class="footer-logo w-nav-brand"> 
+            <img src="../images/Logo.png" width="130" sizes="130px" srcset="../images/Logo-p-500.png 500w, ../images/Logo-p-800.png 800w, ../images/Logo.png 960w" alt="">
           </a>
           <p class="text small">
             <strong>Piedāvājam piegādi tajā pašā dienā</strong><br>
@@ -169,11 +176,11 @@ try {
         </div>
         <div class="footer-links-container">
           <h5 class="footer-header">Mājas lapa</h5>
-          <a href="index.html" class="footer-link">Sākums</a>
-          <a href="precu-katalogs.html" class="footer-link">Preču Katalogs</a>
-          <a href="par-mums.html" class="footer-link">Logo uzdruka</a>
-          <a href="logo-uzdruka.html" class="footer-link">Par mums</a>
-          <a href="kontakti.html" class="footer-link">Kontakti</a>
+          <a href="../index.html" class="footer-link">Sākums</a> 
+          <a href="../precu-katalogs.html" class="footer-link">Preču Katalogs</a>
+          <a href="../par-mums.html" class="footer-link">Logo uzdruka</a>
+          <a href="../logo-uzdruka.html" class="footer-link">Par mums</a>
+          <a href="../kontakti.html" class="footer-link">Kontakti</a>
         </div>
         <div class="footer-links-container">
           <h5 class="footer-header">Darba Laiki</h5>
@@ -193,11 +200,9 @@ try {
       <div class="text-block-2">© 2024 Majors-J. All Rights Reserved.</div>
     </section>
   </div>
-  <script src="https://d3e54v103j8qbb.cloudfront.net/js/jquery-3.5.1.min.dc5e7f18c8.js?site=66f12005df0203b01c953e53" type="text/javascript" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
-  <script src="js/script.js" type="text/javascript"></script>
   <script>
     function removeFromCart(index) {
-      fetch('remove_from_cart.php', {
+      fetch('remove_from_cart.php', { 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -208,7 +213,7 @@ try {
       .then(data => {
         if (data.success) {
           alert('Produkts noņemts no groza!');
-          location.reload(); // Refresh the page to update the cart
+          location.reload();
         } else {
           alert(data.message || 'Kļūda noņemot produktu no groza.');
         }

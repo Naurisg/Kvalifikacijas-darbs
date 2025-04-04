@@ -29,10 +29,10 @@ try {
     <style>
         body {
             font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #2c3e50, #bdc3c7);
+            background: #f8f8f8;
             margin: 0;
             padding: 0;
-            color: #333; 
+            color: #333;
         }
 
         section {
@@ -46,7 +46,7 @@ try {
 
         h2 {
             text-align: center;
-            color: #4A4A4A; 
+            color: #2c3e50;
             margin-bottom: 20px;
         }
 
@@ -54,9 +54,9 @@ try {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 30px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15); 
-            border-radius: 8px; 
-            overflow: hidden; 
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
         }
 
         th, td {
@@ -66,21 +66,21 @@ try {
         }
 
         th {
-            background-color: #007bff; 
+            background-color: #2c3e50;
             color: white;
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
 
         tr:hover {
-            background-color: rgba(0, 123, 255, 0.1); 
+            background-color: #f0f0f0;
         }
 
         .logout-button, .toggle-button {
             display: inline-block;
             padding: 12px 24px;
             margin: 10px;
-            background-color: #dc3545; 
+            background-color: #333;
             color: white;
             text-decoration: none;
             border-radius: 5px;
@@ -89,17 +89,9 @@ try {
         }
 
         .logout-button:hover, .toggle-button:hover {
-            background-color: #c82333; 
+            background-color: #555;
             transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); 
-        }
-
-        .toggle-button {
-            background-color: #007bff; 
-        }
-
-        .toggle-button:hover {
-            background-color: #0056b3; 
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
         .edit-button, .approval-button {
@@ -109,13 +101,13 @@ try {
             cursor: pointer;
             font-size: 11px;
             font-weight: bold;
-            background-color: #17a2b8; 
+            background-color: #2c3e50;
             color: white;
             transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         .edit-button:hover, .approval-button:hover {
-            background-color: #138496; 
+            background-color: #1a252f;
             transform: scale(1.05);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
@@ -130,7 +122,7 @@ try {
         .search-input {
             width: 50%;
             padding: 12px 20px;
-            border: 2px solid #007bff;
+            border: 2px solid #2c3e50;
             border-radius: 25px;
             font-size: 16px;
             transition: all 0.3s ease;
@@ -138,7 +130,7 @@ try {
 
         .search-input:focus {
             outline: none;
-            box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+            box-shadow: 0 0 8px rgba(44, 62, 80, 0.5);
             width: 60%;
         }
 
@@ -162,29 +154,29 @@ try {
         }
 
         .role-select {
-    padding: 6px 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background-color: white;
-    cursor: pointer;
-}
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+            cursor: pointer;
+        }
 
-.role-select:hover {
-    border-color: #007bff;
-}
+        .role-select:hover {
+            border-color: #2c3e50;
+        }
 
-.delete-btn {
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-}
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
 
-.delete-btn:hover {
-    background-color: #c82333;
-}
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
 
         .logo {
             position: absolute;
@@ -207,11 +199,11 @@ try {
             }
 
             h2 {
-                font-size: 1.5rem; 
+                font-size: 1.5rem;
             }
 
             .logout-button, .toggle-button {
-                padding: 10px 20px; 
+                padding: 10px 20px;
             }
         }
     </style>

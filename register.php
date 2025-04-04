@@ -14,6 +14,7 @@ try {
             name TEXT NOT NULL,
             password TEXT NOT NULL,
             accept_privacy_policy INTEGER NOT NULL CHECK (accept_privacy_policy IN (0, 1)),
+            cart TEXT DEFAULT '[]', -- Initialize cart as an empty JSON array
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
     ";
@@ -39,21 +40,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Hash the password for security
     $hashed_password = password_hash($password, PASSWORD_BCRYPT);
 
-    // Prepare SQL statement to insert the data
-    $sql = "INSERT INTO clients (email, name, password, accept_privacy_policy) VALUES (:email, :name, :password, :accept_privacy_policy)";
-    $stmt = $db->prepare($sql);
+    try {
+        // Check if the email already exists
+        $stmt = $db->prepare("SELECT COUNT(*) FROM clients WHERE email = :email");
+        $stmt->execute([':email' => $email]);
+        $emailExists = $stmt->fetchColumn();
 
-    // Bind parameters
-    $stmt->bindParam(':email', $email);
-    $stmt->bindParam(':name', $name);
-    $stmt->bindParam(':password', $hashed_password);
-    $stmt->bindParam(':accept_privacy_policy', $accept_privacy_policy);
+        if ($emailExists) {
+            echo json_encode(["success" => false, "message" => "Lietotājs ar šādu e-pastu jau eksistē!"]);
+            exit();
+        }
 
-    // Execute the statement
-    if ($stmt->execute()) {
-        echo json_encode(["success" => true, "message" => "Reģistrācija veiksmīga!"]);
-    } else {
-        echo json_encode(["success" => false, "message" => "Notikusi kļūda, mēģiniet vēlreiz."]);
+        // Prepare SQL statement to insert the data
+        $sql = "INSERT INTO clients (email, name, password, accept_privacy_policy, cart) VALUES (:email, :name, :password, :accept_privacy_policy, :cart)";
+        $stmt = $db->prepare($sql);
+
+        // Bind parameters
+        $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':name', $name);
+        $stmt->bindParam(':password', $hashed_password);
+        $stmt->bindParam(':accept_privacy_policy', $accept_privacy_policy);
+        $stmt->bindValue(':cart', json_encode([])); // Initialize cart as an empty JSON array
+
+        // Execute the statement
+        if ($stmt->execute()) {
+            echo json_encode(["success" => true, "message" => "Reģistrācija veiksmīga!"]);
+        } else {
+            echo json_encode(["success" => false, "message" => "Notikusi kļūda, mēģiniet vēlreiz."]);
+        }
+    } catch (PDOException $e) {
+        echo json_encode(["success" => false, "message" => "Kļūda: " . $e->getMessage()]);
     }
 }
 ?>

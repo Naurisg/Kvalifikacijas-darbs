@@ -1,35 +1,14 @@
+<?php
+  include '../header.php';
+?>
 <!DOCTYPE html>
 <html lang="lv">
 <head>
     <meta charset="UTF-8">
-    <title>Drošības Sistēmas | Darba Apģērbi</title>
+    <title>Austiņas,Ķiveres,brilles | Darba Apģērbi</title>
     <link rel="stylesheet" href="../css/style.css">
-    <header>
-    <div data-collapse="small" data-animation="default" data-duration="400" data-easing="ease" data-easing2="ease" role="banner" class="nav-bar w-nav">
-        <div class="nav-container w-container">
-            <div class="logo-div">
-                <a href="../index.html" class="nav-logo w-inline-block">
-                    <img src="../images/Logo.png" width="125" sizes="(max-width: 479px) 50vw, 125px" srcset="../images/Logo-p-500.png 500w, ../images/Logo-p-800.png 800w, ../images/Logo.png 960w" alt="" class="logo">
-                </a>
-            </div>
-            <nav role="navigation" class="navbar w-nav-menu">
-                <div class="search-banner"></div>
-                <div class="nav-menu">
-                    <a href="../index.html" class="nav-link w-nav-link">Sākums</a>
-                    <a href="../precu-katalogs.html" class="nav-link w-nav-link w--current">Preču Katalogs</a>
-                    <a href="../logo-uzdruka.html" class="nav-link w-nav-link">Logo uzdruka</a>
-                    <a href="../par-mums.html" class="nav-link w-nav-link">Par mums</a>
-                    <a href="../kontakti.html" class="nav-link w-nav-link">Kontakti</a>
-                </div>
-            </nav>
-            <a href="../grozs.html" class="w-inline-block">
-                <img src="../images/Grozs.png" loading="eager" width="40" height="40" alt="">
-            </a>
-        </div>
-    </div>
-</header>
     <style>
-.shop-container {
+           .shop-container {
     display: flex;
     max-width: 1400px;
     margin: 0 auto;
@@ -248,33 +227,41 @@
         <aside class="filters-sidebar">
             <div class="filter-section">
                 <h3>Cenas filtrs</h3>
-                <input type="range" class="price-range" min="0" max="500" step="20">
+                <input type="range" class="price-range" min="0" max="150" step="10">
                 <div class="price-values">
-                    <span>€0</span> - <span>€500</span>
+                    <span>€0</span> - <span>€150</span>
                 </div>
             </div>
             
             <div class="filter-section">
-                <h3>Kategorijas</h3>
-                <label><input type="checkbox" value="Drošības jostas"> Drošības jostas</label><br>
-                <label><input type="checkbox" value="Kritiena aizsardzība"> Kritiena aizsardzība</label><br>
-                <label><input type="checkbox" value="Drošības troses"> Drošības troses</label><br>
-                <label><input type="checkbox" value="Karabīnes"> Karabīnes</label><br>
-                <label><input type="checkbox" value="Enkurpunkti"> Enkurpunkti</label>
+                <h3>Tips</h3>
+                <label><input type="checkbox" value="Būvniecības"> Būvniecības ķiveres</label><br>
+                <label><input type="checkbox" value="Industriālās"> Industriālās ķiveres</label><br>
+                <label><input type="checkbox" value="Alpīnisma"> Alpīnisma ķiveres</label><br>
+                <label><input type="checkbox" value="Elektriķu"> Elektriķu ķiveres</label>
             </div>
 
             <div class="filter-section">
-                <h3>Pielietojums</h3>
-                <label><input type="checkbox" value="Būvniecība"> Būvniecība</label><br>
-                <label><input type="checkbox" value="Rūpniecība"> Rūpniecība</label><br>
-                <label><input type="checkbox" value="Alpīnisms"> Alpīnisms</label><br>
-                <label><input type="checkbox" value="Glābšanas darbi"> Glābšanas darbi</label>
+                <h3>Krāsa</h3>
+                <label><input type="checkbox" value="Balta"> Balta</label><br>
+                <label><input type="checkbox" value="Dzeltena"> Dzeltena</label><br>
+                <label><input type="checkbox" value="Sarkana"> Sarkana</label><br>
+                <label><input type="checkbox" value="Zila"> Zila</label><br>
+                <label><input type="checkbox" value="Oranža"> Oranža</label>
+            </div>
+
+            <div class="filter-section">
+                <h3>Papildaprīkojums</h3>
+                <label><input type="checkbox" value="Sejassargs"> Ar sejassargu</label><br>
+                <label><input type="checkbox" value="Austiņas"> Ar austiņām</label><br>
+                <label><input type="checkbox" value="Lukturis"> Ar lukturi</label><br>
+                <label><input type="checkbox" value="Ventilācija"> Ar ventilāciju</label>
             </div>
         </aside>
 
         <main class="products-section">
             <div class="search-container">
-                <input type="text" class="search-bar" placeholder="Meklēt drošības sistēmas...">
+                <input type="text" class="search-bar" placeholder="Meklēt ķiveres...">
             </div>
             <div id="products-container" class="products-grid">
             </div>
@@ -285,7 +272,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         let allProducts = [];
         
-        fetch('fetch_category_products.php?category=DrosibasSistemas')
+        fetch('fetch_category_products.php?category=Austinas_kiveres_brilles')
             .then(response => response.json())
             .then(data => {
                 if (data.success) {

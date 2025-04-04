@@ -20,11 +20,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $quantity = $_POST['quantity'];
         $sizes = isset($_POST['sizes']) ? implode(',', $_POST['sizes']) : null;
 
+        // Validate required fields
+        if (empty($productId) || empty($nosaukums) || empty($apraksts) || empty($kategorija) || empty($cena) || empty($quantity)) {
+            throw new Exception("Visi lauki ir obligāti jāaizpilda.");
+        }
+
         // Handle image upload if new image is provided
         if (isset($_FILES['bilde']) && $_FILES['bilde']['error'] === 0) {
-            $fileName = time() . '_' . $_FILES['bilde']['name'];
-            $uploadDir = '../uploads/';
+            $fileName = time() . '_' . basename($_FILES['bilde']['name']);
+            $uploadDir = '../images/products/';
             $filePath = $uploadDir . $fileName;
+
+            // Ensure the upload directory exists
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
 
             // Get old image to delete
             $stmt = $db->prepare("SELECT bilde FROM products WHERE id = :id");
@@ -34,7 +44,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if (move_uploaded_file($_FILES['bilde']['tmp_name'], $filePath)) {
                 // Delete old image
                 if ($oldProduct && $oldProduct['bilde']) {
-                    $oldImagePath = $uploadDir . $oldProduct['bilde'];
+                    $oldImagePath = '../' . $oldProduct['bilde'];
                     if (file_exists($oldImagePath)) {
                         unlink($oldImagePath);
                     }
@@ -50,9 +60,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     ':cena' => $cena,
                     ':quantity' => $quantity,
                     ':sizes' => $sizes,
-                    ':bilde' => $fileName,
+                    ':bilde' => 'images/products/' . $fileName,
                     ':id' => $productId
                 ];
+            } else {
+                throw new Exception("Neizdevās augšupielādēt jauno attēlu.");
             }
         } else {
             $sql = "UPDATE products SET nosaukums = :nosaukums, apraksts = :apraksts, 
@@ -72,7 +84,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->execute($params);
 
         echo json_encode(["success" => true, "message" => "Produkts veiksmīgi atjaunināts"]);
-    } catch (PDOException $e) {
+    } catch (Exception $e) {
         echo json_encode(["success" => false, "message" => $e->getMessage()]);
     }
 }

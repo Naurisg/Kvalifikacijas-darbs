@@ -1,35 +1,14 @@
+<?php
+  include '../header.php';
+?>
 <!DOCTYPE html>
 <html lang="lv">
 <head>
     <meta charset="UTF-8">
-    <title>Darba Apģērbi | Darba Apģērbi</title>
+    <title>Ķīmijas | Darba Apģērbi</title>
     <link rel="stylesheet" href="../css/style.css">
-    <header>
-    <div data-collapse="small" data-animation="default" data-duration="400" data-easing="ease" data-easing2="ease" role="banner" class="nav-bar w-nav">
-        <div class="nav-container w-container">
-            <div class="logo-div">
-                <a href="../index.html" class="nav-logo w-inline-block">
-                    <img src="../images/Logo.png" width="125" sizes="(max-width: 479px) 50vw, 125px" srcset="../images/Logo-p-500.png 500w, ../images/Logo-p-800.png 800w, ../images/Logo.png 960w" alt="" class="logo">
-                </a>
-            </div>
-            <nav role="navigation" class="navbar w-nav-menu">
-                <div class="search-banner"></div>
-                <div class="nav-menu">
-                    <a href="../index.html" class="nav-link w-nav-link">Sākums</a>
-                    <a href="../precu-katalogs.html" class="nav-link w-nav-link w--current">Preču Katalogs</a>
-                    <a href="../logo-uzdruka.html" class="nav-link w-nav-link">Logo uzdruka</a>
-                    <a href="../par-mums.html" class="nav-link w-nav-link">Par mums</a>
-                    <a href="../kontakti.html" class="nav-link w-nav-link">Kontakti</a>
-                </div>
-            </nav>
-            <a href="../grozs.html" class="w-inline-block">
-                <img src="../images/Grozs.png" loading="eager" width="40" height="40" alt="">
-            </a>
-        </div>
-    </div>
-</header>
     <style>
-.shop-container {
+           .shop-container {
     display: flex;
     max-width: 1400px;
     margin: 0 auto;
@@ -248,43 +227,34 @@
         <aside class="filters-sidebar">
             <div class="filter-section">
                 <h3>Cenas filtrs</h3>
-                <input type="range" class="price-range" min="0" max="200" step="10">
+                <input type="range" class="price-range" min="0" max="300" step="10">
                 <div class="price-values">
-                    <span>€0</span> - <span>€200</span>
+                    <span>€0</span> - <span>€300</span>
                 </div>
             </div>
             
             <div class="filter-section">
                 <h3>Izmēri</h3>
-                <label><input type="checkbox" value="XS"> XS</label><br>
                 <label><input type="checkbox" value="S"> S</label><br>
                 <label><input type="checkbox" value="M"> M</label><br>
                 <label><input type="checkbox" value="L"> L</label><br>
                 <label><input type="checkbox" value="XL"> XL</label><br>
-                <label><input type="checkbox" value="XXL"> XXL</label><br>
-                <label><input type="checkbox" value="XXXL"> XXXL</label>
+                <label><input type="checkbox" value="XXL"> XXL</label>
             </div>
 
             <div class="filter-section">
-                <h3>Kategorija</h3>
-                <label><input type="checkbox" value="Bikses"> Darba bikses</label><br>
-                <label><input type="checkbox" value="Jakas"> Darba jakas</label><br>
-                <label><input type="checkbox" value="Kombinezoni"> Kombinezoni</label><br>
-                <label><input type="checkbox" value="Krekli"> Darba krekli</label><br>
-                <label><input type="checkbox" value="Vestes"> Vestes</label>
+                <h3>Aizsardzības tips</h3>
+                <label><input type="checkbox" value="Skābes"> Skābju aizsardzība</label><br>
+                <label><input type="checkbox" value="Sārmi"> Sārmu aizsardzība</label><br>
+                <label><input type="checkbox" value="Šķīdinātāji"> Šķīdinātāju aizsardzība</label><br>
+                <label><input type="checkbox" value="Universāla"> Universāla aizsardzība</label>
             </div>
 
-            <div class="filter-section">
-                <h3>Sezona</h3>
-                <label><input type="checkbox" value="Vasara"> Vasaras</label><br>
-                <label><input type="checkbox" value="Ziema"> Ziemas</label><br>
-                <label><input type="checkbox" value="Universal"> Universāls</label>
-            </div>
         </aside>
 
         <main class="products-section">
             <div class="search-container">
-                <input type="text" class="search-bar" placeholder="Meklēt darba apģērbus...">
+                <input type="text" class="search-bar" placeholder="Meklēt ķīmiskos līdzekļus...">
             </div>
             <div id="products-container" class="products-grid">
             </div>
@@ -295,7 +265,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         let allProducts = [];
         
-        fetch('fetch_category_products.php?category=Apgerbs')
+        fetch('fetch_category_products.php?category=Kimijas')
             .then(response => response.json())
             .then(data => {
                 if (data.success) {

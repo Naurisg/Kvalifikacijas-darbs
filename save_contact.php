@@ -1,11 +1,11 @@
 <?php
 try {
-    // Create (connect to) SQLite database in file
+    // Izveido (pievienojas) SQLite datubāzi failā
     $pdo = new PDO('sqlite:Datubazes/kontakti.db');
-    // Set error mode to exceptions
+    // Uzstāda kļūdu režīmu uz izņēmumiem
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // Create table if it doesn't exist
+    // Izveido tabulu, ja tā neeksistē
     $pdo->exec("CREATE TABLE IF NOT EXISTS contacts (
         id INTEGER PRIMARY KEY,
         vards TEXT,
@@ -14,24 +14,24 @@ try {
         zina TEXT
     )");
 
-    // Prepare INSERT statement to SQLite3 file db
+    // Sagatavo INSERT komandu SQLite3 datubāzei
     $stmt = $pdo->prepare("INSERT INTO contacts (vards, uzvards, epasts, zina) VALUES (:first_name, :last_name, :email, :message)");
 
-    // Bind parameters to statement variables
+    // Piesaista parametrus pie komandas mainīgajiem
     $stmt->bindParam(':first_name', $_POST['First-Name']);
     $stmt->bindParam(':last_name', $_POST['Last-Name']);
     $stmt->bindParam(':email', $_POST['Email']);
     $stmt->bindParam(':message', $_POST['Message']);
 
-    // Execute statement
+    // Izpilda komandu
     $stmt->execute();
 
-    // Redirect to a success page
+    // Pārvirza uz veiksmes lapu
     header("Location: kontakti.html?success=1");
 } catch (PDOException $e) {
-    // Redirect to an error page
+    // Pārvirza uz kļūdas lapu
     header("Location: kontakti.html?error=1");
-    // Print PDOException message
+    // Izvada PDOException kļūdas ziņojumu
     echo $e->getMessage();
 }
 ?>
