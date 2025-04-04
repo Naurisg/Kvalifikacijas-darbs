@@ -10,7 +10,7 @@
 - [x] Izveidot aprakstu par mums
 - [x] Izveidot aprakstu "Kāpēc izvēlēties tieši mūs?"
 - [x] Izveidot sadarbības partneru sadaļu sākuma lapā
-- [ ] Izdomāt/Izveidot Produkti page design un ar iespeju izvēlēties kāda preces kategorija interesē
+- [x] Izdomāt/Izveidot Produkti page design un ar iespeju izvēlēties kāda preces kategorija interesē
 - [x] Izveidot kad var izveidot klientu profilu no admin-paneļa.
 - [x] Izveidot kontakti/adrese page
 - [x] Par mums page
