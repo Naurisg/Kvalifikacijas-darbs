@@ -16,11 +16,8 @@ if (isset($_GET['id'])) {
         $stmt->execute([':id' => $_GET['id']]);
         $product = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($product) {
-            echo json_encode(["success" => true, "product" => $product]);
-        } else {
-            echo json_encode(["success" => false, "message" => "Produkts nav atrasts"]);
-        }
+        // Ensure the category value matches the dropdown in productedit.html
+        echo json_encode(["success" => true, "product" => $product]);
     } catch (PDOException $e) {
         echo json_encode(["success" => false, "message" => $e->getMessage()]);
     }

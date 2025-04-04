@@ -35,7 +35,7 @@ try {
 
     $nosaukums = $_POST['nosaukums'];
     $apraksts = $_POST['apraksts'];
-    $kategorija = $_POST['kategorija'];
+    $kategorija = $_POST['kategorija']; // Ensure this matches "KrasosanasApgerbs"
     $cena = $_POST['cena'];
     $quantity = $_POST['quantity'];
     $sizes = isset($_POST['sizes']) ? implode(',', $_POST['sizes']) : null;
@@ -59,7 +59,7 @@ try {
             ':nosaukums' => $nosaukums,
             ':apraksts' => $apraksts,
             ':bilde' => $bilde_path,
-            ':kategorija' => $kategorija,
+            ':kategorija' => $kategorija, // Ensure this matches the dropdown value in add_product.php
             ':cena' => $cena,
             ':quantity' => $quantity,
             ':sizes' => $sizes

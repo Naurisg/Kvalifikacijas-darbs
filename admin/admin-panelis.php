@@ -275,7 +275,7 @@ try {
             <option value="Cimdi">Cimdi</option>
             <option value="Apavi">Apavi</option>
             <option value="Apgerbs">Apģērbs</option>
-            <option value="DrosibasSistemas">Drošības sistēmas</option>
+            <option value="Drosibas-sistemas">Drošības sistēmas</option> <!-- Updated value -->
             <option value="Gazmaskas">Gazmaskas</option>
             <option value="Arapgerbs">Augstas redzamības apgerbs</option>
             <option value="Austinas_kiveres_brilles">Austinas, kiveres, brilles</option>

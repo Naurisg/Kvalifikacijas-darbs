@@ -22,6 +22,11 @@ try {
     echo '<p>Kļūda ielādējot grozu: ' . htmlspecialchars($e->getMessage()) . '</p>';
     exit();
 }
+
+$totalPrice = 0;
+foreach ($cart as $product) {
+    $totalPrice += $product['cena'] * ($product['quantity'] ?? 1);
+}
 ?>
 <!DOCTYPE html>
 <html lang="lv" data-wf-page="66f12005df0203b01c953ebe" data-wf-site="66f12005df0203b01c953e53">
@@ -44,7 +49,7 @@ try {
       }
     });
   </script>
-  <link href="../images/favicon.png" rel="shortcut icon" type="image/x-icon"> <!-- Adjusted paths -->
+  <link href="../images/favicon.png" rel="shortcut icon" type="image/x-icon"> 
   <link href="../images/webclip.png" rel="apple-touch-icon">
   <meta name="robots" content="noindex">
   <style>
@@ -121,18 +126,42 @@ try {
     }
 
     .remove-button {
-      background-color: #f44336;
-      color: white;
+      background: url('../images/delete.png') no-repeat center center;
+      background-size: contain;
+      width: 24px;
+      height: 24px;
       border: none;
-      padding: 6px 10px;
-      border-radius: 4px;
       cursor: pointer;
-      font-size: 12px;
-      transition: background-color 0.3s;
+      transition: transform 0.3s;
     }
 
     .remove-button:hover {
-      background-color: #d32f2f;
+      transform: scale(1.2);
+    }
+
+    .cart-total {
+      text-align: right;
+      font-size: 18px;
+      font-weight: bold;
+      margin-top: 20px;
+      color: #333;
+    }
+
+    .checkout-button {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+
+    .checkout-button:hover {
+      background-color: #45a049;
     }
   </style>
 </head>
@@ -152,10 +181,14 @@ try {
               <p class="size">Izmērs: <?php echo htmlspecialchars($product['size'] ?? 'Nav norādīts'); ?></p>
               <p class="quantity">Daudzums: <?php echo htmlspecialchars($product['quantity'] ?? 1); ?></p>
             </div>
-            <button class="remove-button" onclick="removeFromCart(<?php echo $index; ?>)">Noņemt</button>
+            <button class="remove-button" onclick="removeFromCart(<?php echo $index; ?>)" title="Noņemt"></button>
           </li>
         <?php endforeach; ?>
       </ul>
+      <div class="cart-total">
+        <h3>Kopējā summa: €<?php echo number_format($totalPrice, 2); ?></h3>
+        <button class="checkout-button" onclick="proceedToCheckout()">Noformēt sūtījumu</button>
+      </div>
     <?php else: ?>
       <p class="cart-empty">Grozs ir tukšs.</p>
     <?php endif; ?>
@@ -222,6 +255,10 @@ try {
         console.error('Error:', error);
         alert('Kļūda noņemot produktu no groza.');
       });
+    }
+
+    function proceedToCheckout() {
+      alert('Noformēt sūtījumu funkcionalitāte vēl nav ieviesta.');
     }
   </script>
 </body>

@@ -388,12 +388,12 @@
                     <h2>${product.nosaukums}</h2>
                     <p class="modal-description">${product.apraksts}</p>
                     <p class="modal-price">€${product.cena}</p>
-                    <p><strong>Pieejamie izmēri:</strong> ${product.sizes ? product.sizes.replace(/,/g, ', ') : 'Nav pieejami'}</p>
+                    <p><strong>Pieejamie izmēri:</strong> ${product.sizes ? product.sizes.split(',').map(size => size.trim()).join(', ') : 'Nav pieejami'}</p>
                     <p><strong>Pieejamais daudzums:</strong> ${product.quantity}</p>
                     <div>
                         <label for="size-select">Izvēlieties izmēru:</label>
                         <select id="size-select">
-                            ${product.sizes ? product.sizes.split(',').map(size => `<option value="${size}">${size}</option>`).join('') : '<option disabled>Nav pieejami</option>'}
+                            ${product.sizes ? product.sizes.split(',').map(size => `<option value="${size.trim()}">${size.trim()}</option>`).join('') : '<option disabled>Nav pieejami</option>'}
                         </select>
                     </div>
                     <div>
