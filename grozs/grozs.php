@@ -229,7 +229,7 @@ foreach ($cart as $product) {
       </ul>
       <div class="cart-total">
         <h3>Kopējā summa: €<?php echo number_format($totalPrice, 2); ?></h3>
-        <button class="checkout-button" onclick="proceedToCheckout()">Noformēt sūtījumu</button>
+        <button class="checkout-button" onclick="window.location.href='adress.php'">Noformēt sūtījumu</button>
       </div>
     <?php else: ?>
       <p class="cart-empty">Grozs ir tukšs.</p>
