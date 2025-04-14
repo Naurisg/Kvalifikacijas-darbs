@@ -7,274 +7,7 @@
     <meta charset="UTF-8">
     <title>Apavi | Darba Apģērbi</title>
     <link rel="stylesheet" href="../css/style.css">
-    <style>
-       .shop-container {
-    display: flex;
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-.filters-sidebar {
-    width: 250px;
-    padding: 20px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-.products-section {
-    flex: 1;
-    padding: 0 20px;
-}
-
-.search-container {
-    width: 100%;
-    padding: 20px 0;
-    margin-bottom: 20px;
-}
-
-.search-bar {
-    width: 100%;
-    padding: 12px 32px;  
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 16px;
-    text-indent: 10px;
-    background-position: 10px center;
-}
-
-.products-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
-}
-
-.product-card {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    transition: transform 0.3s;
-    cursor: pointer;
-    height: 450px;
-    display: flex;
-    flex-direction: column;
-}
-
-.product-card:hover {
-    transform: translateY(-5px);
-}
-
-.product-card img {
-    width: 100%;
-    height: 250px;
-    object-fit: contain;
-    border-radius: 8px 8px 0 0;
-    background: #f5f5f5;
-}
-
-.product-info {
-    padding: 15px;
-    flex: 1;
-
-    flex-direction: column;
-}
-
-.product-info h3 {
-    font-size: 16px;
-    line-height: 1.2;
-    height: 40px;
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    font-weight: bold;
-    color: #333;
-
-}
-
-.product-info p {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-bottom: 5px;
-    font-size: 14px;
-}
-
-.product-info .price {
-    font-size: 18px;
-    font-weight: bold;
-    margin: 8px 0;
-}
-
-.filter-section {
-    margin-bottom: 20px;
-}
-
-.filter-section h3 {
-    margin-bottom: 10px;
-}
-
-.price-range {
-    width: 100%;
-}
-
-.product-buttons {
-    display: flex;
-    gap: 5px;
-    margin-top: auto;
-    margin-bottom: 15px;
-}
-
-.add-to-cart, .buy-now {
-    padding: 6px 10px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    font-size: 12px;
-    white-space: nowrap;
-}
-
-.add-to-cart {
-    background-color: #4CAF50;
-    color: white;
-}
-
-.buy-now {
-    background-color: #2196F3;
-    color: white;
-}
-
-.add-to-cart:hover, .buy-now:hover {
-    opacity: 0.9;
-    transform: scale(1.05);
-}
-
-.modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    z-index: 1000;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.modal-content {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    max-width: 80%;
-    max-height: 90vh;
-    overflow-y: auto;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-.close-modal {
-    position: absolute;
-    right: 20px;
-    top: 10px;
-    font-size: 30px;
-    cursor: pointer;
-}
-
-.modal-product-details {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    align-items: flex-start;
-}
-
-.modal-product-details img {
-    width: 300px;
-    height: 300px;
-    object-fit: contain;
-    border-radius: 8px;
-    background: #f5f5f5;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.modal-product-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.modal-product-info h2 {
-    font-size: 24px;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 10px;
-}
-
-.modal-product-info p {
-    font-size: 16px;
-    line-height: 1.5;
-    color: #555;
-}
-
-.modal-product-info .modal-price {
-    font-size: 20px;
-    font-weight: bold;
-    color: #27ae60;
-}
-
-.modal-product-info label {
-    font-weight: bold;
-    margin-bottom: 5px;
-    display: block;
-}
-
-.modal-product-info select,
-.modal-product-info input {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-}
-
-.modal-buttons {
-    display: flex;
-    gap: 10px;
-    margin-top: 20px;
-}
-
-.modal-buttons button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: bold;
-    transition: background-color 0.3s, transform 0.2s;
-}
-
-.modal-buttons .add-to-cart {
-    background-color: #4CAF50;
-    color: white;
-}
-
-.modal-buttons .buy-now {
-    background-color: #2196F3;
-    color: white;
-}
-
-.modal-buttons button:hover {
-    transform: scale(1.05);
-    opacity: 0.9;
-}
-    </style>
+    <link rel="stylesheet" href="precu.style.css">
 </head>
 <body>
     <div class="shop-container">
@@ -375,14 +108,16 @@
             products.forEach(product => {
                 container.innerHTML += `
                     <div class="product-card" onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">
-                        <img src="../${product.bilde}" alt="${product.nosaukums}">
+                        <img src="/Vissdarbam/${product.bilde}" alt="${product.nosaukums}">
                         <div class="product-info">
                             <h3>${product.nosaukums}</h3>
                             <p>${product.apraksts}</p>
                             <p class="price">€${product.cena}</p>
                             <div class="product-buttons">
-                                <button class="add-to-cart" onclick="event.stopPropagation(); addToCart(${product.id})">Pievienot grozam</button>
-                                <button class="buy-now" onclick="event.stopPropagation(); buyNow(${product.id})">Pirkt tagad</button>
+                                <button class="add-to-cart" onclick="addToCart(${product.id}); event.stopPropagation();">
+                                    <i class="fas fa-shopping-cart"></i>
+                                </button>
+                                <button class="buy-now" onclick="buyNow(${product.id}); event.stopPropagation();">Pirkt tagad</button>
                             </div>
                         </div>
                     </div>
@@ -397,7 +132,7 @@
         
         modalBody.innerHTML = `
             <div class="modal-product-details">
-                <img src="../${product.bilde}" alt="${product.nosaukums}">
+                <img src="/Vissdarbam/${product.bilde}" alt="${product.nosaukums}">
                 <div class="modal-product-info">
                     <h2>${product.nosaukums}</h2>
                     <p class="modal-description">${product.apraksts}</p>
@@ -415,8 +150,10 @@
                         <input type="number" id="quantity-input" min="1" max="${product.quantity}" value="1">
                     </div>
                     <div class="modal-buttons">
-                        <button class="add-to-cart" onclick="addToCart(${product.id})">Pievienot grozam</button>
-                        <button class="buy-now" onclick="buyNow(${product.id})">Pirkt tagad</button>
+                        <button class="add-to-cart" onclick="addToCart(${product.id});">
+                            <i class="fas fa-shopping-cart"></i>
+                        </button>
+                        <button class="buy-now" onclick="buyNow(${product.id});">Pirkt tagad</button>
                     </div>
                 </div>
             </div>

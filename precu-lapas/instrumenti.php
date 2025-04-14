@@ -6,221 +6,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Darba Instrumenti | Darba Apģērbi</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <style>
-       .shop-container {
-    display: flex;
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-.filters-sidebar {
-    width: 250px;
-    padding: 20px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-.products-section {
-    flex: 1;
-    padding: 0 20px;
-}
-
-.search-container {
-    width: 100%;
-    padding: 20px 0;
-    margin-bottom: 20px;
-}
-
-.search-bar {
-    width: 100%;
-    padding: 12px 32px;  
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 16px;
-    text-indent: 10px;
-    background-position: 10px center;
-}
-
-.products-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
-}
-
-.product-card {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    transition: transform 0.3s;
-    cursor: pointer;
-    height: 450px;
-    display: flex;
-    flex-direction: column;
-}
-
-.product-card:hover {
-    transform: translateY(-5px);
-}
-
-.product-card img {
-    width: 100%;
-    height: 250px;
-    object-fit: contain;
-    border-radius: 8px 8px 0 0;
-    background: #f5f5f5;
-}
-
-.product-info {
-    padding: 15px;
-    flex: 1;
-
-    flex-direction: column;
-}
-
-.product-info h3 {
-    font-size: 16px;
-    line-height: 1.2;
-    height: 40px;
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    font-weight: bold;
-    color: #333;
-
-}
-
-.product-info p {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-bottom: 5px;
-    font-size: 14px;
-}
-
-.product-info .price {
-    font-size: 18px;
-    font-weight: bold;
-    margin: 8px 0;
-}
-
-.filter-section {
-    margin-bottom: 20px;
-}
-
-.filter-section h3 {
-    margin-bottom: 10px;
-}
-
-.price-range {
-    width: 100%;
-}
-
-.product-buttons {
-    display: flex;
-    gap: 5px;
-    margin-top: auto;
-    margin-bottom: 15px;
-}
-
-.add-to-cart, .buy-now {
-    padding: 6px 10px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    font-size: 12px;
-    white-space: nowrap;
-}
-
-.add-to-cart {
-    background-color: #4CAF50;
-    color: white;
-}
-
-.buy-now {
-    background-color: #2196F3;
-    color: white;
-}
-
-.add-to-cart:hover, .buy-now:hover {
-    opacity: 0.9;
-    transform: scale(1.05);
-}
-
-.modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    z-index: 1000;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.modal-content {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    max-width: 80%;
-    max-height: 90vh;
-    overflow-y: auto;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-.close-modal {
-    position: absolute;
-    right: 20px;
-    top: 10px;
-    font-size: 30px;
-    cursor: pointer;
-}
-
-.modal-product-details {
-    display: flex;
-    gap: 30px;
-}
-
-.modal-product-details img {
-    width: 400px;
-    height: 400px;
-    object-fit: contain;
-    background: #f5f5f5;
-}
-
-.modal-product-info {
-    flex: 1;
-}
-
-.modal-description {
-    margin: 20px 0;
-    font-size: 16px;
-    line-height: 1.6;
-    white-space: pre-line;
-}
-
-.modal-price {
-    font-size: 24px;
-    font-weight: bold;
-    margin: 20px 0;
-}
-
-.modal-buttons {
-    display: flex;
-    gap: 15px;
-}
-    </style>
+    <link rel="stylesheet" href="/Vissdarbam/css/style.css">
+    <link rel="stylesheet" href="precu.style.css">
 </head>
 <body>
     <div class="shop-container">
@@ -235,26 +22,26 @@
             
             <div class="filter-section">
                 <h3>Kategorija</h3>
-                <label><input type="checkbox" value="Rokas"> Rokas instrumenti</label><br>
-                <label><input type="checkbox" value="Elektriskie"> Elektriskie instrumenti</label><br>
-                <label><input type="checkbox" value="Mērinstrumenti"> Mērinstrumenti</label><br>
-                <label><input type="checkbox" value="Urbji"> Urbji un uzgaļi</label>
+                <label><input type="checkbox" class="category-filter" value="Rokas"> Rokas instrumenti</label><br>
+                <label><input type="checkbox" class="category-filter" value="Elektriskie"> Elektriskie instrumenti</label><br>
+                <label><input type="checkbox" class="category-filter" value="Mērinstrumenti"> Mērinstrumenti</label><br>
+                <label><input type="checkbox" class="category-filter" value="Urbji"> Urbji un uzgaļi</label>
             </div>
 
             <div class="filter-section">
                 <h3>Zīmols</h3>
-                <label><input type="checkbox" value="Makita"> Makita</label><br>
-                <label><input type="checkbox" value="Bosch"> Bosch</label><br>
-                <label><input type="checkbox" value="DeWalt"> DeWalt</label><br>
-                <label><input type="checkbox" value="Milwaukee"> Milwaukee</label>
+                <label><input type="checkbox" class="brand-filter" value="Makita"> Makita</label><br>
+                <label><input type="checkbox" class="brand-filter" value="Bosch"> Bosch</label><br>
+                <label><input type="checkbox" class="brand-filter" value="DeWalt"> DeWalt</label><br>
+                <label><input type="checkbox" class="brand-filter" value="Milwaukee"> Milwaukee</label>
             </div>
 
             <div class="filter-section">
                 <h3>Pielietojums</h3>
-                <label><input type="checkbox" value="Būvniecība"> Būvniecība</label><br>
-                <label><input type="checkbox" value="Metālapstrāde"> Metālapstrāde</label><br>
-                <label><input type="checkbox" value="Kokapstrāde"> Kokapstrāde</label><br>
-                <label><input type="checkbox" value="Dārzkopība"> Dārzkopība</label>
+                <label><input type="checkbox" class="application-filter" value="Būvniecība"> Būvniecība</label><br>
+                <label><input type="checkbox" class="application-filter" value="Metālapstrāde"> Metālapstrāde</label><br>
+                <label><input type="checkbox" class="application-filter" value="Kokapstrāde"> Kokapstrāde</label><br>
+                <label><input type="checkbox" class="application-filter" value="Dārzkopība"> Dārzkopība</label>
             </div>
         </aside>
 
@@ -271,7 +58,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         let allProducts = [];
         
-        fetch('fetch_category_products.php?category=Instrumenti')
+        fetch('/Vissdarbam/precu-lapas/fetch_category_products.php?category=Instrumenti')
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -280,24 +67,37 @@
                 }
             });
 
-        document.querySelector('.search-bar').addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase();
-            filterProducts();
+        document.querySelector('.search-bar').addEventListener('input', () => filterProducts());
+        document.querySelector('.price-range').addEventListener('input', () => filterProducts());
+        document.querySelectorAll('.category-filter').forEach(checkbox => {
+            checkbox.addEventListener('change', () => filterProducts());
         });
-
-        document.querySelector('.price-range').addEventListener('input', (e) => {
-            filterProducts();
+        document.querySelectorAll('.brand-filter').forEach(checkbox => {
+            checkbox.addEventListener('change', () => filterProducts());
+        });
+        document.querySelectorAll('.application-filter').forEach(checkbox => {
+            checkbox.addEventListener('change', () => filterProducts());
         });
 
         function filterProducts() {
             const searchTerm = document.querySelector('.search-bar').value.toLowerCase();
             const maxPrice = parseFloat(document.querySelector('.price-range').value);
+            const selectedCategories = Array.from(document.querySelectorAll('.category-filter:checked')).map(cb => cb.value);
+            const selectedBrands = Array.from(document.querySelectorAll('.brand-filter:checked')).map(cb => cb.value);
+            const selectedApplications = Array.from(document.querySelectorAll('.application-filter:checked')).map(cb => cb.value);
 
             const filteredProducts = allProducts.filter(product => {
                 const matchesSearch = product.nosaukums.toLowerCase().includes(searchTerm) ||
-                                    product.apraksts.toLowerCase().includes(searchTerm);
+                                      product.apraksts.toLowerCase().includes(searchTerm);
                 const matchesPrice = parseFloat(product.cena) <= maxPrice;
-                return matchesSearch && matchesPrice;
+                const matchesCategory = selectedCategories.length === 0 || 
+                                      (product.category && selectedCategories.some(cat => product.category.includes(cat)));
+                const matchesBrand = selectedBrands.length === 0 || 
+                                   (product.brand && selectedBrands.some(brand => product.brand.includes(brand)));
+                const matchesApplication = selectedApplications.length === 0 || 
+                                        (product.application && selectedApplications.some(app => product.application.includes(app)));
+                
+                return matchesSearch && matchesPrice && matchesCategory && matchesBrand && matchesApplication;
             });
 
             displayProducts(filteredProducts);
@@ -323,7 +123,7 @@
             products.forEach(product => {
                 container.innerHTML += `
                     <div class="product-card" onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">
-                        <img src="../${product.bilde}" alt="${product.nosaukums}">
+                        <img src="/Vissdarbam/${product.bilde}" alt="${product.nosaukums}">
                         <div class="product-info">
                             <h3>${product.nosaukums}</h3>
                             <p>${product.apraksts}</p>
@@ -345,11 +145,19 @@
         
         modalBody.innerHTML = `
             <div class="modal-product-details">
-                <img src="../${product.bilde}" alt="${product.nosaukums}">
+                <img src="/Vissdarbam/${product.bilde}" alt="${product.nosaukums}">
                 <div class="modal-product-info">
                     <h2>${product.nosaukums}</h2>
                     <p class="modal-description">${product.apraksts}</p>
                     <p class="modal-price">€${product.cena}</p>
+                    ${product.category ? `<p><strong>Kategorija:</strong> ${product.category}</p>` : ''}
+                    ${product.brand ? `<p><strong>Zīmols:</strong> ${product.brand}</p>` : ''}
+                    ${product.application ? `<p><strong>Pielietojums:</strong> ${product.application}</p>` : ''}
+                    <p><strong>Pieejamais daudzums:</strong> ${product.quantity}</p>
+                    <div>
+                        <label for="quantity-input">Daudzums:</label>
+                        <input type="number" id="quantity-input" min="1" max="${product.quantity}" value="1">
+                    </div>
                     <div class="modal-buttons">
                         <button class="add-to-cart" onclick="addToCart(${product.id})">Pievienot grozam</button>
                         <button class="buy-now" onclick="buyNow(${product.id})">Pirkt tagad</button>
@@ -369,7 +177,34 @@
     });
 
     function addToCart(productId) {
-        console.log('Adding product to cart:', productId);
+        const quantityInput = document.getElementById('quantity-input');
+        const quantity = parseInt(quantityInput.value, 10) || 1;
+        const maxQuantity = parseInt(quantityInput.max, 10);
+
+        if (quantity > maxQuantity) {
+            alert(`Maksimālais pieejamais daudzums ir ${maxQuantity}.`);
+            return;
+        }
+
+        fetch('/Vissdarbam/grozs/add_to_cart.php', { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ id: productId, quantity: quantity }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Produkts pievienots grozam!');
+            } else {
+                alert(data.message || 'Kļūda pievienojot produktu grozam.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Kļūda pievienojot produktu grozam.');
+        });
     }
 
     function buyNow(productId) {

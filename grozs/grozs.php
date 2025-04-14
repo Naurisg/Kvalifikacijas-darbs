@@ -24,6 +24,8 @@ try {
 }
 
 $totalPrice = 0;
+$totalItems = count($cart);
+
 foreach ($cart as $product) {
     $totalPrice += $product['cena'] * ($product['quantity'] ?? 1);
 }
@@ -163,12 +165,47 @@ foreach ($cart as $product) {
     .checkout-button:hover {
       background-color: #45a049;
     }
+
+    .quantity-container {
+      display: flex;
+      align-items: center;
+    }
+
+    .quantity-container input[type="number"] {
+      width: 60px;
+      padding: 5px;
+      font-size: 14px;
+      text-align: center;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .clear-cart-button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background-color: #FFFFFF;
+      color: #000000;
+      border: 2px solid #000000;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .clear-cart-button:hover {
+      background-color: #F0F0F0;
+      color: #333333;
+    }
   </style>
 </head>
 <body>
   <div class="cart-container">
     <div class="cart-header">
       <h2>Jūsu Grozs</h2>
+      <p>Kopējais preču skaits: <?php echo $totalItems; ?></p>
+      <?php if ($totalItems > 0): ?>
+        <button class="clear-cart-button" onclick="clearCart()">Iztukšot grozu</button>
+      <?php endif; ?>
     </div>
     <?php if (!empty($cart)): ?>
       <ul class="cart-list">
@@ -179,7 +216,12 @@ foreach ($cart as $product) {
               <h3><?php echo htmlspecialchars($product['nosaukums']); ?></h3>
               <p>Cena: €<?php echo htmlspecialchars($product['cena']); ?></p>
               <p class="size">Izmērs: <?php echo htmlspecialchars($product['size'] ?? 'Nav norādīts'); ?></p>
-              <p class="quantity">Daudzums: <?php echo htmlspecialchars($product['quantity'] ?? 1); ?></p>
+              <p class="quantity">
+                Daudzums:
+                <div class="quantity-container">
+                  <input type="number" value="<?php echo htmlspecialchars($product['quantity'] ?? 1); ?>" min="1" onchange="updateQuantity(<?php echo $index; ?>, this.value)">
+                </div>
+              </p>
             </div>
             <button class="remove-button" onclick="removeFromCart(<?php echo $index; ?>)" title="Noņemt"></button>
           </li>
@@ -259,6 +301,51 @@ foreach ($cart as $product) {
 
     function proceedToCheckout() {
       alert('Noformēt sūtījumu funkcionalitāte vēl nav ieviesta.');
+    }
+
+    function updateQuantity(index, quantity) {
+      fetch('update_quantity.php', { 
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ index: index, quantity: quantity }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Daudzums atjaunināts!');
+          location.reload();
+        } else {
+          alert(data.message || 'Kļūda atjauninot daudzumu.');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Kļūda atjauninot daudzumu.');
+      });
+    }
+
+    function clearCart() {
+      fetch('clear_cart.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Grozs ir notīrīts!');
+          location.reload();
+        } else {
+          alert(data.message || 'Kļūda notīrot grozu.');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Kļūda notīrot grozu.');
+      });
     }
   </script>
 </body>
