@@ -11,7 +11,7 @@ try {
     $clientDb = new PDO('sqlite:../Datubazes/client_signup.db');
     $clientDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // Fetch cart, name, email, and phone from database
+    // Iegūst cart, name, email, and phone no datubāzes
     $stmt = $clientDb->prepare('SELECT cart, name, email, phone FROM clients WHERE id = :user_id');
     $stmt->execute([':user_id' => $_SESSION['user_id']]);
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -431,6 +431,7 @@ try {
     </section>
   </div>
   
+  <script src="https://js.stripe.com/v3/"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       const userData = {
@@ -438,10 +439,38 @@ try {
         email: "<?php echo htmlspecialchars($userData['email']); ?>",
         phone: "<?php echo htmlspecialchars($userData['phone']); ?>"
       };
-      
-      if (userData.name) document.getElementById('name').value = userData.name;
-      if (userData.email) document.getElementById('email').value = userData.email;
-      if (userData.phone) document.getElementById('phone').value = userData.phone;
+
+      const nameField = document.getElementById('name');
+      const emailField = document.getElementById('email');
+      const phoneField = document.getElementById('phone');
+
+      if (nameField && userData.name) nameField.value = userData.name;
+      if (emailField && userData.email) emailField.value = userData.email;
+      if (phoneField && userData.phone) phoneField.value = userData.phone;
+    });
+
+    document.getElementById('addressForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        fetch('create_checkout_session.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.id) {
+                const stripe = Stripe('pk_test_51QP0wYHs6AycTP1yY0zaKnaw3dgfxaiKEX5OWQSuRo4IQzobUkCd3d347FksWLIrzASGinvz1Sdp4VjnWYfDTwW900N5fxwZIx'); //Stripee public key
+                stripe.redirectToCheckout({ sessionId: data.id });
+            } else {
+                alert(data.error || 'Kļūda izveidojot maksājumu.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Kļūda izveidojot maksājumu.');
+        });
     });
   </script>
 </body>
