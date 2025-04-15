@@ -1,6 +1,6 @@
 <?php
 session_start();
-include '../header.php'; 
+include '../header.php';
 
 if (!isset($_SESSION['user_id'])) {
     header('Location: ../login.php');
@@ -8,14 +8,20 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 try {
-    $clientDb = new PDO('sqlite:../Datubazes/client_signup.db'); 
+    $clientDb = new PDO('sqlite:../Datubazes/client_signup.db');
     $clientDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    $stmt = $clientDb->prepare('SELECT cart FROM clients WHERE id = :user_id');
+    // Fetch cart, name, email, and phone from database
+    $stmt = $clientDb->prepare('SELECT cart, name, email, phone FROM clients WHERE id = :user_id');
     $stmt->execute([':user_id' => $_SESSION['user_id']]);
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
     $cart = $result['cart'] ? json_decode($result['cart'], true) : [];
+    $userData = [
+        'name' => $result['name'] ?? '',
+        'email' => $result['email'] ?? '',
+        'phone' => $result['phone'] ?? ''
+    ];
     
     if (empty($cart)) {
         header('Location: grozs.php');
@@ -39,7 +45,7 @@ try {
   <meta content="Piegādes Adrese" property="og:title">
   <meta content="Piegādes Adrese" property="twitter:title">
   <meta content="width=device-width, initial-scale=1" name="viewport">
-  <link href="../css/normalize.css" rel="stylesheet" type="text/css"> 
+  <link href="../css/normalize.css" rel="stylesheet" type="text/css">
   <link href="../css/main.css" rel="stylesheet" type="text/css">
   <link href="../css/style.css" rel="stylesheet" type="text/css">
   <link href="https://fonts.googleapis.com" rel="preconnect">
@@ -52,7 +58,7 @@ try {
       }
     });
   </script>
-  <link href="../images/favicon.png" rel="shortcut icon" type="image/x-icon"> 
+  <link href="../images/favicon.png" rel="shortcut icon" type="image/x-icon">
   <link href="../images/webclip.png" rel="apple-touch-icon">
   <meta name="robots" content="noindex">
   <style>
@@ -301,15 +307,9 @@ try {
     <div class="checkout-content">
       <div class="address-form">
         <form id="addressForm" action="payment.php" method="POST">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="firstname">Vārds *</label>
-              <input type="text" id="firstname" name="firstname" required>
-            </div>
-            <div class="form-group">
-              <label for="lastname">Uzvārds *</label>
-              <input type="text" id="lastname" name="lastname" required>
-            </div>
+          <div class="form-group">
+            <label for="name">Vārds un uzvārds *</label>
+            <input type="text" id="name" name="name" required>
           </div>
           
           <div class="form-group">
@@ -345,7 +345,7 @@ try {
           
           <div class="form-group">
             <label for="country">Valsts *</label>
-            <input type="text" id="country" name="country" required >
+            <input type="text" id="country" name="country" required>
           </div>
           
           <div class="form-group">
@@ -354,10 +354,14 @@ try {
           </div>
           
           <div class="button-group">
-            <button type="button" class="back-button" onclick="window.location.href='grozs.php'">Atpakaļ uz grozu</button>
-            <button type="submit" class="checkout-button">Turpināt uz maksājumu</button>
+          <button type="button" class="back-button" onclick="window.location.href='grozs.php'">
+          <i class="fas fa-shopping-cart"></i> Atpakaļ uz grozu
+          </button>
+          <button type="submit" class="checkout-button">
+          <i class="fas fa-credit-card"></i> Turpināt uz maksājumu
+          </button>
             <div class="secure-checkout">
-              <img src="../images/favicon.png" alt="Secure Payment">
+              <img src="../images/stripe.png" alt="Secure Payment">
               <span>Drošs maksājums</span>
             </div>
           </div>
@@ -390,7 +394,7 @@ try {
     <div class="footer-container w-container">
       <div class="w-layout-grid footer-grid">
         <div id="w-node-b8d7be4a-ce45-83ab-5947-02d204c8bff0-cf3fcb86" class="footerlogobloks">
-          <a data-ix="logo" href="../index.html" class="footer-logo w-nav-brand"> 
+          <a data-ix="logo" href="../index.html" class="footer-logo w-nav-brand">
             <img src="../images/Logo.png" width="130" sizes="130px" srcset="../images/Logo-p-500.png 500w, ../images/Logo-p-800.png 800w, ../images/Logo.png 960w" alt="">
           </a>
           <p class="text small">
@@ -402,7 +406,7 @@ try {
         </div>
         <div class="footer-links-container">
           <h5 class="footer-header">Mājas lapa</h5>
-          <a href="../index.html" class="footer-link">Sākums</a> 
+          <a href="../index.html" class="footer-link">Sākums</a>
           <a href="../precu-katalogs.html" class="footer-link">Preču Katalogs</a>
           <a href="../par-mums.html" class="footer-link">Logo uzdruka</a>
           <a href="../logo-uzdruka.html" class="footer-link">Par mums</a>
@@ -430,14 +434,12 @@ try {
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       const userData = {
-        firstname: "<?php echo isset($_SESSION['user_firstname']) ? $_SESSION['user_firstname'] : ''; ?>",
-        lastname: "<?php echo isset($_SESSION['user_lastname']) ? $_SESSION['user_lastname'] : ''; ?>",
-        email: "<?php echo isset($_SESSION['user_email']) ? $_SESSION['user_email'] : ''; ?>",
-        phone: "<?php echo isset($_SESSION['user_phone']) ? $_SESSION['user_phone'] : ''; ?>"
+        name: "<?php echo htmlspecialchars($userData['name']); ?>",
+        email: "<?php echo htmlspecialchars($userData['email']); ?>",
+        phone: "<?php echo htmlspecialchars($userData['phone']); ?>"
       };
       
-      if (userData.firstname) document.getElementById('firstname').value = userData.firstname;
-      if (userData.lastname) document.getElementById('lastname').value = userData.lastname;
+      if (userData.name) document.getElementById('name').value = userData.name;
       if (userData.email) document.getElementById('email').value = userData.email;
       if (userData.phone) document.getElementById('phone').value = userData.phone;
     });

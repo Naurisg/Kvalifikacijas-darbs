@@ -10,12 +10,13 @@ include 'header.php'; // Pievieno header.php failu
 $user_id = $_SESSION['user_id'];
 $db = new SQLite3('Datubazes/client_signup.db');
 
-$query = $db->prepare('SELECT email, name, password FROM clients WHERE id = :id');
+$query = $db->prepare('SELECT email, name, phone, password FROM clients WHERE id = :id');
 $query->bindValue(':id', $user_id, SQLITE3_INTEGER);
 $result = $query->execute()->fetchArray(SQLITE3_ASSOC);
 
 $email = $result['email'];
 $name = $result['name'];
+$phone = $result['phone'] ?? '';
 $hashed_password = $result['password'];
 
 $popup_message = null; 
@@ -23,6 +24,7 @@ $popup_type = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $new_name = $_POST['name'];
+    $new_phone = $_POST['phone'];
     $old_password = $_POST['old_password'];
     $new_password = $_POST['new_password'];
 
@@ -35,12 +37,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $popup_message = "Jaunā parole nevar būt tāda pati kā vecā parole!";
                 $popup_type = "error";
             } else {
-                $update_query = $db->prepare('UPDATE clients SET name = :name, password = :password WHERE id = :id');
+                $update_query = $db->prepare('UPDATE clients SET name = :name, phone = :phone, password = :password WHERE id = :id');
                 $update_query->bindValue(':name', $new_name, SQLITE3_TEXT);
+                $update_query->bindValue(':phone', $new_phone, SQLITE3_TEXT);
                 $update_query->bindValue(':password', password_hash($new_password, PASSWORD_DEFAULT), SQLITE3_TEXT);
                 $update_query->bindValue(':id', $user_id, SQLITE3_INTEGER);
                 $update_query->execute();
-                $popup_message = "Jūsu parole un vārds ir veiksmīgi atjaunināti.";
+                $popup_message = "Jūsu parole, vārds un telefona numurs ir veiksmīgi atjaunināti.";
                 $popup_type = "success";
             }
         } else {
@@ -48,21 +51,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $popup_type = "error";
         }
     } else {
-        $update_query = $db->prepare('UPDATE clients SET name = :name WHERE id = :id');
+        $update_query = $db->prepare('UPDATE clients SET name = :name, phone = :phone WHERE id = :id');
         $update_query->bindValue(':name', $new_name, SQLITE3_TEXT);
+        $update_query->bindValue(':phone', $new_phone, SQLITE3_TEXT);
         $update_query->bindValue(':id', $user_id, SQLITE3_INTEGER);
         $update_query->execute();
-        $popup_message = "Jūsu vārds ir veiksmīgi atjaunināts.";
+        $popup_message = "Jūsu vārds un telefona numurs ir veiksmīgi atjaunināti.";
         $popup_type = "success";
     }
 
     // Atjauno jauna lietotāja datus
-    $query = $db->prepare('SELECT email, name, password FROM clients WHERE id = :id');
+    $query = $db->prepare('SELECT email, name, phone, password FROM clients WHERE id = :id');
     $query->bindValue(':id', $user_id, SQLITE3_INTEGER);
     $result = $query->execute()->fetchArray(SQLITE3_ASSOC);
 
     $email = $result['email'];
     $name = $result['name'];
+    $phone = $result['phone'] ?? '';
     $hashed_password = $result['password'];
 }
 ?>
@@ -93,6 +98,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <input placeholder="" id="wf-user-account-email" disabled="" name="Email" class="text-field w-input w-input-disabled" type="email" autocomplete="username" required="" data-wf-user-form-input-type="email" value="<?php echo htmlspecialchars($email); ?>">
           <label for="wf-user-account-name" class="field-label">Vārds</label>
           <input class="text-field w-input" maxlength="256" name="name" data-name="field" data-wf-user-field="wf-user-field-name" placeholder="" fieldtype="" type="text" id="wf-user-account-name" required="" value="<?php echo htmlspecialchars($name); ?>">
+          <label for="wf-user-account-phone" class="field-label">Tālruņa numurs</label>
+          <input class="text-field w-input" maxlength="20" name="phone" data-name="field" data-wf-user-field="wf-user-field-phone" placeholder="" fieldtype="" type="tel" id="wf-user-account-phone" value="<?php echo htmlspecialchars($phone); ?>">
           <div class="spacer _16"></div>
           <h3 class="field-label">Paroles iestatījumi:</h3>
           <label for="old_password" class="field-label">Vecā parole:</label>
@@ -121,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <div class="w-layout-grid footer-grid">
         <div id="w-node-b8d7be4a-ce45-83ab-5947-02d204c8bff0-cf3fcb86" class="footerlogobloks">
           <a data-ix="logo" href="index.php" class="footer-logo w-nav-brand"><img src="images/Logo.png" width="130" sizes="130px" srcset="images/Logo-p-500.png 500w, images/Logo-p-800.png 800w, images/Logo.png 960w" alt=""></a>
-          <p class="text small"><strong>Piedāvājam piegādi tajā pašā dienā </strong><br><strong>Tālruņa numurs: </strong>29 702 132<br><strong>Epasts:</strong> vissdarbam@gmail.com<br><strong>Adrese:</strong> Brīvības iela 56, Liepāja, LV-3401<br><br></p>
+          <p class="text small"><strong>Piedāvājam piegādi tajā pašā dienā </strong><br><strong>Tālruņa numurs: </strong>29 702 132<br><strong>Epasts:</strong> vissdarbam@gmail.com<br><strong>Adrese:</strong> Brīvības iela 56, Liepāja, LV-3401<br><br></p>
         </div>
         <div class="footer-links-container">
           <h5 class="footer-header">Mājas lapa</h5>
@@ -161,16 +168,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           const eyeIcon = document.getElementById('eye-icon-new');
           if (passwordField.type === 'password') {
               passwordField.type = 'text';
-              eyeIcon.src = 'images/eye-close.png'; // Change to "eye-slash" icon
+              eyeIcon.src = 'images/eye-close.png';
           } else {
               passwordField.type = 'password';
-              eyeIcon.src = 'images/eye-icon.png'; // Change back to "eye" icon
+              eyeIcon.src = 'images/eye-icon.png';
           }
       });
   </script>
 </body>
 <style>
-/* Add styles for the popup notification */
 .popup-notification {
     position: fixed;
     top: 20px;

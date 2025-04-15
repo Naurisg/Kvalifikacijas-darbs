@@ -2049,6 +2049,7 @@ figcaption {
   color: var(--black);
   border-radius: 12px;
   width: 100%;
+  height: auto;
   max-width: 380px;
   padding: 24px 32px;
 }
@@ -2061,7 +2062,6 @@ figcaption {
   align-items: center;
   width: 100vw;
   max-width: 100%;
-  height: 90vh;
   min-height: 650px;
   max-height: 100%;
   padding: 20px;
