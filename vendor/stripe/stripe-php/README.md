@@ -52,11 +52,7 @@ If you use Composer, these dependencies should be handled automatically. If you 
 Simple usage looks like:
 
 ```php
-<<<<<<< HEAD
 $stripe = new \Stripe\StripeClient(''); //sk_test_BQokikJOvBiI2HlWgH4olfQ2
-=======
-$stripe = new \Stripe\StripeClient(''); 
->>>>>>> parent of 79ce384 (Stripe payment)
 $customer = $stripe->customers->create([
     'description' => 'example customer',
     'email' => 'email@example.com',
