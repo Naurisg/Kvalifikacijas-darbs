@@ -6,6 +6,19 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit();
 }
+
+// Fetch orders from the database
+try {
+    $clientDb = new PDO('sqlite:Datubazes/client_signup.db');
+    $clientDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    $stmt = $clientDb->prepare('SELECT orders FROM clients WHERE id = :user_id');
+    $stmt->execute([':user_id' => $_SESSION['user_id']]);
+    $orders = $stmt->fetchColumn();
+    $orders = $orders ? json_decode($orders, true) : [];
+} catch (Exception $e) {
+    $orders = [];
+}
 ?>
 
 <!DOCTYPE html>
@@ -98,11 +111,48 @@ if (!isset($_SESSION['user_id'])) {
                 </tr>
             </thead>
             <tbody>
-                <!-- Dati ielasisies šeit -->
-                <!-- Pievienot php loģiku lai ielasītu datus -->
+                <?php if (!empty($orders)): ?>
+                    <?php foreach ($orders as $index => $order): ?>
+                        <tr id="orderRow-<?= htmlspecialchars($order['order_id']) ?>">
+                            <td><?= htmlspecialchars($order['order_id']) ?></td>
+                            <td><?= htmlspecialchars($order['created_at']) ?></td>
+                            <td>
+                                <button onclick="showOrderDetails(<?= htmlspecialchars(json_encode($order)) ?>)" style="cursor: pointer;">Apskatīt</button>
+                            </td>
+                            <td><?= htmlspecialchars(number_format($order['total_amount'], 2)) ?> EUR</td>
+                            <td><?= 'Completed' ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <tr>
+                        <td colspan="5" class="no-orders">Nav atrasti pasūtījumi.</td>
+                    </tr>
+                <?php endif; ?>
             </tbody>
         </table>
         <p class="no-orders" style="display: none;">Nav atrasti pasūtījumi.</p>
+    </div>
+
+    <!-- Modal for order details -->
+    <div id="orderModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1000;">
+        <div style="background: white; margin: 10% auto; padding: 20px; width: 70%; border-radius: 8px; position: relative;">
+            <span onclick="closeOrderModal()" style="position: absolute; top: 10px; right: 20px; cursor: pointer; font-size: 20px;">&times;</span>
+            <h2>Pasūtījuma Detalizācija</h2>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                <thead>
+                    <tr>
+                        <th>Attēls</th>
+                        <th>Nosaukums</th>
+                        <th>Daudzums</th>
+                        <th>Izmērs</th>
+                        <th>Cena</th>
+                    </tr>
+                </thead>
+                <tbody id="orderDetailsTable">
+                    <!-- Product details will be dynamically inserted here -->
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script>
@@ -119,6 +169,35 @@ if (!isset($_SESSION['user_id'])) {
             });
 
             document.querySelector('.no-orders').style.display = hasVisibleRows ? 'none' : 'block';
+        }
+
+        function showOrderDetails(order) {
+            const orderDetailsTable = document.getElementById('orderDetailsTable');
+            orderDetailsTable.innerHTML = ''; // Clear previous content
+
+            try {
+                const products = JSON.parse(order.items);
+                products.forEach(product => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><img src="${product.bilde || 'placeholder.jpg'}" alt="Product Image" style="width: 50px; height: 50px;"></td>
+                        <td>${product.nosaukums}</td>
+                        <td>${product.quantity}</td>
+                        <td>${product.size || 'N/A'}</td>
+                        <td>${product.cena} EUR</td>
+                    `;
+                    orderDetailsTable.appendChild(row);
+                });
+
+                document.getElementById('orderModal').style.display = 'block';
+            } catch (error) {
+                console.error('Error parsing order items:', error);
+                alert('Kļūda ielādējot pasūtījuma detaļas.');
+            }
+        }
+
+        function closeOrderModal() {
+            document.getElementById('orderModal').style.display = 'none';
         }
     </script>
 </body>
