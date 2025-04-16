@@ -221,6 +221,7 @@ try {
     <button class="toggle-button" onclick="showTable('product')">Produkti</button>
     <button class="toggle-button" onclick="showTable('subscriber')">Abonenti</button>
     <button class="toggle-button" onclick="showTable('contact')">Kontakti</button>
+    <button class="toggle-button" onclick="showTable('orders')">Pasūtījumi</button>
     
     <a href="logout.php" class="logout-button">Iziet</a>
 
@@ -340,6 +341,26 @@ try {
         <tbody>
         </tbody>
     </table>
+
+    <h2 id="orders-header" style="display: none;">Pasūtījumi</h2>
+    <div class="search-container" id="orders-actions" style="display: none;">
+        <input type="text" id="ordersSearchInput" class="search-input" placeholder="Meklēt pēc ID vai Klienta Vārda...">
+    </div>
+    <table id="orders-table" style="display: none;">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Klienta Vārds</th>
+                <th>Produkti</th>
+                <th>Kopējā Cena</th>
+                <th>Datums</th>
+                <th>Statuss</th>
+                <th>Darbības</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
 </section>
 
 <script>
@@ -355,24 +376,28 @@ function showTable(table) {
     const productTable = document.getElementById("product-table");
     const subscriberTable = document.getElementById("subscriber-table");
     const contactTable = document.getElementById("contact-table");
+    const ordersTable = document.getElementById("orders-table");
     const adminHeader = document.getElementById("admin-header");
     const clientHeader = document.getElementById("client-header");
     const productHeader = document.getElementById("product-header");
     const subscriberHeader = document.getElementById("subscriber-header");
     const contactHeader = document.getElementById("contact-header");
+    const ordersHeader = document.getElementById("orders-header");
     const productSearch = document.getElementById("product-search");
     const adminActions = document.getElementById("admin-actions");
     const clientActions = document.getElementById("client-actions");
     const subscriberActions = document.getElementById("subscriber-actions");
     const contactActions = document.getElementById("contact-actions");
+    const ordersActions = document.getElementById("orders-actions");
 
-    [adminTable, clientTable, productTable, subscriberTable, contactTable].forEach(t => t.style.display = 'none');
-    [adminHeader, clientHeader, productHeader, subscriberHeader, contactHeader].forEach(h => h.style.display = 'none');
+    [adminTable, clientTable, productTable, subscriberTable, contactTable, ordersTable].forEach(t => t.style.display = 'none');
+    [adminHeader, clientHeader, productHeader, subscriberHeader, contactHeader, ordersHeader].forEach(h => h.style.display = 'none');
     productSearch.style.display = 'none';
     adminActions.style.display = 'none';
     clientActions.style.display = 'none';
     subscriberActions.style.display = 'none';
     contactActions.style.display = 'none';
+    ordersActions.style.display = 'none';
 
     if (table === 'admin' && '<?php echo $user_role; ?>' !== 'Moderators') {
         adminTable.style.display = 'table';
@@ -390,6 +415,10 @@ function showTable(table) {
         contactTable.style.display = 'table';
         contactHeader.style.display = 'block';
         contactActions.style.display = 'flex';
+    } else if (table === 'orders') {
+        ordersTable.style.display = 'table';
+        ordersHeader.style.display = 'block';
+        ordersActions.style.display = 'flex';
     } else {
         productTable.style.display = 'table';
         productHeader.style.display = 'block';
@@ -607,6 +636,29 @@ function showTable(table) {
         }
     }
 
+    document.getElementById('ordersSearchInput').addEventListener('keyup', filterOrders);
+
+    function filterOrders() {
+        const searchValue = document.getElementById('ordersSearchInput').value.toLowerCase();
+        const table = document.getElementById('orders-table');
+        const rows = table.getElementsByTagName('tr');
+
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            const cells = row.getElementsByTagName('td');
+            let found = false;
+
+            for (let j = 0; j < 2; j++) { // Search in ID and Client Name columns
+                const cellText = cells[j].textContent.toLowerCase();
+                if (cellText.includes(searchValue)) {
+                    found = true;
+                    break;
+                }
+            }
+            row.style.display = found ? '' : 'none';
+        }
+    }
+
     // Admin ieladejas
     fetch('get_admins.php')
     .then(response => response.json())
@@ -719,7 +771,12 @@ function deleteAdmin(adminId) {
 
 
     fetch('get_clients.php')
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             const clients = data.clients;
@@ -748,7 +805,7 @@ function deleteAdmin(adminId) {
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Kļūda ielādējot klientus');
+        alert('Kļūda ielādējot klientus: ' + error.message);
     });
 
     fetch('get_products.php')
@@ -821,6 +878,68 @@ function deleteAdmin(adminId) {
             });
         }
     });
+
+fetch('get_orders.php')
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const orders = data.orders;
+            const tbody = document.querySelector("#orders-table tbody");
+
+            console.log("Orders fetched:", orders); // Debugging: Log fetched orders
+
+            orders.forEach(order => {
+                const products = Array.isArray(order.products) ? order.products : [];
+                const productNames = products.map(product => product.name).join(', ');
+
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${order.id}</td>
+                    <td>${order.client_name}</td>
+                    <td>${productNames}</td>
+                    <td>${order.total_price}€</td>
+                    <td>${order.date}</td>
+                    <td>${order.status}</td>
+                    <td>
+                        <button class="edit-button" onclick="viewOrder(${order.id})">Skatīt</button>
+                        <button class="delete-btn" onclick="deleteOrder(${order.id})">Dzēst</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        } else {
+            alert('Kļūda ielādējot pasūtījumus: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching orders:', error);
+        alert('Kļūda ielādējot pasūtījumus: ' + error.message);
+    });
+
+function deleteOrder(orderId) {
+    if (confirm('Vai tiešām vēlaties dzēst šo pasūtījumu?')) {
+        fetch('delete_order.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'id=' + orderId
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Kļūda dzēšot pasūtījumu');
+        });
+    }
+}
 
 function deleteContact(contactId) {
     if (confirm('Vai tiešām vēlaties dzēst šo kontaktu?')) {
