@@ -7,7 +7,7 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// Fetch orders from the database
+// iegūst sūtijumus no datubāzes
 try {
     $clientDb = new PDO('sqlite:Datubazes/client_signup.db');
     $clientDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -16,6 +16,23 @@ try {
     $stmt->execute([':user_id' => $_SESSION['user_id']]);
     $orders = $stmt->fetchColumn();
     $orders = $orders ? json_decode($orders, true) : [];
+    
+    foreach ($orders as &$order) {
+        $order['total_price'] = 0;
+        $order['status'] = $order['status'] ?? 'Gaida apstiprinājumu'; 
+        if (isset($order['items'])) {
+            $items = json_decode($order['items'], true);
+            if (is_array($items)) {
+                foreach ($items as $item) {
+                    if (isset($item['cena']) && isset($item['quantity'])) {
+                        $order['total_price'] += floatval($item['cena']) * intval($item['quantity']);
+                    }
+                }
+            }
+        }
+    }
+    unset($order); 
+    
 } catch (Exception $e) {
     $orders = [];
 }
@@ -33,7 +50,6 @@ try {
             font-family: 'Roboto', sans-serif;
             background-color: #f9f9f9;
             margin: 0;
-            padding: 20px;
         }
 
         .container {
@@ -92,6 +108,100 @@ try {
             color: #777;
             margin: 20px 0;
         }
+
+        #orderModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 25px;
+            width: 80%;
+            max-width: 900px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-close {
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+            transition: color 0.3s;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        .modal-body {
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .modal-summary {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-total {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .order-details-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .order-details-table th {
+            position: sticky;
+            top: 0;
+            background: #f4f4f4;
+            z-index: 10;
+        }
+
+        .order-details-table img {
+            max-width: 60px;
+            max-height: 60px;
+            object-fit: contain;
+        }
+
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+                margin: 2% auto;
+                padding: 15px;
+            }
+            
+            .modal-body {
+                max-height: 70vh;
+            }
+        }
     </style>
 </head>
 <body>
@@ -119,8 +229,8 @@ try {
                             <td>
                                 <button onclick="showOrderDetails(<?= htmlspecialchars(json_encode($order)) ?>)" style="cursor: pointer;">Apskatīt</button>
                             </td>
-                            <td><?= htmlspecialchars(number_format($order['total_amount'], 2)) ?> EUR</td>
-                            <td><?= 'Completed' ?></td>
+                            <td><?= number_format($order['total_price'] ?? 0, 2) ?> EUR</td>
+                            <td><?= htmlspecialchars($order['status']) ?></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
@@ -133,25 +243,41 @@ try {
         <p class="no-orders" style="display: none;">Nav atrasti pasūtījumi.</p>
     </div>
 
-    <!-- Modal for order details -->
-    <div id="orderModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1000;">
-        <div style="background: white; margin: 10% auto; padding: 20px; width: 70%; border-radius: 8px; position: relative;">
-            <span onclick="closeOrderModal()" style="position: absolute; top: 10px; right: 20px; cursor: pointer; font-size: 20px;">&times;</span>
-            <h2>Pasūtījuma Detalizācija</h2>
-            <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-                <thead>
-                    <tr>
-                        <th>Attēls</th>
-                        <th>Nosaukums</th>
-                        <th>Daudzums</th>
-                        <th>Izmērs</th>
-                        <th>Cena</th>
-                    </tr>
-                </thead>
-                <tbody id="orderDetailsTable">
-                    <!-- Product details will be dynamically inserted here -->
-                </tbody>
-            </table>
+    <div id="orderModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Pasūtījuma Informācija</h2>
+                <span class="modal-close" onclick="closeOrderModal()">&times;</span>
+            </div>
+            
+            <div class="modal-summary">
+                <div>
+                    <strong>Pasūtījuma ID:</strong> <span id="modalOrderId"></span><br>
+                    <strong>Datums:</strong> <span id="modalOrderDate"></span><br>
+                    <strong>Statuss:</strong> <span id="modalOrderStatus"></span>
+                </div>
+                <div class="modal-total">
+                    Kopējā summa: <span id="modalTotalPrice">0.00</span> EUR
+                </div>
+            </div>
+            
+            <div class="modal-body">
+                <table class="order-details-table">
+                    <thead>
+                        <tr>
+                            <th>Attēls</th>
+                            <th>Nosaukums</th>
+                            <th>Daudzums</th>
+                            <th>Izmērs</th>
+                            <th>Cena</th>
+                            <th>Summa</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orderDetailsTable">
+                        <!-- Šeit dinamiski tiks ievietota informācija par produktu -->
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -173,23 +299,36 @@ try {
 
         function showOrderDetails(order) {
             const orderDetailsTable = document.getElementById('orderDetailsTable');
-            orderDetailsTable.innerHTML = ''; // Clear previous content
+            orderDetailsTable.innerHTML = '';
+            let totalPrice = 0;
+
+            document.getElementById('modalOrderId').textContent = order.order_id;
+            document.getElementById('modalOrderDate').textContent = order.created_at;
+            document.getElementById('modalOrderStatus').textContent = order.status;
 
             try {
                 const products = JSON.parse(order.items);
                 products.forEach(product => {
+                    const itemPrice = parseFloat(product.cena) || 0;
+                    const quantity = parseInt(product.quantity) || 0;
+                    const itemTotal = itemPrice * quantity;
+                    totalPrice += itemTotal;
+                    
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td><img src="${product.bilde || 'placeholder.jpg'}" alt="Product Image" style="width: 50px; height: 50px;"></td>
+                        <td><img src="${product.bilde || 'placeholder.jpg'}" alt="${product.nosaukums}"></td>
                         <td>${product.nosaukums}</td>
-                        <td>${product.quantity}</td>
+                        <td>${quantity}</td>
                         <td>${product.size || 'N/A'}</td>
-                        <td>${product.cena} EUR</td>
+                        <td>${itemPrice.toFixed(2)} EUR</td>
+                        <td>${itemTotal.toFixed(2)} EUR</td>
                     `;
                     orderDetailsTable.appendChild(row);
                 });
 
+                document.getElementById('modalTotalPrice').textContent = totalPrice.toFixed(2);
                 document.getElementById('orderModal').style.display = 'block';
+                document.body.style.overflow = 'hidden'; 
             } catch (error) {
                 console.error('Error parsing order items:', error);
                 alert('Kļūda ielādējot pasūtījuma detaļas.');
@@ -198,6 +337,14 @@ try {
 
         function closeOrderModal() {
             document.getElementById('orderModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('orderModal');
+            if (event.target === modal) {
+                closeOrderModal();
+            }
         }
     </script>
 </body>
