@@ -18,6 +18,8 @@
 - [ ] Izveidot Atsauksmes page
 - [ ] Izveidot Noteikumi page??
 - [x] Pievienot footer
+- [x] Izveidot order-history kur lietotājs var apskatīt veiktos pasūtijumus
+- [x] Izveidot user profile kur lietotājam iespējams rediģēt savu informāciju
 - [x] Main page zem slideshow/bildes pievienot preču jaunumus un top kategorijas
 - [x] Izveidot jaunas bildes ar AI kuras tiks izmantotas majas lapa
 - [ ] salikt produktu bildes mape
