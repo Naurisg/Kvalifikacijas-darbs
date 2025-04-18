@@ -35,12 +35,12 @@
 - [ ] pievienot visus produktu aprakstus
 - [ ] Salikt produktus
 - [x] Pievienot klienta login
-- [ ] Pielikt opciju pievienot grozam
-- [ ] Pievienot opciju nopirkt preci
+- [x] Pielikt opciju pievienot grozam
+- [x] Pievienot opciju nopirkt preci
 - [x] Pievienot search bar pie produktiem iekš jau kādas no kategorijām
 - [ ] Pievienot dark mode
 - [ ] uztaisīt lai darkmode paliek pēc refresh
-- [ ] pievienotas preces grozam nepazud pēc page reload
+- [] pievienotas preces grozam nepazud pēc page reload
 - [ ] Pievienot opciju nopirkt preci mājas lapā
 - [ ] Iespejams pievienot opciju kad nopērkot klients preci tam atnāk pavadzīme epastā vai kads paziņojums par pirkumu
 - [ ] Tests payment metodei
