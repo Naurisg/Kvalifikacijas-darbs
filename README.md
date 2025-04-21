@@ -1,3 +1,4 @@
+TO DO:
 - [X] Izveidot plānu projektam
 - [X] Izveidot datubāzi mājas lapai
 - [x] Pievienot header ar logo kreisajā malā un pogām kas atrodas labajā pusē
@@ -15,9 +16,13 @@
 - [x] Izveidot kontakti/adrese page
 - [x] Par mums page
 - [x] Izveidot opciju klientam abonēt jaunumus ar epasta adresi
+- [x] Izveidot kad admin redz veiktos pasūtijumus
+- [ ] Izveidot opciju apstiprināt sūtijumu no admin panel un kad to redz lietotāja pusē
 - [ ] Izveidot Atsauksmes page
 - [ ] Izveidot Noteikumi page??
 - [x] Pievienot footer
+- [x] Izveidot order-history kur lietotājs var apskatīt veiktos pasūtijumus
+- [x] Izveidot user profile kur lietotājam iespējams rediģēt savu informāciju
 - [x] Main page zem slideshow/bildes pievienot preču jaunumus un top kategorijas
 - [x] Izveidot jaunas bildes ar AI kuras tiks izmantotas majas lapa
 - [ ] salikt produktu bildes mape
@@ -33,13 +38,13 @@
 - [ ] pievienot visus produktu aprakstus
 - [ ] Salikt produktus
 - [x] Pievienot klienta login
-- [ ] Pielikt opciju pievienot grozam
-- [ ] Pievienot opciju nopirkt preci
+- [x] Pielikt opciju pievienot grozam
+- [x] Pievienot opciju nopirkt preci
 - [x] Pievienot search bar pie produktiem iekš jau kādas no kategorijām
 - [ ] Pievienot dark mode
 - [ ] uztaisīt lai darkmode paliek pēc refresh
-- [ ] pievienotas preces grozam nepazud pēc page reload
-- [ ] Pievienot opciju nopirkt preci mājas lapā
+- [x] pievienotas preces grozam nepazud pēc page reload
+- [x] Pievienot opciju nopirkt preci mājas lapā
 - [ ] Iespejams pievienot opciju kad nopērkot klients preci tam atnāk pavadzīme epastā vai kads paziņojums par pirkumu
 - [ ] Tests payment metodei
 - [ ] Test host
