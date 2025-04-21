@@ -109,6 +109,56 @@ try {
             margin: 20px 0;
         }
 
+        /* Status colors */
+        .status-Gaida-apstiprinājumu {
+            background-color: #fff3cd;
+            color: #856404;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .status-Apstiprināts {
+            background-color: #28a745;
+            color: white;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .status-Sagatavo {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .status-Nosūtīts {
+            background-color: #fd7e14;
+            color: white;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .status-Piegādāts {
+            background-color: #155724;
+            color: white;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .status-Atcelts {
+            background-color: #dc3545;
+            color: white;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
         #orderModal {
             display: none;
             position: fixed;
@@ -222,17 +272,17 @@ try {
             </thead>
             <tbody>
                 <?php if (!empty($orders)): ?>
-                    <?php foreach ($orders as $index => $order): ?>
-                        <tr id="orderRow-<?= htmlspecialchars($order['order_id']) ?>">
-                            <td><?= htmlspecialchars($order['order_id']) ?></td>
-                            <td><?= htmlspecialchars($order['created_at']) ?></td>
-                            <td>
-                                <button onclick="showOrderDetails(<?= htmlspecialchars(json_encode($order)) ?>)" style="cursor: pointer;">Apskatīt</button>
-                            </td>
-                            <td><?= number_format($order['total_price'] ?? 0, 2) ?> EUR</td>
-                            <td><?= htmlspecialchars($order['status']) ?></td>
-                        </tr>
-                    <?php endforeach; ?>
+                <?php foreach ($orders as $index => $order): ?>
+                    <tr id="orderRow-<?= htmlspecialchars($order['order_id']) ?>">
+                        <td><?= htmlspecialchars($order['order_id']) ?></td>
+                        <td><?= htmlspecialchars($order['created_at']) ?></td>
+                        <td>
+                            <button onclick="showOrderDetails(<?= htmlspecialchars(json_encode($order)) ?>)" style="cursor: pointer;">Apskatīt</button>
+                        </td>
+                        <td><?= number_format($order['total_price'] ?? 0, 2) ?> EUR</td>
+                        <td><span class="status-<?= htmlspecialchars(str_replace(' ', '-', $order['status'])) ?>"><?= htmlspecialchars($order['status']) ?></span></td>
+                    </tr>
+                <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
                         <td colspan="5" class="no-orders">Nav atrasti pasūtījumi.</td>

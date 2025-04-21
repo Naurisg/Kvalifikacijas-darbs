@@ -266,6 +266,7 @@ try {
             position: sticky;
             top: 0;
             background: #f4f4f4;
+            color: black;
             z-index: 10;
             padding: 12px;
             text-align: left;
@@ -879,7 +880,7 @@ function showOrderDetails(order) {
             
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td><img src="${product.bilde || 'placeholder.jpg'}" alt="${product.nosaukums}" style="max-width: 60px; max-height: 60px; object-fit: contain;"></td>
+<td><img src="../${product.bilde || 'placeholder.jpg'}" alt="${product.nosaukums}" style="max-width: 60px; max-height: 60px; object-fit: contain;"></td>
                 <td>${product.nosaukums || 'N/A'}</td>
                 <td>${quantity}</td>
                 <td>${product.size || 'N/A'}</td>
