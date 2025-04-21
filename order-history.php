@@ -1,5 +1,83 @@
 <?php
 session_start();
+
+if (isset($_GET['fetch_review']) && $_GET['fetch_review'] == '1' && isset($_GET['order_id'])) {
+    if (!isset($_SESSION['user_id'])) {
+        http_response_code(403);
+        echo json_encode(['error' => 'Unauthorized']);
+        exit();
+    }
+    try {
+        $reviewsDb = new PDO('sqlite:Datubazes/reviews.db');
+        $reviewsDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        $stmt = $reviewsDb->prepare('SELECT review_text, images, rating FROM reviews WHERE user_id = :user_id AND order_id = :order_id');
+        $stmt->execute([
+            ':user_id' => $_SESSION['user_id'],
+            ':order_id' => $_GET['order_id']
+        ]);
+        $review = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($review) {
+            $review['images'] = json_decode($review['images'], true);
+            header('Content-Type: application/json');
+            echo json_encode($review);
+        } else {
+            http_response_code(404);
+            echo json_encode(['error' => 'Review not found']);
+        }
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Server error']);
+    }
+    exit();
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id'], $_POST['review_text'], $_POST['rating'])) {
+    try {
+        $reviewsDb = new PDO('sqlite:Datubazes/reviews.db');
+        $reviewsDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        $uploadedImages = [];
+        if (!empty($_FILES['review_images']['name'][0])) {
+            $uploadDir = 'review_images/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            foreach ($_FILES['review_images']['tmp_name'] as $key => $tmpName) {
+                $originalName = basename($_FILES['review_images']['name'][$key]);
+                $extension = pathinfo($originalName, PATHINFO_EXTENSION);
+                $newFileName = uniqid('review_img_') . '.' . $extension;
+                $destination = $uploadDir . $newFileName;
+                if (move_uploaded_file($tmpName, $destination)) {
+                    $uploadedImages[] = $destination;
+                }
+            }
+        }
+        $imagesJson = json_encode($uploadedImages);
+
+        $insertStmt = $reviewsDb->prepare('INSERT INTO reviews (user_id, order_id, review_text, images, rating) VALUES (:user_id, :order_id, :review_text, :images, :rating)');
+        $insertStmt->execute([
+            ':user_id' => $_SESSION['user_id'],
+            ':order_id' => $_POST['order_id'],
+            ':review_text' => $_POST['review_text'],
+            ':images' => $imagesJson,
+            ':rating' => floatval($_POST['rating'])
+        ]);
+        $reviewMessage = "Atsauksme veiksmīgi saglabāta.";
+
+        // Pēc veiksmīgas atsauksmes saglabāšanas pāradresē uz to pašu lapu, lai novērstu POST atkārtotu iesniegšanu
+        header("Location: " . strtok($_SERVER['REQUEST_URI'], '?') . "?review_saved=1");
+        exit();
+
+    } catch (Exception $e) {
+        if (strpos($e->getMessage(), 'UNIQUE constraint failed') !== false) {
+            $reviewMessage = "Jau esat atstājis atsauksmi par šo pasūtījumu.";
+        } else {
+            $reviewMessage = "Kļūda saglabājot atsauksmi: " . $e->getMessage();
+        }
+    }
+}
+
 include 'header.php';
 
 if (!isset($_SESSION['user_id'])) {
@@ -7,7 +85,7 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// iegūst sūtijumus no datubāzes
+// Iegūst sūtījumus no datubāzes
 try {
     $clientDb = new PDO('sqlite:Datubazes/client_signup.db');
     $clientDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -16,6 +94,12 @@ try {
     $stmt->execute([':user_id' => $_SESSION['user_id']]);
     $orders = $stmt->fetchColumn();
     $orders = $orders ? json_decode($orders, true) : [];
+
+    // Pieslēdzas atsauksmju datubāzei, lai pārbaudītu esošās atsauksmes
+    $reviewsDb = new PDO('sqlite:Datubazes/reviews.db');
+    $reviewsDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    $reviewCheckStmt = $reviewsDb->prepare('SELECT COUNT(*) FROM reviews WHERE user_id = :user_id AND order_id = :order_id');
     
     foreach ($orders as &$order) {
         $order['total_price'] = 0;
@@ -30,6 +114,9 @@ try {
                 }
             }
         }
+        // Pārbauda, vai šim pasūtījumam jau ir atsauksme
+        $reviewCheckStmt->execute([':user_id' => $_SESSION['user_id'], ':order_id' => $order['order_id']]);
+        $order['has_review'] = $reviewCheckStmt->fetchColumn() > 0;
     }
     unset($order); 
     
@@ -268,6 +355,7 @@ try {
                     <th>Produkti</th>
                     <th>Kopējā Cena</th>
                     <th>Statuss</th>
+                    <th>Atsauksme</th>
                 </tr>
             </thead>
             <tbody>
@@ -281,11 +369,18 @@ try {
                         </td>
                         <td><?= number_format($order['total_price'] ?? 0, 2) ?> EUR</td>
                         <td><span class="status-<?= htmlspecialchars(str_replace(' ', '-', $order['status'])) ?>"><?= htmlspecialchars($order['status']) ?></span></td>
+                        <td>
+                        <?php if (!empty($order['has_review'])): ?>
+                            <button onclick="openViewReviewModal('<?= htmlspecialchars($order['order_id']) ?>')" style="cursor: pointer;">Skatīt atsauksmi</button>
+                        <?php else: ?>
+                            <button onclick="openReviewModal('<?= htmlspecialchars($order['order_id']) ?>')" style="cursor: pointer;">Atstāt atsauksmi</button>
+                        <?php endif; ?>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="5" class="no-orders">Nav atrasti pasūtījumi.</td>
+                        <td colspan="6" class="no-orders">Nav atrasti pasūtījumi.</td>
                     </tr>
                 <?php endif; ?>
             </tbody>
@@ -330,6 +425,214 @@ try {
             </div>
         </div>
     </div>
+
+    <!-- Review Modal -->
+    <div id="reviewModal" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index: 1001; overflow-y: auto;">
+        <div class="modal-content" style="max-width: 600px; margin: 5% auto; padding: 20px; border-radius: 8px; background: white; position: relative;">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2>Atstāt atsauksmi</h2>
+                <span class="modal-close" style="font-size: 28px; font-weight: bold; cursor: pointer; color: #aaa;" onclick="closeReviewModal()">&times;</span>
+            </div>
+            <form id="reviewForm" method="POST" action="" enctype="multipart/form-data">
+                <input type="hidden" name="order_id" id="reviewOrderId" value="">
+                <label for="starRating" style="display: block; margin-bottom: 5px;">Novērtējums:</label>
+                <div id="starRating" style="font-size: 24px; color: #ccc; margin-bottom: 10px; cursor: pointer;">
+                    <i class="fas fa-star" data-value="1"></i>
+                    <i class="fas fa-star" data-value="2"></i>
+                    <i class="fas fa-star" data-value="3"></i>
+                    <i class="fas fa-star" data-value="4"></i>
+                    <i class="fas fa-star" data-value="5"></i>
+                </div>
+                <input type="hidden" name="rating" id="ratingInput" required>
+                <textarea name="review_text" id="reviewText" rows="5" style="width: 100%; padding: 10px; font-size: 16px;" placeholder="Rakstiet savu atsauksmi šeit..." required></textarea>
+                <label for="reviewImages" style="display: block; margin-top: 10px;">Pievienot attēlus (var būt vairāki):</label>
+                <input type="file" name="review_images[]" id="reviewImages" multiple accept="image/*" style="display: none;">
+                <div id="imagePreviewContainer" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
+                    <div id="addImageBox" style="width: 80px; height: 80px; border: 2px dashed #ccc; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 36px; color: #ccc;">
+                        +
+                    </div>
+                </div>
+                <div style="margin-top: 15px; text-align: right;">
+                    <button type="submit" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">Iesniegt</button>
+                    <button type="button" style="padding: 10px 20px; font-size: 16px; cursor: pointer; margin-left: 10px;" onclick="closeReviewModal()">Atcelt</button>
+                </div>
+            </form>
+            <script>
+                const stars = document.querySelectorAll('#starRating i');
+                const ratingInput = document.getElementById('ratingInput');
+                stars.forEach(star => {
+                    star.addEventListener('click', () => {
+                        const rating = star.getAttribute('data-value');
+                        ratingInput.value = rating;
+                        stars.forEach(s => {
+                            if (s.getAttribute('data-value') <= rating) {
+                                s.style.color = '#ffc107';
+                            } else {
+                                s.style.color = '#ccc';
+                            }
+                        });
+                    });
+                });
+
+                const reviewImagesInput = document.getElementById('reviewImages');
+                const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+                const addImageBox = document.getElementById('addImageBox');
+
+                let selectedFiles = [];
+
+                addImageBox.addEventListener('click', () => {
+                    reviewImagesInput.click();
+                });
+
+                reviewImagesInput.addEventListener('change', () => {
+                    // Append new files to selectedFiles array
+                    selectedFiles = selectedFiles.concat(Array.from(reviewImagesInput.files));
+                    updateImagePreviews();
+                    // Reset input to allow selecting same file again if needed
+                    reviewImagesInput.value = '';
+                });
+
+                function updateImagePreviews() {
+                    // Clear existing previews except addImageBox
+                    const previews = imagePreviewContainer.querySelectorAll('.image-preview');
+                    previews.forEach(preview => preview.remove());
+
+                    selectedFiles.forEach((file, index) => {
+                        const reader = new FileReader();
+                        reader.onload = e => {
+                            const imgDiv = document.createElement('div');
+                            imgDiv.classList.add('image-preview');
+                            imgDiv.style.position = 'relative';
+                            imgDiv.style.width = '80px';
+                            imgDiv.style.height = '80px';
+                            imgDiv.style.border = '1px solid #ccc';
+                            imgDiv.style.borderRadius = '4px';
+                            imgDiv.style.overflow = 'hidden';
+
+                            const img = document.createElement('img');
+                            img.src = e.target.result;
+                            img.style.width = '100%';
+                            img.style.height = '100%';
+                            img.style.objectFit = 'cover';
+                            imgDiv.appendChild(img);
+
+                            const removeBtn = document.createElement('button');
+                            removeBtn.textContent = '×';
+                            removeBtn.style.position = 'absolute';
+                            removeBtn.style.top = '2px';
+                            removeBtn.style.right = '2px';
+                            removeBtn.style.background = 'rgba(0,0,0,0.5)';
+                            removeBtn.style.color = 'white';
+                            removeBtn.style.border = 'none';
+                            removeBtn.style.borderRadius = '50%';
+                            removeBtn.style.width = '20px';
+                            removeBtn.style.height = '20px';
+                            removeBtn.style.cursor = 'pointer';
+                            removeBtn.addEventListener('click', () => {
+                                selectedFiles.splice(index, 1);
+                                updateImagePreviews();
+                            });
+                            imgDiv.appendChild(removeBtn);
+
+                            imagePreviewContainer.insertBefore(imgDiv, addImageBox);
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                }
+
+                // Override form submit to append selectedFiles to FormData
+                const reviewForm = document.getElementById('reviewForm');
+                reviewForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(reviewForm);
+                    // Clear existing review_images entries
+                    formData.delete('review_images[]');
+                    // Append selected files
+                    selectedFiles.forEach(file => {
+                        formData.append('review_images[]', file);
+                    });
+
+                    fetch(reviewForm.action, {
+                        method: 'POST',
+                        body: formData,
+                        credentials: 'same-origin'
+                    }).then(response => {
+                        if (response.redirected) {
+                            window.location.href = response.url;
+                        } else {
+                            return response.text().then(text => {
+                                alert('Kļūda iesniedzot atsauksmi.');
+                            });
+                        }
+                    }).catch(() => {
+                        alert('Kļūda iesniedzot atsauksmi.');
+                    });
+                });
+            </script>
+        </div>
+    </div>
+
+    <!-- View Review Modal -->
+    <div id="viewReviewModal" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index: 1002; overflow-y: auto;">
+        <div class="modal-content" style="max-width: 600px; margin: 5% auto; padding: 20px; border-radius: 8px; background: white; position: relative;">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2>Jūsu Atsauksme</h2>
+                <span class="modal-close" style="font-size: 28px; font-weight: bold; cursor: pointer; color: #aaa;" onclick="closeViewReviewModal()">&times;</span>
+            </div>
+            <div id="viewReviewContent" style="font-size: 16px; line-height: 1.5;">
+                <p><strong>Novērtējums:</strong> <span id="viewReviewRating"></span></p>
+                <p><strong>Atsauksme:</strong></p>
+                <p id="viewReviewText"></p>
+                <div id="viewReviewImages" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openViewReviewModal(orderId) {
+            fetch(`?fetch_review=1&order_id=${orderId}`, { credentials: 'same-origin' })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Atsauksmes ielāde neizdevās.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById('viewReviewRating').textContent = data.rating ? data.rating.toFixed(1) + ' / 5' : 'Nav novērtējuma';
+                    document.getElementById('viewReviewText').textContent = data.review_text || 'Nav atsauksmes teksta.';
+                    const imagesContainer = document.getElementById('viewReviewImages');
+                    imagesContainer.innerHTML = '';
+                    if (data.images && data.images.length > 0) {
+                        data.images.forEach(imgPath => {
+                            const img = document.createElement('img');
+                            img.src = imgPath;
+                            img.style.maxWidth = '100px';
+                            img.style.maxHeight = '100px';
+                            img.style.objectFit = 'cover';
+                            img.style.borderRadius = '4px';
+                            imagesContainer.appendChild(img);
+                        });
+                    }
+                    document.getElementById('viewReviewModal').style.display = 'block';
+                    document.body.style.overflow = 'hidden';
+                })
+                .catch(error => {
+                    alert(error.message);
+                });
+        }
+
+        function closeViewReviewModal() {
+            document.getElementById('viewReviewModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        window.onclick = function(event) {
+            const viewReviewModal = document.getElementById('viewReviewModal');
+            if (event.target === viewReviewModal) {
+                closeViewReviewModal();
+            }
+        }
+    </script>
 
     <script>
         function filterOrders() {
@@ -394,6 +697,25 @@ try {
             const modal = document.getElementById('orderModal');
             if (event.target === modal) {
                 closeOrderModal();
+            }
+        }
+    </script>
+    <script>
+        function openReviewModal(orderId) {
+            document.getElementById('reviewOrderId').value = orderId;
+            document.getElementById('reviewModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeReviewModal() {
+            document.getElementById('reviewModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        window.onclick = function(event) {
+            const reviewModal = document.getElementById('reviewModal');
+            if (event.target === reviewModal) {
+                closeReviewModal();
             }
         }
     </script>

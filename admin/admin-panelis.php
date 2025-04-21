@@ -325,6 +325,7 @@ try {
     <button class="toggle-button" onclick="showTable('subscriber')">Abonenti</button>
     <button class="toggle-button" onclick="showTable('contact')">Kontakti</button>
     <button class="toggle-button" onclick="showTable('orders')">Pasūtījumi</button>
+    <button class="toggle-button" onclick="showTable('reviews')">Atsauksmes</button>
     
     <a href="logout.php" class="logout-button">Iziet</a>
 
@@ -464,9 +465,29 @@ try {
         <tbody>
         </tbody>
     </table>
+
+    <h2 id="reviews-header" style="display: none;">Atsauksmes</h2>
+    <div class="search-container" id="reviews-actions" style="display: none;">
+        <input type="text" id="reviewsSearchInput" class="search-input" placeholder="Meklēt pēc Lietotāja Vārda, Epasta vai Teksta...">
+    </div>
+    <table id="reviews-table" style="display: none; width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Lietotājs</th>
+                <th>Epasts</th>
+                <th>Izveidots</th>
+                <th>Novērtējums</th>
+                <th>Atsauksmes teksts</th>
+                <th>Attēli</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
 </section>
 
-<!-- Order Details Modal -->
+<!-- Pasūtijumu Modal -->
 <div id="orderModal">
     <div class="modal-content">
         <div class="modal-header">
@@ -507,7 +528,7 @@ try {
                     </tr>
                 </thead>
                 <tbody id="orderDetailsTable">
-                    <!-- Order items will be inserted here -->
+                    <!-- Šeit tiks ievietotas pasūtījuma preces -->
                 </tbody>
             </table>
         </div>
@@ -920,7 +941,7 @@ function updateOrderStatus() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Update the status in the table
+            // Atjaunina statusu tabula
             const rows = document.querySelectorAll('#orders-table tbody tr');
             rows.forEach(row => {
                 if (row.cells[0].textContent === currentOrderId) {
@@ -1211,6 +1232,139 @@ window.onclick = function(event) {
     const modal = document.getElementById('orderModal');
     if (event.target === modal) {
         closeOrderModal();
+    }
+}
+</script>
+
+<script>
+document.getElementById('reviewsSearchInput').addEventListener('keyup', filterReviews);
+
+function showTable(table) {
+    localStorage.setItem('lastTable', table);
+    const adminTable = document.getElementById("admin-table");
+    const clientTable = document.getElementById("client-table");
+    const productTable = document.getElementById("product-table");
+    const subscriberTable = document.getElementById("subscriber-table");
+    const contactTable = document.getElementById("contact-table");
+    const ordersTable = document.getElementById("orders-table");
+    const reviewsTable = document.getElementById("reviews-table");
+    const adminHeader = document.getElementById("admin-header");
+    const clientHeader = document.getElementById("client-header");
+    const productHeader = document.getElementById("product-header");
+    const subscriberHeader = document.getElementById("subscriber-header");
+    const contactHeader = document.getElementById("contact-header");
+    const ordersHeader = document.getElementById("orders-header");
+    const reviewsHeader = document.getElementById("reviews-header");
+    const productSearch = document.getElementById("product-search");
+    const adminActions = document.getElementById("admin-actions");
+    const clientActions = document.getElementById("client-actions");
+    const subscriberActions = document.getElementById("subscriber-actions");
+    const contactActions = document.getElementById("contact-actions");
+    const ordersActions = document.getElementById("orders-actions");
+    const reviewsActions = document.getElementById("reviews-actions");
+
+    [adminTable, clientTable, productTable, subscriberTable, contactTable, ordersTable, reviewsTable].forEach(t => t.style.display = 'none');
+    [adminHeader, clientHeader, productHeader, subscriberHeader, contactHeader, ordersHeader, reviewsHeader].forEach(h => h.style.display = 'none');
+    productSearch.style.display = 'none';
+    adminActions.style.display = 'none';
+    clientActions.style.display = 'none';
+    subscriberActions.style.display = 'none';
+    contactActions.style.display = 'none';
+    ordersActions.style.display = 'none';
+    reviewsActions.style.display = 'none';
+
+    if (table === 'admin' && '<?php echo $user_role; ?>' !== 'Moderators') {
+        adminTable.style.display = 'table';
+        adminHeader.style.display = 'block';
+        adminActions.style.display = 'flex';
+    } else if (table === 'client') {
+        clientTable.style.display = 'table';
+        clientHeader.style.display = 'block';
+        clientActions.style.display = 'flex';
+    } else if (table === 'subscriber') {
+        subscriberTable.style.display = 'table';
+        subscriberHeader.style.display = 'block';
+        subscriberActions.style.display = 'flex';
+    } else if (table === 'contact') {
+        contactTable.style.display = 'table';
+        contactHeader.style.display = 'block';
+        contactActions.style.display = 'flex';
+    } else if (table === 'orders') {
+        ordersTable.style.display = 'table';
+        ordersHeader.style.display = 'block';
+        ordersActions.style.display = 'flex';
+        loadOrders();
+    } else if (table === 'reviews') {
+        reviewsTable.style.display = 'table';
+        reviewsHeader.style.display = 'block';
+        reviewsActions.style.display = 'flex';
+        loadReviews();
+    } else {
+        productTable.style.display = 'table';
+        productHeader.style.display = 'block';
+        productSearch.style.display = 'block';
+    }
+}
+
+function loadReviews() {
+    fetch('get_reviews.php')
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const reviews = data.reviews;
+            const tbody = document.querySelector("#reviews-table tbody");
+            tbody.innerHTML = "";
+
+            reviews.forEach(review => {
+                const row = document.createElement("tr");
+
+                // Prepare images HTML
+                let imagesHtml = "";
+                if (review.images && review.images.length > 0) {
+                    review.images.forEach(imgPath => {
+                        imagesHtml += `<img src="../${imgPath}" style="max-width: 80px; max-height: 80px; object-fit: cover; margin-right: 5px; border-radius: 4px;">`;
+                    });
+                }
+
+                row.innerHTML = `
+                    <td>${review.id}</td>
+                    <td>${review.user_name || 'Nezināms'}</td>
+                    <td>${review.user_email || 'Nezināms'}</td>
+                    <td>${review.created_at || 'Nezināms'}</td>
+                    <td>${review.rating ? review.rating.toFixed(1) + ' / 5' : 'Nav novērtējuma'}</td>
+                    <td>${review.review_text || ''}</td>
+                    <td>${imagesHtml}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        } else {
+            alert('Kļūda ielādējot atsauksmes: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching reviews:', error);
+        alert('Kļūda ielādējot atsauksmes.');
+    });
+}
+
+function filterReviews() {
+    const searchValue = document.getElementById('reviewsSearchInput').value.toLowerCase();
+    const table = document.getElementById('reviews-table');
+    const rows = table.getElementsByTagName('tr');
+
+    for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        const cells = row.getElementsByTagName('td');
+        let found = false;
+
+        for (let j = 1; j < cells.length - 1; j++) { // Skip ID and images columns
+            const cellText = cells[j].textContent.toLowerCase();
+            if (cellText.includes(searchValue)) {
+                found = true;
+                break;
+            }
+        }
+        row.style.display = found ? '' : 'none';
     }
 }
 </script>
