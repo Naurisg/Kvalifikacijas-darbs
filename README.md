@@ -17,7 +17,7 @@ TO DO:
 - [x] Par mums page
 - [x] Izveidot opciju klientam abonēt jaunumus ar epasta adresi
 - [x] Izveidot kad admin redz veiktos pasūtijumus
-- [ ] Izveidot opciju apstiprināt sūtijumu no admin panel un kad to redz lietotāja pusē
+- [x] Izveidot opciju apstiprināt sūtijumu no admin panel un kad to redz lietotāja pusē
 - [ ] Izveidot Atsauksmes page
 - [ ] Izveidot Noteikumi page??
 - [x] Pievienot footer
