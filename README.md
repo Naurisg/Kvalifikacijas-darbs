@@ -28,6 +28,7 @@ TO DO:
 - [ ] salikt produktu bildes mape
 - [x] Izdomāt design krāsas mājas lapai
 - [x] Izveidot admin login
+- [x] Pievienot iespēju atstāt atsauksmi par katru produktu
 - [ ] izveidot kad ja role ir moderators viņš neredz admin tabulu
 - [x] Izveidot moderatora reģistrešanos lapu
 - [x] Izveidot kad lietotājs var rediģēt savu profilu
