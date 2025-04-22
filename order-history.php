@@ -372,8 +372,10 @@ try {
                         <td>
                         <?php if (!empty($order['has_review'])): ?>
                             <button onclick="openViewReviewModal('<?= htmlspecialchars($order['order_id']) ?>')" style="cursor: pointer;">Skatīt atsauksmi</button>
-                        <?php else: ?>
+                        <?php elseif ($order['status'] === 'Piegādāts'): ?>
                             <button onclick="openReviewModal('<?= htmlspecialchars($order['order_id']) ?>')" style="cursor: pointer;">Atstāt atsauksmi</button>
+                        <?php else: ?>
+                            <span style="color: #777; font-size: 0.8em; white-space: nowrap;">Atsauksmi būs iespējams atstāt, kad sūtījums būs piegādāts</span>
                         <?php endif; ?>
                         </td>
                     </tr>
@@ -426,7 +428,7 @@ try {
         </div>
     </div>
 
-    <!-- Review Modal -->
+    <!-- Atsauksmes Modal -->
     <div id="reviewModal" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index: 1001; overflow-y: auto;">
         <div class="modal-content" style="max-width: 600px; margin: 5% auto; padding: 20px; border-radius: 8px; background: white; position: relative;">
             <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -485,15 +487,12 @@ try {
                 });
 
                 reviewImagesInput.addEventListener('change', () => {
-                    // Append new files to selectedFiles array
                     selectedFiles = selectedFiles.concat(Array.from(reviewImagesInput.files));
                     updateImagePreviews();
-                    // Reset input to allow selecting same file again if needed
                     reviewImagesInput.value = '';
                 });
 
                 function updateImagePreviews() {
-                    // Clear existing previews except addImageBox
                     const previews = imagePreviewContainer.querySelectorAll('.image-preview');
                     previews.forEach(preview => preview.remove());
 
@@ -540,14 +539,11 @@ try {
                     });
                 }
 
-                // Override form submit to append selectedFiles to FormData
                 const reviewForm = document.getElementById('reviewForm');
                 reviewForm.addEventListener('submit', (e) => {
                     e.preventDefault();
                     const formData = new FormData(reviewForm);
-                    // Clear existing review_images entries
                     formData.delete('review_images[]');
-                    // Append selected files
                     selectedFiles.forEach(file => {
                         formData.append('review_images[]', file);
                     });
@@ -572,7 +568,7 @@ try {
         </div>
     </div>
 
-    <!-- View Review Modal -->
+    <!-- Apskatīt Review Modal -->
     <div id="viewReviewModal" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index: 1002; overflow-y: auto;">
         <div class="modal-content" style="max-width: 600px; margin: 5% auto; padding: 20px; border-radius: 8px; background: white; position: relative;">
             <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">

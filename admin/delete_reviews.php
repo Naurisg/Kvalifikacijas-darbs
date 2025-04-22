@@ -26,6 +26,24 @@ try {
     $reviewsDb = new PDO('sqlite:../Datubazes/reviews.db');
     $reviewsDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+    // Iegūst attēlu JSON datus, kas saistīti ar dzēšamo atsauksmi
+    // un dzēš tos no servera
+    $selectStmt = $reviewsDb->prepare('SELECT images FROM reviews WHERE user_id = :user_id AND order_id = :order_id');
+    $selectStmt->execute([':user_id' => $user_id, ':order_id' => $order_id]);
+    $row = $selectStmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
+        $images = json_decode($row['images'], true);
+        if (is_array($images)) {
+            foreach ($images as $image) {
+                $imagePath = __DIR__ . '/../review_images/' . basename($image);
+                if (file_exists($imagePath)) {
+                    unlink($imagePath);
+                }
+            }
+        }
+    }
+
     $stmt = $reviewsDb->prepare('DELETE FROM reviews WHERE user_id = :user_id AND order_id = :order_id');
     $stmt->execute([':user_id' => $user_id, ':order_id' => $order_id]);
 
