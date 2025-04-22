@@ -480,6 +480,7 @@ try {
                 <th>Novērtējums</th>
                 <th>Atsauksmes teksts</th>
                 <th>Attēli</th>
+                <th>Darbības</th>
             </tr>
         </thead>
         <tbody>
@@ -1315,28 +1316,31 @@ function loadReviews() {
             const tbody = document.querySelector("#reviews-table tbody");
             tbody.innerHTML = "";
 
-            reviews.forEach(review => {
-                const row = document.createElement("tr");
+reviews.forEach(review => {
+    const row = document.createElement("tr");
 
-                // Prepare images HTML
-                let imagesHtml = "";
-                if (review.images && review.images.length > 0) {
-                    review.images.forEach(imgPath => {
-                        imagesHtml += `<img src="../${imgPath}" style="max-width: 80px; max-height: 80px; object-fit: cover; margin-right: 5px; border-radius: 4px;">`;
-                    });
-                }
+    // Sagatavo images HTML
+    let imagesHtml = "";
+    if (review.images && review.images.length > 0) {
+        review.images.forEach(imgPath => {
+            imagesHtml += `<img src="../${imgPath}" style="max-width: 80px; max-height: 80px; object-fit: cover; margin-right: 5px; border-radius: 4px;">`;
+        });
+    }
 
-                row.innerHTML = `
-                    <td>${review.id}</td>
-                    <td>${review.user_name || 'Nezināms'}</td>
-                    <td>${review.user_email || 'Nezināms'}</td>
-                    <td>${review.created_at || 'Nezināms'}</td>
-                    <td>${review.rating ? review.rating.toFixed(1) + ' / 5' : 'Nav novērtējuma'}</td>
-                    <td>${review.review_text || ''}</td>
-                    <td>${imagesHtml}</td>
-                `;
-                tbody.appendChild(row);
-            });
+    row.innerHTML = `
+        <td>${review.id}</td>
+        <td>${review.user_name || 'Nezināms'}</td>
+        <td>${review.user_email || 'Nezināms'}</td>
+        <td>${review.created_at || 'Nezināms'}</td>
+        <td>${review.rating ? review.rating.toFixed(1) + ' / 5' : 'Nav novērtējuma'}</td>
+        <td>${review.review_text || ''}</td>
+        <td>${imagesHtml}</td>
+        <td>
+            <button class="delete-btn" onclick="deleteReview('${review.user_id}', '${review.order_id}')">Dzēst</button>
+        </td>
+    `;
+    tbody.appendChild(row);
+});
         } else {
             alert('Kļūda ielādējot atsauksmes: ' + data.message);
         }
@@ -1357,7 +1361,7 @@ function filterReviews() {
         const cells = row.getElementsByTagName('td');
         let found = false;
 
-        for (let j = 1; j < cells.length - 1; j++) { // Skip ID and images columns
+        for (let j = 1; j < cells.length - 1; j++) {
             const cellText = cells[j].textContent.toLowerCase();
             if (cellText.includes(searchValue)) {
                 found = true;
@@ -1365,6 +1369,35 @@ function filterReviews() {
             }
         }
         row.style.display = found ? '' : 'none';
+    }
+}
+
+function deleteReview(userId, orderId) {
+    if (confirm('Vai tiešām vēlaties dzēst šo atsauksmi?')) {
+        fetch('delete_reviews.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                user_id: userId,
+                order_id: orderId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Atsauksme veiksmīgi dzēsta');
+                // Atjauno reviews pēc izdzēšanas
+                loadReviews();
+            } else {
+                alert('Kļūda dzēšot atsauksmi: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Kļūda dzēšot atsauksmi');
+        });
     }
 }
 </script>

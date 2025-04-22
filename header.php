@@ -402,6 +402,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
           <a href="/Vissdarbam/kontakti.php" class="nav-link w-nav-link <?php echo $current_page == 'kontakti.php' ? 'active-page' : ''; ?>">
             <span class="nav-text">Kontakti</span>
           </a>
+          <a href="/Vissdarbam/reviews.php" class="nav-link w-nav-link <?php echo $current_page == 'reviews.php' ? 'active-page' : ''; ?>">
+            <span class="nav-text">Atsauksmes</span>
+          </a>
           <a href="/Vissdarbam/log-in.php" class="nav-link w-nav-link header-login-link <?php echo $current_page == 'log-in.php' ? 'active-page' : ''; ?>">
             <img src="/Vissdarbam/images/login.png" alt="Ienākt" class="header-icon">
             <span class="nav-text">Ienākt</span>
