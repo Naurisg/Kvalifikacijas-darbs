@@ -101,24 +101,28 @@ try {
 
     $reviewCheckStmt = $reviewsDb->prepare('SELECT COUNT(*) FROM reviews WHERE user_id = :user_id AND order_id = :order_id');
     
-    foreach ($orders as &$order) {
-        $order['total_price'] = 0;
-        $order['status'] = $order['status'] ?? 'Gaida apstiprinājumu'; 
-        if (isset($order['items'])) {
+foreach ($orders as &$order) {
+    $order['total_price'] = 0;
+
+    if (isset($order['items'])) {
+        if (is_string($order['items'])) {
             $items = json_decode($order['items'], true);
-            if (is_array($items)) {
-                foreach ($items as $item) {
-                    if (isset($item['cena']) && isset($item['quantity'])) {
-                        $order['total_price'] += floatval($item['cena']) * intval($item['quantity']);
-                    }
+        } else {
+            $items = $order['items'];
+        }
+        if (is_array($items)) {
+            foreach ($items as $item) {
+                if (isset($item['cena']) && isset($item['quantity'])) {
+                    $order['total_price'] += floatval($item['cena']) * intval($item['quantity']);
                 }
             }
         }
-        // Pārbauda, vai šim pasūtījumam jau ir atsauksme
-        $reviewCheckStmt->execute([':user_id' => $_SESSION['user_id'], ':order_id' => $order['order_id']]);
-        $order['has_review'] = $reviewCheckStmt->fetchColumn() > 0;
     }
-    unset($order); 
+    // Pārbauda, vai šim pasūtījumam jau ir atsauksme
+    $reviewCheckStmt->execute([':user_id' => $_SESSION['user_id'], ':order_id' => $order['order_id']]);
+    $order['has_review'] = $reviewCheckStmt->fetchColumn() > 0;
+}
+unset($order); 
     
 } catch (Exception $e) {
     $orders = [];
@@ -656,7 +660,10 @@ try {
             document.getElementById('modalOrderStatus').textContent = order.status;
 
             try {
-                const products = JSON.parse(order.items);
+                let products = order.items;
+                if (typeof products === 'string') {
+                    products = JSON.parse(products);
+                }
                 products.forEach(product => {
                     const itemPrice = parseFloat(product.cena) || 0;
                     const quantity = parseInt(product.quantity) || 0;
