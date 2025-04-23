@@ -18,7 +18,7 @@ TO DO:
 - [x] Izveidot opciju klientam abonēt jaunumus ar epasta adresi
 - [x] Izveidot kad admin redz veiktos pasūtijumus
 - [x] Izveidot opciju apstiprināt sūtijumu no admin panel un kad to redz lietotāja pusē
-- [ ] Izveidot Atsauksmes page
+- [x] Izveidot Atsauksmes page
 - [ ] Izveidot Noteikumi page??
 - [x] Pievienot footer
 - [x] Izveidot order-history kur lietotājs var apskatīt veiktos pasūtijumus
