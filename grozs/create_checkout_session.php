@@ -46,7 +46,7 @@ try {
         'payment_method_types' => ['card'],
         'line_items' => $lineItems,
         'mode' => 'payment',
-        'success_url' => 'http://localhost/Vissdarbam/grozs/success.php',
+        'success_url' => 'http://localhost/Vissdarbam/grozs/success.php?session_id={CHECKOUT_SESSION_ID}',
         'cancel_url' => 'http://localhost/Vissdarbam/grozs/adress.php',
     ]);
 

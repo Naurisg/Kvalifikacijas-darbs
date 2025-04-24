@@ -1,13 +1,34 @@
 <?php
+require '../vendor/autoload.php';
 session_start();
 
 if (!isset($_SESSION['user_id'])) {
+    echo '<div style="display:flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; text-align: center;">';
     echo '<h1>Unauthorized</h1>';
-    echo '<p>Please log in to complete your purchase.</p>';
+    echo '<p>Lūdzu, piesakieties, lai pabeigtu pirkumu.</p>';
+    echo '</div>';
     exit();
 }
 
+if (!isset($_GET['session_id'])) {
+    echo '<div style="display:flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; text-align: center;">';
+    echo '<h1>Pieeja nav atļauta</h1>';
+    echo '<p>Nav atrasta neviena maksājuma sesija. Lūdzu, pabeidziet pirkumu, izmantojot norēķinu procesu.</p>';
+    echo '</div>';
+    exit();
+}
+
+\Stripe\Stripe::setApiKey('sk_test_51QP0wYHs6AycTP1yyPSwfq6pYdkUGT9w6yLf2gsZdEsgfIxnsTqkwRJnqZZoF1H4f42axHvNyqHIj7enkqtMEp1100Zzk0WPsE'); // Replace with your secret key
+
 try {
+    $sessionId = $_GET['session_id'];
+    $stripe = new \Stripe\StripeClient('sk_test_51QP0wYHs6AycTP1yyPSwfq6pYdkUGT9w6yLf2gsZdEsgfIxnsTqkwRJnqZZoF1H4f42axHvNyqHIj7enkqtMEp1100Zzk0WPsE');
+    $session = $stripe->checkout->sessions->retrieve($sessionId);
+
+    if ($session->payment_status !== 'paid') {
+        throw new Exception('Maksājums nav pabeigts. Lūdzu, aizpildiet maksājumu, lai turpinātu.');
+    }
+
     $db = new PDO('sqlite:../Datubazes/client_signup.db');
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
@@ -57,10 +78,29 @@ try {
         ':user_id' => $_SESSION['user_id']
     ]);
 
+    echo '<div style="display:flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; text-align: center;">';
     echo '<h1>Maksājums veiksmīgs!</h1>';
     echo '<p>Paldies par pirkumu. Jūsu pasūtījums tiks apstrādāts.</p>';
+    echo '<p>Jūs tiksiet novirzīts pēc <span id="countdown">3</span> sekundēm.</p>';
+    echo '<p><strong>Lūdzu neaizveriet šo lapu</strong></p>';
+    echo '</div>';
+    echo '<script>
+        var countdownElement = document.getElementById("countdown");
+        var countdown = 3;
+        var interval = setInterval(function() {
+            countdown--;
+            if (countdown <= 0) {
+                clearInterval(interval);
+                window.location.href = "../order-history.php";
+            } else {
+                countdownElement.textContent = countdown;
+            }
+        }, 1000);
+    </script>';
 } catch (Exception $e) {
+    echo '<div style="display:flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; text-align: center;">';
     echo '<h1>Kļūda</h1>';
     echo '<p>' . htmlspecialchars($e->getMessage()) . '</p>';
+    echo '</div>';
 }
 ?>

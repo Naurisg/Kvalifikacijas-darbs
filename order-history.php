@@ -95,6 +95,11 @@ try {
     $orders = $stmt->fetchColumn();
     $orders = $orders ? json_decode($orders, true) : [];
 
+    // Sort orders by created_at descending (newest first)
+    usort($orders, function($a, $b) {
+        return strtotime($b['created_at']) - strtotime($a['created_at']);
+    });
+
     // Pieslēdzas atsauksmju datubāzei, lai pārbaudītu esošās atsauksmes
     $reviewsDb = new PDO('sqlite:Datubazes/reviews.db');
     $reviewsDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -348,8 +353,10 @@ unset($order);
 <body>
     <div class="container">
         <h1>Pasūtījumu Vēsture</h1>
-        <div class="search-container">
-            <input type="text" class="search-input" placeholder="Meklēt pēc ID vai datuma..." onkeyup="filterOrders()">
+        <div class="search-container" style="display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 20px;">
+            <input type="text" class="search-input" placeholder="Meklēt pēc ID vai datuma..." onkeyup="filterOrders()" style="padding: 8px; font-size: 16px; border: 1px solid #ddd; border-radius: 4px; width: 300px;">
+            <button id="sortPriceBtn" onclick="sortByPrice()" style="padding: 8px 16px; font-size: 16px; cursor: pointer; border: 1px solid #333; background-color: #333; color: white; border-radius: 4px; transition: background-color 0.3s;">Kārtot pēc cenas ↑</button>
+            <button id="sortDateBtn" onclick="sortByDate()" style="padding: 8px 16px; font-size: 16px; cursor: pointer; border: 1px solid #333; background-color: #333; color: white; border-radius: 4px; transition: background-color 0.3s;">Kārtot pēc datuma ↑</button>
         </div>
         <table id="orderTable">
             <thead>
@@ -369,7 +376,7 @@ unset($order);
                         <td><?= htmlspecialchars($order['order_id']) ?></td>
                         <td><?= htmlspecialchars($order['created_at']) ?></td>
                         <td>
-                            <button onclick="showOrderDetails(<?= htmlspecialchars(json_encode($order)) ?>)" style="cursor: pointer;">Apskatīt</button>
+                            <button onclick="showOrderDetails(<?= htmlspecialchars(json_encode($order)) ?>)" style="padding: 4px 10px; font-size: 14px; cursor: pointer; border: 1px solid #333; background-color: #333; color: white; border-radius: 4px; transition: background-color 0.3s;">Apskatīt</button>
                         </td>
                         <td><?= number_format($order['total_price'] ?? 0, 2) ?> EUR</td>
                         <td><span class="status-<?= htmlspecialchars(str_replace(' ', '-', $order['status'])) ?>"><?= htmlspecialchars($order['status']) ?></span></td>
@@ -648,6 +655,46 @@ unset($order);
             });
 
             document.querySelector('.no-orders').style.display = hasVisibleRows ? 'none' : 'block';
+        }
+
+        let priceSortAsc = true;
+        function sortByPrice() {
+            const table = document.getElementById('orderTable');
+            const tbody = table.tBodies[0];
+            const rows = Array.from(tbody.rows);
+
+            rows.sort((a, b) => {
+                const priceA = parseFloat(a.cells[3].textContent.replace(' EUR', '').replace(',', '.')) || 0;
+                const priceB = parseFloat(b.cells[3].textContent.replace(' EUR', '').replace(',', '.')) || 0;
+                return priceSortAsc ? priceA - priceB : priceB - priceA;
+            });
+
+            rows.forEach(row => tbody.appendChild(row));
+            priceSortAsc = !priceSortAsc;
+
+            const btn = document.getElementById('sortPriceBtn');
+            btn.textContent = `Kārtot pēc cenas ${priceSortAsc ? '↑' : '↓'}`;
+            btn.style.backgroundColor = priceSortAsc ? '#333' : '#000';
+        }
+
+        let dateSortAsc = false;
+        function sortByDate() {
+            const table = document.getElementById('orderTable');
+            const tbody = table.tBodies[0];
+            const rows = Array.from(tbody.rows);
+
+            rows.sort((a, b) => {
+                const dateA = new Date(a.cells[1].textContent);
+                const dateB = new Date(b.cells[1].textContent);
+                return dateSortAsc ? dateA - dateB : dateB - dateA;
+            });
+
+            rows.forEach(row => tbody.appendChild(row));
+            dateSortAsc = !dateSortAsc;
+
+            const btn = document.getElementById('sortDateBtn');
+            btn.textContent = `Kārtot pēc datuma ${dateSortAsc ? '↑' : '↓'}`;
+            btn.style.backgroundColor = dateSortAsc ? '#333' : '#000';
         }
 
         function showOrderDetails(order) {
