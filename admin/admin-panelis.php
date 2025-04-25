@@ -1323,7 +1323,7 @@ reviews.forEach(review => {
     let imagesHtml = "";
     if (review.images && review.images.length > 0) {
         review.images.forEach(imgPath => {
-            imagesHtml += `<img src="../${imgPath}" style="max-width: 80px; max-height: 80px; object-fit: cover; margin-right: 5px; border-radius: 4px;">`;
+imagesHtml += `<img src="../${imgPath}" style="max-width: 50px; max-height: 50px; object-fit: cover; margin-right: 2px; border-radius: 4px;">`;
         });
     }
 

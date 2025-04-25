@@ -34,6 +34,11 @@ try {
         }
     }
 
+    // Kārto pasūtījumus pēc datuma dilstošā secībā (jaunākie vispirms)
+    usort($orders, function($a, $b) {
+        return strtotime($b['date']) <=> strtotime($a['date']);
+    });
+
     echo json_encode(['success' => true, 'orders' => $orders]);
 } catch (PDOException $e) {
     echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
