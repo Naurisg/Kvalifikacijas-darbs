@@ -80,6 +80,148 @@
     .product-buttons .add-to-cart:hover {
       color: gray;
     }
+
+    /* Modal stils */
+    .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 1000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        max-width: 80%;
+        max-height: 90vh;
+        overflow-y: auto;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .close-modal {
+        position: absolute;
+        right: 20px;
+        top: 10px;
+        font-size: 30px;
+        cursor: pointer;
+    }
+
+    .modal-product-details {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        align-items: flex-start;
+    }
+
+    .modal-product-details img {
+        width: 300px;
+        height: 300px;
+        object-fit: contain;
+        border-radius: 8px;
+        background: #f5f5f5;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-product-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .modal-product-info h2 {
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .modal-product-info p {
+        font-size: 16px;
+        line-height: 1.5;
+        color: #555;
+    }
+
+    .modal-product-info .modal-price {
+        font-size: 20px;
+        font-weight: bold;
+        color: #27ae60;
+    }
+
+    .modal-product-info label {
+        font-weight: bold;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    .modal-product-info select,
+    .modal-product-info input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .modal-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .modal-buttons button {
+        background-color: transparent;
+        border: 1px solid black; 
+        color: black;
+        padding: 5px 10px;
+        font-size: 12px; 
+        cursor: pointer;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .modal-buttons button:hover {
+        background-color: black;
+        color: white;
+    }
+
+    .modal-buttons .buy-now {
+        background-color: black; 
+        color: white;
+        border: 1px solid black;
+        padding: 5px 10px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .modal-buttons .buy-now:hover {
+        background-color: white; 
+        color: black;
+    }
+
+    .modal-buttons .add-to-cart {
+        background-color: transparent;
+        border: none;
+        color: black;
+        font-size: 16px;
+        cursor: pointer;
+        padding: 5px;
+        transition: color 0.3s ease;
+    }
+
+    .modal-buttons .add-to-cart:hover {
+        color: gray;
+    }
   </style>
 </head>
 <body>
@@ -92,7 +234,7 @@
         <div class="w-layout-grid sakumsgrid">
           <div id="w-node-accfd924-78f6-ecf1-4abb-37edf78b5e65-1c953eb0" class="text-box">
             <h1 class="heading h1">VissDarbam</h1>
-            <p class="text large"><strong class="bold-text-5">Jūsu azsardzība- mūsu rūpes</strong></p>
+            <p class="text large"><strong class="bold-text-5">Jūsu aizsardzība- mūsu rūpes</strong></p>
             <div class="spacer _16"></div>
             <a href="precu-katalogs.php" class="button w-button">Preču Katalogs</a>
           </div>
@@ -143,6 +285,14 @@
               <!-- Produkti tiks ielādēti šeit dynamically -->
           </div>
       </div>
+  </div>
+
+  <!-- Modal for product details -->
+  <div id="product-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close-modal">&times;</span>
+      <div class="modal-body"></div>
+    </div>
   </div>
   
 
@@ -233,64 +383,47 @@
   <script src="https://d3e54v103j8qbb.cloudfront.net/js/jquery-3.5.1.min.dc5e7f18c8.js?site=66f12005df0203b01c953e53" type="text/javascript" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
   <script src="js/script.js" type="text/javascript"></script>
   <script>
-    const nightModeToggle = document.getElementById('nightModeToggle');
-  
-    if (localStorage.getItem('darkMode') === 'true') {
-      document.body.classList.add('dark-mode');
-      document.querySelectorAll('.nav-bar, .sakumssection, .jaunumisection, .kapecmussection, .sadarbibassection').forEach(section => {
-        section.classList.add('dark-mode');
-      });
-      document.querySelectorAll('.button').forEach(button => {
-        button.classList.add('dark-mode');
-      });
-      document.querySelectorAll('a').forEach(link => {
-        link.classList.add('dark-mode');
-      });
-    }
-  
-    nightModeToggle.addEventListener('click', (event) => {
-      event.preventDefault(); 
-      document.body.classList.toggle('dark-mode');
-      document.querySelectorAll('.nav-bar, .sakumssection, .jaunumisection, .kapecmussection, .sadarbibassection').forEach(section => {
-        section.classList.toggle('dark-mode');
-      });
-      document.querySelectorAll('.button').forEach(button => {
-        button.classList.toggle('dark-mode');
-      });
-      document.querySelectorAll('a').forEach(link => {
-        link.classList.toggle('dark-mode');
-      });
-  
-      // saglaba darkmode local storage
-      localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
-    });
+let currentProduct = null;
 
-    // Abonentu js
-    document.getElementById('subscribe-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const email = document.getElementById('subscribe-email').value;
-    
-    fetch('subscribe.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: 'email=' + encodeURIComponent(email)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if(data.success) {
-            alert('Paldies par abonēšanu!');
-            document.getElementById('subscribe-email').value = '';
-        } else {
-            alert('Kļūda: ' + data.message);
-        }
-    });
-});
+function showProductModal(product) {
+    const modal = document.getElementById('product-modal');
+    const modalBody = modal.querySelector('.modal-body');
+    currentProduct = product;
 
+    modalBody.innerHTML = `
+        <div class="modal-product-details">
+            <img src="${product.bilde}" alt="${product.nosaukums}">
+            <div class="modal-product-info">
+                <h2>${product.nosaukums}</h2>
+                <p class="modal-description">${product.apraksts}</p>
+                <p class="modal-price">€${product.cena}</p>
+                <p><strong>Pieejamie izmēri:</strong> ${product.sizes ? product.sizes.split(',').map(size => size.trim()).join(', ') : 'Nav pieejami'}</p>
+                <div>
+                    <label for="size-select">Izvēlieties izmēru:</label>
+                    <select id="size-select">
+                        ${product.sizes ? product.sizes.split(',').map(size => `<option value="${size.trim()}">${size.trim()}</option>`).join('') : '<option disabled>Nav pieejami</option>'}
+                    </select>
+                </div>
+                <div>
+                    <label for="quantity-input">Daudzums:</label>
+                    <input type="number" id="quantity-input" min="1" max="${product.quantity}" value="1">
+                </div>
+                <div class="modal-buttons">
+                    <button class="add-to-cart" onclick="addToCart()">
+                        <i class="fas fa-shopping-cart"></i>
+                    </button>
+                    <button class="buy-now" onclick="buyNow()">
+                        Pirkt tagad
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
 
+    modal.style.display = 'flex';
+}
 
-    document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
     fetch('fetch_latest_products.php')
         .then(response => response.json())
         .then(data => {
@@ -298,17 +431,16 @@
                 const container = document.getElementById('latest-products-container');
                 data.products.forEach(product => {
                     container.innerHTML += `
-                        <div class="product-card">
+                        <div class="product-card" onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">
                             <img src="${product.bilde}" loading="lazy" alt="${product.nosaukums}">
                             <div class="product-info">
                                 <h3>${product.nosaukums}</h3>
                                 <p>${product.apraksts}</p>
                                 <p class="price">€${product.cena}</p>
                                 <div class="product-buttons">
-                                    <button class="add-to-cart" onclick="event.stopPropagation(); addToCart(${product.id})">
-                                      <i class="fas fa-shopping-cart"></i>
+                                    <button class="add-to-cart" onclick="event.stopPropagation(); showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">
+                                        <i class="fas fa-shopping-cart"></i>
                                     </button>
-                                    <button class="buy-now" onclick="event.stopPropagation(); buyNow(${product.id})">Pirkt tagad</button>
                                 </div>
                             </div>
                         </div>
@@ -317,22 +449,47 @@
             }
         })
         .catch(error => console.error('Error:', error));
+
+    document.addEventListener('click', function(event) {
+        const modal = document.getElementById('product-modal');
+        if (event.target.classList.contains('close-modal') || event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
 });
 
+function addToCart() {
+    if (!currentProduct) return;
 
-    // Back to Top Button functionality
-    const backToTopButton = document.getElementById('backToTop');
-    window.addEventListener('scroll', () => {
-      if (window.scrollY > 200) {
-        backToTopButton.style.display = 'block';
-      } else {
-        backToTopButton.style.display = 'none';
-      }
-    });
+    const selectedSize = document.getElementById('size-select')?.value || 'Nav norādīts';
+    const quantityInput = document.getElementById('quantity-input');
+    const quantity = quantityInput ? parseInt(quantityInput.value, 10) || 1 : 1;
 
-    backToTopButton.addEventListener('click', () => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    fetch('/Vissdarbam/grozs/add_to_cart.php', { 
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+            id: currentProduct.id, 
+            size: selectedSize, 
+            quantity: quantity 
+        }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Produkts pievienots grozam!');
+            document.getElementById('product-modal').style.display = 'none';
+        } else {
+            alert(data.message || 'Kļūda pievienojot produktu grozam.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Kļūda pievienojot produktu grozam.');
     });
+}
   </script>
   <style>
     #backToTop {

@@ -550,27 +550,31 @@ function showTable(table) {
     const subscriberTable = document.getElementById("subscriber-table");
     const contactTable = document.getElementById("contact-table");
     const ordersTable = document.getElementById("orders-table");
+    const reviewsTable = document.getElementById("reviews-table");
     const adminHeader = document.getElementById("admin-header");
     const clientHeader = document.getElementById("client-header");
     const productHeader = document.getElementById("product-header");
     const subscriberHeader = document.getElementById("subscriber-header");
     const contactHeader = document.getElementById("contact-header");
     const ordersHeader = document.getElementById("orders-header");
+    const reviewsHeader = document.getElementById("reviews-header");
     const productSearch = document.getElementById("product-search");
     const adminActions = document.getElementById("admin-actions");
     const clientActions = document.getElementById("client-actions");
     const subscriberActions = document.getElementById("subscriber-actions");
     const contactActions = document.getElementById("contact-actions");
     const ordersActions = document.getElementById("orders-actions");
+    const reviewsActions = document.getElementById("reviews-actions");
 
-    [adminTable, clientTable, productTable, subscriberTable, contactTable, ordersTable].forEach(t => t.style.display = 'none');
-    [adminHeader, clientHeader, productHeader, subscriberHeader, contactHeader, ordersHeader].forEach(h => h.style.display = 'none');
+    [adminTable, clientTable, productTable, subscriberTable, contactTable, ordersTable, reviewsTable].forEach(t => t.style.display = 'none');
+    [adminHeader, clientHeader, productHeader, subscriberHeader, contactHeader, ordersHeader, reviewsHeader].forEach(h => h.style.display = 'none');
     productSearch.style.display = 'none';
     adminActions.style.display = 'none';
     clientActions.style.display = 'none';
     subscriberActions.style.display = 'none';
     contactActions.style.display = 'none';
     ordersActions.style.display = 'none';
+    reviewsActions.style.display = 'none';
 
     if (table === 'admin' && '<?php echo $user_role; ?>' !== 'Moderators') {
         adminTable.style.display = 'table';
@@ -593,6 +597,11 @@ function showTable(table) {
         ordersHeader.style.display = 'block';
         ordersActions.style.display = 'flex';
         loadOrders();
+    } else if (table === 'reviews') {
+        reviewsTable.style.display = 'table';
+        reviewsHeader.style.display = 'block';
+        reviewsActions.style.display = 'flex';
+        loadReviews();
     } else {
         productTable.style.display = 'table';
         productHeader.style.display = 'block';
@@ -1136,8 +1145,9 @@ fetch('get_products.php')
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            const products = data.products;
+            const products = data.products.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); // Sort by newest
             const tbody = document.querySelector("#product-table tbody");
+            tbody.innerHTML = ''; // Clear existing rows
             products.forEach(product => {
                 const row = document.createElement("tr");
                 row.innerHTML = `

@@ -129,7 +129,9 @@
                             <p>${product.apraksts}</p>
                             <p class="price">€${product.cena}</p>
                             <div class="product-buttons">
-                                <button class="add-to-cart" onclick="event.stopPropagation(); addToCart(${product.id})">Pievienot grozam</button>
+                                <button class="add-to-cart" onclick="addToCart(${product.id}); event.stopPropagation();">
+                                    <i class="fas fa-shopping-cart"></i>
+                                </button>
                                 <button class="buy-now" onclick="event.stopPropagation(); buyNow(${product.id})">Pirkt tagad</button>
                             </div>
                         </div>
@@ -158,8 +160,10 @@
                         <label for="quantity-input">Daudzums:</label>
                         <input type="number" id="quantity-input" min="1" max="${product.quantity}" value="1">
                     </div>
-                    <div class="modal-buttons">
-                        <button class="add-to-cart" onclick="addToCart(${product.id})">Pievienot grozam</button>
+                        <div class="modal-buttons">
+                        <button class="add-to-cart" onclick="addToCart(${product.id})">
+                            <i class="fas fa-shopping-cart"></i>
+                        </button>
                         <button class="buy-now" onclick="buyNow(${product.id})">Pirkt tagad</button>
                     </div>
                 </div>
