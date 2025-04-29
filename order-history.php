@@ -107,6 +107,23 @@ try {
     $reviewCheckStmt = $reviewsDb->prepare('SELECT COUNT(*) FROM reviews WHERE user_id = :user_id AND order_id = :order_id');
     
 foreach ($orders as &$order) {
+    // Debug: Log the address data to verify
+    error_log(print_r($order['address'] ?? null, true));
+
+    // Ensure address data is displayed correctly
+    if (!isset($order['address']) || !is_array($order['address'])) {
+        $order['address'] = [
+            'name' => 'Nav norādīts',
+            'email' => 'Nav norādīts',
+            'phone' => 'Nav norādīts',
+            'address' => 'Nav norādīts',
+            'city' => 'Nav norādīts',
+            'postal_code' => 'Nav norādīts',
+            'country' => 'Nav norādīts',
+            'notes' => ''
+        ];
+    }
+
     $order['total_price'] = 0;
 
     if (isset($order['items'])) {
@@ -418,6 +435,11 @@ unset($order);
                     Kopējā summa: <span id="modalTotalPrice">0.00</span> EUR
                 </div>
             </div>
+
+            <div class="modal-address" style="margin-bottom: 20px;">
+                <h3>Adrese</h3>
+                <div id="modalAddress" style="line-height: 1.5;"></div>
+            </div>
             
             <div class="modal-body">
                 <table class="order-details-table">
@@ -706,6 +728,20 @@ unset($order);
             document.getElementById('modalOrderDate').textContent = order.created_at;
             document.getElementById('modalOrderStatus').textContent = order.status;
 
+            // Display address information
+            const addressInfo = order.address || {};
+            document.getElementById('modalAddress').innerHTML = `
+                <strong>Vārds:</strong> ${addressInfo.name || 'Nav norādīts'}<br>
+                <strong>E-pasts:</strong> ${addressInfo.email || 'Nav norādīts'}<br>
+                <strong>Telefons:</strong> ${addressInfo.phone || 'Nav norādīts'}<br>
+                <strong>Adrese:</strong> ${addressInfo.address || 'Nav norādīts'}<br>
+                ${addressInfo.address2 ? `<strong>Dzīvoklis:</strong> ${addressInfo.address2}<br>` : ''}
+                <strong>Pilsēta:</strong> ${addressInfo.city || 'Nav norādīts'}<br>
+                <strong>Pasta indekss:</strong> ${addressInfo.postal_code || 'Nav norādīts'}<br>
+                <strong>Valsts:</strong> ${addressInfo.country || 'Nav norādīts'}<br>
+                ${addressInfo.notes ? `<strong>Piezīmes:</strong> ${addressInfo.notes}` : ''}
+            `;
+
             try {
                 let products = order.items;
                 if (typeof products === 'string') {
@@ -749,8 +785,7 @@ unset($order);
                 closeOrderModal();
             }
         }
-    </script>
-    <script>
+
         function openReviewModal(orderId) {
             document.getElementById('reviewOrderId').value = orderId;
             document.getElementById('reviewModal').style.display = 'block';
@@ -766,6 +801,18 @@ unset($order);
             const reviewModal = document.getElementById('reviewModal');
             if (event.target === reviewModal) {
                 closeReviewModal();
+            }
+        };
+
+        function closeOrderModal() {
+            document.getElementById('orderModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('orderModal');
+            if (event.target === modal) {
+                closeOrderModal();
             }
         }
     </script>

@@ -8,16 +8,16 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 try {
-
     $clientDb = new PDO('sqlite:../Datubazes/client_signup.db'); 
     $clientDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+    // Always fetch the cart from the database
     $stmt = $clientDb->prepare('SELECT cart FROM clients WHERE id = :user_id');
     $stmt->execute([':user_id' => $_SESSION['user_id']]);
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
     $cart = $result['cart'] ? json_decode($result['cart'], true) : [];
-    $_SESSION['cart'] = $cart;
+    $_SESSION['cart'] = $cart; // Update session cart to match the database
 } catch (PDOException $e) {
     echo '<p>Kļūda ielādējot grozu: ' . htmlspecialchars($e->getMessage()) . '</p>';
     exit();
@@ -31,7 +31,7 @@ foreach ($cart as $product) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="lv" data-wf-page="66f12005df0203b01c953ebe" data-wf-site="66f12005df0203b01c953e53">
+<html lang="lv">
 <head>
   <meta charset="utf-8">
   <title>Jūsu Grozs</title>

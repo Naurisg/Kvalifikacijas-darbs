@@ -515,6 +515,11 @@ try {
                 Kopējā summa: <span id="modalTotalPrice">0.00</span> EUR
             </div>
         </div>
+
+        <div class="modal-address" style="margin-bottom: 20px;">
+            <h3>Adrese</h3>
+            <div id="modalAddress" style="line-height: 1.5;"></div>
+        </div>
         
         <div class="modal-body">
             <table class="order-details-table">
@@ -901,6 +906,20 @@ function showOrderDetails(order) {
     document.getElementById('modalOrderDate').textContent = order.date;
     document.getElementById('modalOrderStatus').value = order.status || 'Gaida apstiprinājumu';
 
+    // Rāda adreses informāciju
+    const addressInfo = order.address || {};
+    document.getElementById('modalAddress').innerHTML = `
+        <strong>Vārds:</strong> ${addressInfo.name || 'Nav norādīts'}<br>
+        <strong>E-pasts:</strong> ${addressInfo.email || 'Nav norādīts'}<br>
+        <strong>Telefons:</strong> ${addressInfo.phone || 'Nav norādīts'}<br>
+        <strong>Adrese:</strong> ${addressInfo.address || 'Nav norādīts'}<br>
+        ${addressInfo.address2 ? `<strong>Dzīvoklis:</strong> ${addressInfo.address2}<br>` : ''}
+        <strong>Pilsēta:</strong> ${addressInfo.city || 'Nav norādīts'}<br>
+        <strong>Pasta indekss:</strong> ${addressInfo.postal_code || 'Nav norādīts'}<br>
+        <strong>Valsts:</strong> ${addressInfo.country || 'Nav norādīts'}<br>
+        ${addressInfo.notes ? `<strong>Piezīmes:</strong> ${addressInfo.notes}` : ''}
+    `;
+
     try {
         const products = Array.isArray(order.products) ? order.products : [];
         products.forEach(product => {
@@ -921,11 +940,12 @@ function showOrderDetails(order) {
             orderDetailsTable.appendChild(row);
         });
 
+        // Atjaunina kopējo cenu modālā
         document.getElementById('modalTotalPrice').textContent = totalPrice.toFixed(2);
         document.getElementById('orderModal').style.display = 'block';
         document.body.style.overflow = 'hidden';
     } catch (error) {
-        console.error('Error parsing order items:', error);
+        console.error('Kļūda ielādējot pasūtījuma preces:', error);
         alert('Kļūda ielādējot pasūtījuma detaļas.');
     }
 }
@@ -1238,7 +1258,7 @@ function deleteContact(contactId) {
     }
 }
 
-// Aizver modal logu nospiezōt arpus tā
+ // Aizver modal logu nospiežot ārpus tā
 window.onclick = function(event) {
     const modal = document.getElementById('orderModal');
     if (event.target === modal) {
@@ -1250,6 +1270,7 @@ window.onclick = function(event) {
 <script>
 document.getElementById('reviewsSearchInput').addEventListener('keyup', filterReviews);
 
+// Funkcija, kas parāda izvēlēto tabulu un slēpj citas
 function showTable(table) {
     localStorage.setItem('lastTable', table);
     const adminTable = document.getElementById("admin-table");
@@ -1317,6 +1338,7 @@ function showTable(table) {
     }
 }
 
+// Ielādē atsauksmes no servera un parāda tabulā
 function loadReviews() {
     fetch('get_reviews.php')
     .then(response => response.json())
@@ -1326,41 +1348,42 @@ function loadReviews() {
             const tbody = document.querySelector("#reviews-table tbody");
             tbody.innerHTML = "";
 
-reviews.forEach(review => {
-    const row = document.createElement("tr");
+            reviews.forEach(review => {
+                const row = document.createElement("tr");
 
-    // Sagatavo images HTML
-    let imagesHtml = "";
-    if (review.images && review.images.length > 0) {
-        review.images.forEach(imgPath => {
-imagesHtml += `<img src="../${imgPath}" style="max-width: 50px; max-height: 50px; object-fit: cover; margin-right: 2px; border-radius: 4px;">`;
-        });
-    }
+                // Sagatavo attēlu HTML
+                let imagesHtml = "";
+                if (review.images && review.images.length > 0) {
+                    review.images.forEach(imgPath => {
+                        imagesHtml += `<img src="../${imgPath}" style="max-width: 50px; max-height: 50px; object-fit: cover; margin-right: 2px; border-radius: 4px;">`;
+                    });
+                }
 
-    row.innerHTML = `
-        <td>${review.id}</td>
-        <td>${review.user_name || 'Nezināms'}</td>
-        <td>${review.user_email || 'Nezināms'}</td>
-        <td>${review.created_at || 'Nezināms'}</td>
-        <td>${review.rating ? review.rating.toFixed(1) + ' / 5' : 'Nav novērtējuma'}</td>
-        <td>${review.review_text || ''}</td>
-        <td>${imagesHtml}</td>
-        <td>
-            <button class="delete-btn" onclick="deleteReview('${review.user_id}', '${review.order_id}')">Dzēst</button>
-        </td>
-    `;
-    tbody.appendChild(row);
-});
+                row.innerHTML = `
+                    <td>${review.id}</td>
+                    <td>${review.user_name || 'Nezināms'}</td>
+                    <td>${review.user_email || 'Nezināms'}</td>
+                    <td>${review.created_at || 'Nezināms'}</td>
+                    <td>${review.rating ? review.rating.toFixed(1) + ' / 5' : 'Nav novērtējuma'}</td>
+                    <td>${review.review_text || ''}</td>
+                    <td>${imagesHtml}</td>
+                    <td>
+                        <button class="delete-btn" onclick="deleteReview('${review.user_id}', '${review.order_id}')">Dzēst</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
         } else {
             alert('Kļūda ielādējot atsauksmes: ' + data.message);
         }
     })
     .catch(error => {
-        console.error('Error fetching reviews:', error);
+        console.error('Kļūda ielādējot atsauksmes:', error);
         alert('Kļūda ielādējot atsauksmes.');
     });
 }
 
+// Filtrē atsauksmes pēc meklēšanas ievades
 function filterReviews() {
     const searchValue = document.getElementById('reviewsSearchInput').value.toLowerCase();
     const table = document.getElementById('reviews-table');
@@ -1382,6 +1405,7 @@ function filterReviews() {
     }
 }
 
+// Dzēš atsauksmi pēc lietotāja ID un pasūtījuma ID
 function deleteReview(userId, orderId) {
     if (confirm('Vai tiešām vēlaties dzēst šo atsauksmi?')) {
         fetch('delete_reviews.php', {
@@ -1398,14 +1422,14 @@ function deleteReview(userId, orderId) {
         .then(data => {
             if (data.success) {
                 alert('Atsauksme veiksmīgi dzēsta');
-                // Atjauno reviews pēc izdzēšanas
+                // Atjauno atsauksmes pēc dzēšanas
                 loadReviews();
             } else {
                 alert('Kļūda dzēšot atsauksmi: ' + data.message);
             }
         })
         .catch(error => {
-            console.error('Error:', error);
+            console.error('Kļūda dzēšot atsauksmi:', error);
             alert('Kļūda dzēšot atsauksmi');
         });
     }

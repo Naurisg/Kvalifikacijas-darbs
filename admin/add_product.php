@@ -1,62 +1,65 @@
 <?php
-session_start();
-
-if (!isset($_SESSION['user_id'])) {
-    header("Location: adminlogin.html");
-    exit();
-}
+require_once 'auth_check.php'; // Pārbauda, vai lietotājs ir autorizēts
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="lv">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Pievienot Produktu</title>
     <style>
+        /* Stila noteikumi lapas izkārtojumam un dizainam */
         body {
-            font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #2c3e50, #bdc3c7);
+            background-color: #f5f5f5;
+            font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 20px;
         }
 
-        .form-container {
-            max-width: 800px;
+        .container {
+            max-width: 600px;
             margin: 40px auto;
-            padding: 30px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
         h2 {
-            text-align: center;
-            color: #4A4A4A;
+            color: #333;
             margin-bottom: 30px;
+            font-size: 24px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         label {
             display: block;
             margin-bottom: 8px;
-            font-weight: bold;
-            color: #333;
+            color: #444;
+            font-weight: 600;
         }
 
-        input[type="text"],
-        input[type="number"],
-        textarea,
-        select {
+        input, select, textarea {
             width: 100%;
             padding: 12px;
-            border: 2px solid #007bff;
-            border-radius: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #fafafa;
+            transition: border-color 0.3s ease;
             font-size: 16px;
-            margin-bottom: 10px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #666;
+            background: white;
         }
 
         textarea {
@@ -66,63 +69,95 @@ if (!isset($_SESSION['user_id'])) {
 
         .button-group {
             display: flex;
-            justify-content: space-between;
+            gap: 15px;
             margin-top: 30px;
         }
 
-        .submit-btn, .back-btn {
-            padding: 12px 24px;
+        button {
+            flex: 1;
+            padding: 14px;
             border: none;
-            border-radius: 5px;
+            border-radius: 4px;
             cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
         }
 
-        .submit-btn {
-            background-color: #28a745;
+        button[type="submit"] {
+            background-color: #333;
             color: white;
         }
 
-        .back-btn {
-            background-color: #6c757d;
-            color: white;
-            text-decoration: none;
+        button[type="submit"]:hover {
+            background-color: #444;
         }
 
-        .submit-btn:hover, .back-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        button[type="button"] {
+            background-color: #666;
+            color: white;
+        }
+
+        button[type="button"]:hover {
+            background-color: #555;
+        }
+
+        .message {
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+            border-left: 4px solid;
+        }
+
+        .success {
+            background-color: #f0f0f0;
+            border-color: #2d2d2d;
+            color: #2d2d2d;
+        }
+
+        .error {
+            background-color: #f0f0f0;
+            border-color: #4a4a4a;
+            color: #4a4a4a;
         }
     </style>
 </head>
 <body>
-    <div class="form-container">
+    <div class="container">
         <h2>Pievienot Jaunu Produktu</h2>
         <form id="addProductForm" enctype="multipart/form-data">
+            <!-- Produkta nosaukuma ievades lauks -->
             <div class="form-group">
                 <label for="nosaukums">Nosaukums:</label>
-                <input type="text" id="nosaukums" name="nosaukums" required>
+                <input type="text" id="nosaukums" name="nosaukums" required />
             </div>
 
+            <!-- Produkta apraksta ievades lauks -->
             <div class="form-group">
                 <label for="apraksts">Apraksts:</label>
                 <textarea id="apraksts" name="apraksts" required></textarea>
             </div>
 
+            <!-- Produkta attēlu augšupielādes sadaļa -->
             <div class="form-group">
-                <label for="bilde">Bilde:</label>
-                <input type="file" id="bilde" name="bilde" accept="image/*" required>
+                <label for="bilde">Bildes:</label>
+                <div id="image-upload-container" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <label class="image-upload-label" style="cursor: pointer; font-size: 24px; font-weight: bold; color: #333; border: 1px solid #ddd; width: 100px; height: 100px; display: flex; justify-content: center; align-items: center; background: #fafafa;">
+                        +
+                        <input type="file" name="bilde[]" accept="image/*" onchange="addImage(event)" style="display: none;" />
+                    </label>
+                </div>
             </div>
 
+            <!-- Produkta kategorijas izvēles lauks -->
             <div class="form-group">
                 <label for="kategorija">Kategorija:</label>
                 <select id="kategorija" name="kategorija" required>
                     <option value="">Izvēlieties kategoriju</option>
+                    <!-- Kategoriju saraksts -->
                     <option value="Cimdi">Cimdi</option>
                     <option value="Apavi">Apavi</option>
                     <option value="Apgerbs">Apģērbs</option>
-                    <option value="Drosibas-sistemas">Drošības sistēmas</option> <!-- Updated value -->
+                    <option value="Drosibas-sistemas">Drošības sistēmas</option>
                     <option value="Gazmaskas">Gazmaskas</option>
                     <option value="Arapgerbs">Augstas redzamības apgerbs</option>
                     <option value="Austinas_kiveres_brilles">Austinas,kiveres,brilles</option>
@@ -134,35 +169,41 @@ if (!isset($_SESSION['user_id'])) {
                 </select>
             </div>
 
+            <!-- Produkta cenas ievades lauks -->
             <div class="form-group">
                 <label for="cena">Cena (€):</label>
-                <input type="number" id="cena" name="cena" step="0.01" required>
+                <input type="number" id="cena" name="cena" step="0.01" required />
             </div>
 
+            <!-- Produkta daudzuma ievades lauks -->
             <div class="form-group">
                 <label for="quantity">Daudzums:</label>
-                <input type="number" id="quantity" name="quantity" min="1" required>
+                <input type="number" id="quantity" name="quantity" min="1" required />
             </div>
 
+            <!-- Produkta izmēru izvēles sadaļa -->
             <div class="form-group" id="sizes-section" style="display: none;">
                 <label>Izmēri:</label>
                 <div id="sizes-container">
-                    <!-- Checkboxes will be dynamically populated based on the selected category -->
+                    <!-- Izmēru izvēles iespējas tiks ģenerētas dinamiski -->
                 </div>
             </div>
 
+            <!-- Pogas formas iesniegšanai vai atgriešanai uz administrācijas paneli -->
             <div class="button-group">
-                <a href="admin-panelis.php" class="back-btn">Atpakaļ</a>
-                <button type="submit" class="submit-btn">Pievienot Produktu</button>
+                <button type="button" onclick="window.location.href='admin-panelis.php'">Atgriezties uz administrācijas paneli</button>
+                <button type="submit">Pievienot produktu</button>
             </div>
         </form>
     </div>
 
     <script>
+        // Izmēru sadaļas un kategoriju izvēles funkcionalitāte
         const sizesSection = document.getElementById('sizes-section');
         const sizesContainer = document.getElementById('sizes-container');
         const categoryElement = document.getElementById('kategorija');
 
+        // Izmēru saraksts dažādām kategorijām
         const sizesForCategories = {
             cimdi: ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'],
             apavi: ['36', '37', '38', '39', '40', '41', '42', '43', '44', '45'],
@@ -174,9 +215,10 @@ if (!isset($_SESSION['user_id'])) {
             krasosanasapgerbs: ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL']
         };
 
+        // Mainot kategoriju, tiek ģenerēti atbilstošie izmēri
         categoryElement.addEventListener('change', function () {
             const selectedCategory = this.value.toLowerCase();
-            sizesContainer.innerHTML = ''; // Clear previous checkboxes
+            sizesContainer.innerHTML = ''; // Notīra iepriekšējos izmērus
 
             if (sizesForCategories[selectedCategory]) {
                 sizesSection.style.display = 'block';
@@ -202,6 +244,7 @@ if (!isset($_SESSION['user_id'])) {
             }
         });
 
+        // Forma tiek iesniegta, izmantojot AJAX pieprasījumu
         document.getElementById('addProductForm').addEventListener('submit', function (e) {
             e.preventDefault();
             const formData = new FormData(this);
@@ -223,6 +266,69 @@ if (!isset($_SESSION['user_id'])) {
                 alert('Kļūda pievienojot produktu');
             });
         });
+
+        // Funkcija attēlu pievienošanai un priekšskatīšanai
+        function addImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const container = document.getElementById('image-upload-container');
+
+                    // Izveido jaunu attēla priekšskatījuma kvadrātu
+                    const imageWrapper = document.createElement('div');
+                    imageWrapper.style.width = '100px';
+                    imageWrapper.style.height = '100px';
+                    imageWrapper.style.border = '1px solid #ddd';
+                    imageWrapper.style.borderRadius = '4px';
+                    imageWrapper.style.overflow = 'hidden';
+                    imageWrapper.style.position = 'relative';
+                    imageWrapper.style.display = 'flex';
+                    imageWrapper.style.justifyContent = 'center';
+                    imageWrapper.style.alignItems = 'center';
+                    imageWrapper.style.background = '#fafafa';
+
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'cover';
+
+                    // Pievieno pogu attēla noņemšanai
+                    const removeBtn = document.createElement('button');
+                    removeBtn.textContent = '×';
+                    removeBtn.style.position = 'absolute';
+                    removeBtn.style.top = '5px';
+                    removeBtn.style.right = '5px';
+                    removeBtn.style.background = 'rgba(0,0,0,0.5)';
+                    removeBtn.style.color = 'white';
+                    removeBtn.style.border = 'none';
+                    removeBtn.style.borderRadius = '50%';
+                    removeBtn.style.width = '25px';
+                    removeBtn.style.height = '25px';
+                    removeBtn.style.cursor = 'pointer';
+                    removeBtn.style.display = 'none'; // Sākotnēji paslēpta
+                    removeBtn.style.justifyContent = 'center';
+                    removeBtn.style.alignItems = 'center';
+                    removeBtn.onclick = function() {
+                        container.removeChild(imageWrapper);
+                    };
+
+                    // Parāda noņemšanas pogu, kad pele ir virs attēla
+                    imageWrapper.onmouseover = function() {
+                        removeBtn.style.display = 'flex';
+                    };
+                    imageWrapper.onmouseout = function() {
+                        removeBtn.style.display = 'none';
+                    };
+
+                    imageWrapper.appendChild(img);
+                    imageWrapper.appendChild(removeBtn);
+                    container.insertBefore(imageWrapper, container.lastElementChild);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
     </script>
 </body>
 </html>

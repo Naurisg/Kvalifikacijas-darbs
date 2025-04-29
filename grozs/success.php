@@ -18,13 +18,14 @@ if (!isset($_GET['session_id'])) {
     exit();
 }
 
-\Stripe\Stripe::setApiKey('sk_test_51QP0wYHs6AycTP1yyPSwfq6pYdkUGT9w6yLf2gsZdEsgfIxnsTqkwRJnqZZoF1H4f42axHvNyqHIj7enkqtMEp1100Zzk0WPsE'); // Replace with your secret key
+\Stripe\Stripe::setApiKey('sk_test_51QP0wYHs6AycTP1yyPSwfq6pYdkUGT9w6yLf2gsZdEsgfIxnsTqkwRJnqZZoF1H4f42axHvNyqHIj7enkqtMEp1100Zzk0WPsE'); // Aizstājiet ar savu slepeno atslēgu
 
 try {
     $sessionId = $_GET['session_id'];
     $stripe = new \Stripe\StripeClient('sk_test_51QP0wYHs6AycTP1yyPSwfq6pYdkUGT9w6yLf2gsZdEsgfIxnsTqkwRJnqZZoF1H4f42axHvNyqHIj7enkqtMEp1100Zzk0WPsE');
     $session = $stripe->checkout->sessions->retrieve($sessionId);
 
+    // Pārbauda, vai maksājums ir veikts
     if ($session->payment_status !== 'paid') {
         throw new Exception('Maksājums nav pabeigts. Lūdzu, aizpildiet maksājumu, lai turpinātu.');
     }
@@ -32,23 +33,36 @@ try {
     $db = new PDO('sqlite:../Datubazes/client_signup.db');
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // iegust lietotaja datus
+    // Iegūst lietotāja datus
     $stmt = $db->prepare('SELECT cart, orders FROM clients WHERE id = :user_id');
     $stmt->execute([':user_id' => $_SESSION['user_id']]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$user) {
-        throw new Exception('User not found.');
+        throw new Exception('Lietotājs nav atrasts.');
     }
 
     $cart = $user['cart'] ? json_decode($user['cart'], true) : [];
     if (empty($cart)) {
-        throw new Exception('Cart is empty.');
+        throw new Exception('Grozs ir tukšs.');
     }
 
     $orders = $user['orders'] ? json_decode($user['orders'], true) : [];
 
-    // apreķinaja kopejo summu
+    // Iegūst adreses datus no sesijas metadatiem
+    $address = [
+        'name' => $session->metadata->name,
+        'email' => $session->metadata->email,
+        'phone' => $session->metadata->phone,
+        'address' => $session->metadata->address,
+        'address2' => $session->metadata->address2,
+        'city' => $session->metadata->city,
+        'postal_code' => $session->metadata->postal_code,
+        'country' => $session->metadata->country,
+        'notes' => $session->metadata->notes
+    ];
+
+    // Aprēķina kopējo summu
     $totalAmount = 0;
     foreach ($cart as $product) {
         $price = isset($product['cena']) ? floatval($product['cena']) : 0;
@@ -56,27 +70,31 @@ try {
         $totalAmount += $price * $quantity;
     }
 
-    // ģenere unikālu pasūtijuma id
+    // Ģenerē unikālu pasūtījuma ID
     $orderId = uniqid('order_');
 
-    // izveido jaunu pasūtijumu
+    // Izveido jaunu pasūtījumu
     $newOrder = [
         'order_id' => $orderId,
         'items' => $cart,
         'total_amount' => $totalAmount,
         'created_at' => date('Y-m-d H:i:s'),
-        'status' => 'Pending'
+        'status' => 'Pending',
+        'address' => $address
     ];
 
     $orders[] = $newOrder;
 
-    // Atjaunina pasūtijumus un notīra grozu datubāzē
+    // Atjauno pasūtījumus un notīra grozu datubāzē
     $updateStmt = $db->prepare('UPDATE clients SET orders = :orders, cart = :cart WHERE id = :user_id');
     $updateStmt->execute([
         ':orders' => json_encode($orders),
         ':cart' => json_encode([]),
         ':user_id' => $_SESSION['user_id']
     ]);
+
+    // Notīra sesijas grozu
+    unset($_SESSION['cart']);
 
     echo '<div style="display:flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; text-align: center;">';
     echo '<h1>Maksājums veiksmīgs!</h1>';

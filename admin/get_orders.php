@@ -28,7 +28,8 @@ try {
                     'products' => $items, 
                     'total_price' => $order['total_amount'] ?? 0,
                     'date' => $order['created_at'] ?? 'N/A',
-                    'status' => $order['status'] ?? 'Pending'
+                    'status' => $order['status'] ?? 'Pending',
+                    'address' => $order['address'] ?? null
                 ];
             }
         }

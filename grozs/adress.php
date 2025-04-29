@@ -306,32 +306,27 @@ try {
     
     <div class="checkout-content">
       <div class="address-form">
-        <form id="addressForm" action="payment.php" method="POST">
+        <form id="addressForm" action="success.php" method="POST">
           <div class="form-group">
             <label for="name">Vārds un uzvārds *</label>
             <input type="text" id="name" name="name" required>
           </div>
-          
           <div class="form-group">
             <label for="email">E-pasts *</label>
             <input type="email" id="email" name="email" required>
           </div>
-          
           <div class="form-group">
             <label for="phone">Telefona numurs *</label>
             <input type="tel" id="phone" name="phone" required>
           </div>
-          
           <div class="form-group">
             <label for="address">Adrese *</label>
             <input type="text" id="address" name="address" required>
           </div>
-          
           <div class="form-group">
             <label for="address2">Dzīvoklis, istaba, utt. (nav obligāts)</label>
             <input type="text" id="address2" name="address2">
           </div>
-          
           <div class="form-row">
             <div class="form-group">
               <label for="city">Pilsēta *</label>
@@ -342,28 +337,17 @@ try {
               <input type="text" id="postal_code" name="postal_code" required>
             </div>
           </div>
-          
           <div class="form-group">
             <label for="country">Valsts *</label>
             <input type="text" id="country" name="country" required>
           </div>
-          
           <div class="form-group">
             <label for="notes">Piezīmes pie pasūtījuma (nav obligāts)</label>
             <textarea id="notes" name="notes" rows="3"></textarea>
           </div>
-          
           <div class="button-group">
-          <button type="button" class="back-button" onclick="window.location.href='grozs.php'">
-          <i class="fas fa-shopping-cart"></i> Atpakaļ uz grozu
-          </button>
-          <button type="submit" class="checkout-button">
-          <i class="fas fa-credit-card"></i> Turpināt uz maksājumu
-          </button>
-            <div class="secure-checkout">
-              <img src="../images/stripe.png" alt="Secure Payment">
-              <span>Drošs maksājums</span>
-            </div>
+            <button type="button" class="back-button" onclick="window.location.href='grozs.php'">Atpakaļ uz grozu</button>
+            <button type="submit" class="checkout-button">Turpināt uz maksājumu</button>
           </div>
         </form>
       </div>
@@ -452,16 +436,30 @@ try {
     document.getElementById('addressForm').addEventListener('submit', function (e) {
         e.preventDefault();
 
+        // Collect form data
+        const formData = {
+            name: document.getElementById('name').value,
+            email: document.getElementById('email').value,
+            phone: document.getElementById('phone').value,
+            address: document.getElementById('address').value,
+            address2: document.getElementById('address2').value,
+            city: document.getElementById('city').value,
+            postal_code: document.getElementById('postal_code').value,
+            country: document.getElementById('country').value,
+            notes: document.getElementById('notes').value
+        };
+
         fetch('create_checkout_session.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
+            body: JSON.stringify(formData)
         })
         .then(response => response.json())
         .then(data => {
             if (data.id) {
-                const stripe = Stripe('pk_test_51QP0wYHs6AycTP1yY0zaKnaw3dgfxaiKEX5OWQSuRo4IQzobUkCd3d347FksWLIrzASGinvz1Sdp4VjnWYfDTwW900N5fxwZIx'); //Stripee public key
+                const stripe = Stripe('pk_test_51QP0wYHs6AycTP1yY0zaKnaw3dgfxaiKEX5OWQSuRo4IQzobUkCd3d347FksWLIrzASGinvz1Sdp4VjnWYfDTwW900N5fxwZIx'); //Stripe public key
                 stripe.redirectToCheckout({ sessionId: data.id });
             } else {
                 alert(data.error || 'Kļūda izveidojot maksājumu.');

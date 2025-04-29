@@ -6,7 +6,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $db = new PDO('sqlite:../Datubazes/admin_signup.db');
         $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        $name = $_POST['name'];  // Changed from 'username' to 'name'
+        $name = $_POST['name'];
         $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
         $email = $_POST['email'];
         $role = $_POST['role'];
@@ -19,67 +19,127 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'role' => $role
         ]);
 
-        $success_message = "Admin successfully added!";
+        $success_message = "Administrators veiksmīgi pievienots!";
     } catch(PDOException $e) {
-        $error_message = "Error: " . $e->getMessage();
+        $error_message = "Kļūda: " . $e->getMessage();
     }
 }
 ?>
 
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="lv">
 <head>
     <meta charset="UTF-8">
-    <title>Pievienot jaunu Adminu</title>
+    <title>Pievienot jaunu administratoru</title>
     <style>
-        .container {
-            max-width: 500px;
-            margin: 50px auto;
+        body {
+            background-color: #f5f5f5;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
             padding: 20px;
-            background: #fff;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: white;
+            padding: 40px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
+
+        h2 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 24px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 25px;
         }
+
         label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            color: #444;
+            font-weight: 600;
         }
+
         input, select {
             width: 100%;
-            padding: 8px;
+            padding: 12px;
             border: 1px solid #ddd;
             border-radius: 4px;
+            background: #fafafa;
+            transition: border-color 0.3s ease;
         }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #666;
+            background: white;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
         button {
-            background: #4CAF50;
-            color: white;
-            padding: 10px 15px;
+            flex: 1;
+            padding: 14px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
         }
+
+        button[type="submit"] {
+            background-color: #333;
+            color: white;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #444;
+        }
+
+        button[type="button"] {
+            background-color: #666;
+            color: white;
+        }
+
+        button[type="button"]:hover {
+            background-color: #555;
+        }
+
         .message {
-            padding: 10px;
-            margin-bottom: 15px;
+            padding: 15px;
+            margin-bottom: 25px;
             border-radius: 4px;
+            border-left: 4px solid;
         }
+
         .success {
-            background: #dff0d8;
-            color: #3c763d;
+            background-color: #f0f0f0;
+            border-color: #2d2d2d;
+            color: #2d2d2d;
         }
+
         .error {
-            background: #f2dede;
-            color: #a94442;
+            background-color: #f0f0f0;
+            border-color: #4a4a4a;
+            color: #4a4a4a;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Pievienot jaunu Adminu</h2>
+        <h2>Pievienot jaunu administratoru</h2>
         
         <?php if (isset($success_message)): ?>
             <div class="message success"><?php echo $success_message; ?></div>
@@ -91,31 +151,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         <form method="POST" action="">
             <div class="form-group">
-                <label for="username">Username:</label>
+                <label for="name">Lietotājvārds:</label>
                 <input type="text" id="name" name="name" required>
             </div>
             
             <div class="form-group">
-                <label for="password">Password:</label>
+                <label for="password">Parole:</label>
                 <input type="password" id="password" name="password" required>
             </div>
             
             <div class="form-group">
-                <label for="email">Email:</label>
+                <label for="email">E-pasts:</label>
                 <input type="email" id="email" name="email" required>
             </div>
             
             <div class="form-group">
-                <label for="role">Role:</label>
+                <label for="role">Loma:</label>
                 <select id="role" name="role" required>
-                    <option value="admin">Admin</option>
-                    <option value="moderator">Moderator</option>
+                    <option value="admin">Administrators</option>
+                    <option value="moderator">Moderators</option>
                 </select>
             </div>
             
-            <div class="form-group">
-                <button type="submit">Add Admin</button>
-                <button type="button" onclick="window.location.href='admin-panelis.php'">Back to Admin Panel</button>
+            <div class="button-group">
+                <button type="submit">Pievienot administratoru</button>
+                <button type="button" onclick="window.location.href='admin-panelis.php'">Atgriezties uz administrācijas paneli</button>
             </div>
         </form>
     </div>
