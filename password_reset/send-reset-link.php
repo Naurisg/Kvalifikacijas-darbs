@@ -1,0 +1,73 @@
+<?php
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require '../vendor/autoload.php';
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['error' => 'Metode nav atļauta']);
+    exit;
+}
+
+$email = filter_var($_POST['Email'] ?? '', FILTER_VALIDATE_EMAIL);
+if (!$email) {
+    echo json_encode(['error' => 'Nederīga e-pasta adrese']);
+    exit;
+}
+
+try {
+    $db = new SQLite3('../Datubazes/client_signup.db');
+
+    $stmt = $db->prepare('SELECT id FROM clients WHERE email = :email');
+    $stmt->bindValue(':email', $email, SQLITE3_TEXT);
+    $result = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
+
+    if (!$result) {
+        echo json_encode(['message' => 'Ja atradām kontu, kas saistīts ar šo e-pasta adresi, mēs nosūtījām saiti paroles atiestatīšanai.']);
+        exit;
+    }
+
+    $token = bin2hex(random_bytes(16));
+    $expires_at = (new DateTime('+1 hour'))->format('Y-m-d H:i:s');
+
+    $insert = $db->prepare('INSERT INTO password_resets (email, token, expires_at) VALUES (:email, :token, :expires_at)');
+    $insert->bindValue(':email', $email, SQLITE3_TEXT);
+    $insert->bindValue(':token', $token, SQLITE3_TEXT);
+    $insert->bindValue(':expires_at', $expires_at, SQLITE3_TEXT);
+    $insert->execute();
+
+    $reset_link = sprintf(
+        '%s/vissdarbam/password_reset/reset-password-process.php?token=%s',
+        (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'],
+        $token
+    );
+
+    $mail = new PHPMailer(true);
+    try {
+        $mail->SMTPDebug = 0; 
+        $mail->isSMTP();
+        $mail->Host       = 'smtp.gmail.com';
+        $mail->SMTPAuth   = true;
+        $mail->Username   = 'naurissgg@gmail.com';
+        $mail->Password   = 'dpxm zmkp pmoy gmql';
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port       = 587;
+
+        $mail->setFrom('naurissgg@gmail.com', 'Paroles atiestatisanas lietotne');
+        $mail->addAddress($email);
+
+        $mail->isHTML(false);
+        $mail->Subject = 'Paroles atjaunosanas pieprasijums';
+        $mail->Body    = "Sveiki,\n\nMēs saņēmām pieprasījumu atiestatīt jūsu paroli. Noklikšķiniet uz zemāk esošās saites, lai to atiestatītu:\n\n$reset_link\n\nJa jūs to neesat pieprasījis, lūdzu, ignorējiet šo e-pastu.\n\nPaldies.";
+
+        $mail->send();
+        echo json_encode(['message' => 'Ja eksistē konts, kas saistīts ar šo e-pasta adresi, mēs nosūtījām saiti paroles atiestatīšanai.']);
+    } catch (Exception $e) {
+        echo json_encode(['error' => 'Pasta sūtīšanas kļūda: ' . $mail->ErrorInfo]);
+    }
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Servera kļūda: ' . $e->getMessage()]);
+}
+?>
