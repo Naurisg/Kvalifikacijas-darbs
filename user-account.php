@@ -1,9 +1,6 @@
 <?php
-session_start();
-if (!isset($_SESSION['user_id'])) {
-    header("Location: log-in.php");
-    exit();
-}
+include 'session_helper.php';
+validate_session_user();
 
 include 'header.php'; // Pievieno header.php failu
 

@@ -41,14 +41,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         <html>
         <head>
             <title>Paroles atiestatīšana</title>
+            <link href="../css/normalize.css" rel="stylesheet" type="text/css">
+            <link href="../css/main.css" rel="stylesheet" type="text/css">
+            <link href="../css/style.css" rel="stylesheet" type="text/css">
+            <link href="https://fonts.googleapis.com" rel="preconnect">
+            <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin="anonymous">
+            <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js" type="text/javascript"></script>
+            <script type="text/javascript">WebFont.load({google: {families: ["Inter:regular,500,600,700","Libre Baskerville:regular,italic,700","Volkhov:regular,italic,700,700italic","Noto Serif:regular,italic,700,700italic"]}});</script>
+            <script type="text/javascript">!function(o,c){var n=c.documentElement,t=" w-mod-";n.className+=t+"js",("ontouchstart"in o||o.DocumentTouch&&c instanceof DocumentTouch)&&(n.className+=t+"touch")}(window,document);</script>
+            <link href="../images/favicon.png" rel="shortcut icon" type="image/x-icon">
+            <link href="../images/webclip.png" rel="apple-touch-icon">
         </head>
         <body>
-            <h2>Atiestatiet savu paroli</h2>
-            <form method="post" action="reset-password-process.php">
-                <label for="new_password">Jaunā parole:</label><br>
-                <input type="password" id="new_password" name="new_password" required minlength="8"><br><br>
-                <input type="submit" value="Atiestatīt paroli">
-            </form>
+            <div class="w-users-userformpagewrap full-page-wrapper">
+                <div class="w-users-userresetpasswordformwrapper admin-form-card center-align">
+                    <div class="w-users-userformheader form-card-header">
+                        <h2 class="heading h3">Atiestatiet savu paroli</h2>
+                    </div>
+                    <form method="post" action="reset-password-process.php">
+                        <div class="form-field">
+                            <label for="new_password" class="text small">Jaunā parole:</label>
+                            <input type="password" id="new_password" name="new_password" class="text-field w-input" required minlength="8">
+                        </div>
+                        <input type="submit" value="Atiestatīt paroli" class="w-users-userformbutton button w-button">
+                    </form>
+                </div>
+            </div>
         </body>
         </html>
         <?php

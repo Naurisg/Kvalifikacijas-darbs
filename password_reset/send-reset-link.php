@@ -28,9 +28,37 @@ try {
         exit;
     }
 
+    // Pārbauda, vai paroles atiestatīšanas tokens tika ģenerēts nesen (pēdējo 5 minūšu laikā)
+    $checkRecentToken = $db->prepare('SELECT expires_at FROM password_resets WHERE email = :email ORDER BY expires_at DESC LIMIT 1');
+    $checkRecentToken->bindValue(':email', $email, SQLITE3_TEXT);
+    $recentTokenResult = $checkRecentToken->execute()->fetchArray(SQLITE3_ASSOC);
+
+    if ($recentTokenResult) {
+        $expiresAt = new DateTime($recentTokenResult['expires_at']);
+        $now = new DateTime();
+
+        // Aprēķina tokena izveides laiku kā expires_at mīnus 1 stunda
+        $creationTime = clone $expiresAt;
+        $creationTime->modify('-1 hour');
+
+        $interval = $now->getTimestamp() - $creationTime->getTimestamp();
+
+        // Ja tokens tika izveidots mazāk nekā pirms 2 minūtēm, noraida pieprasījumu
+        if ($interval < 120) { // 120 sekundes = 2 minūtes
+            echo json_encode(['error' => 'Jau nesen tika nosūtīta paroles atiestatīšanas saite. Lūdzu, uzgaidiet dažas minūtes pirms mēģināt vēlreiz.']);
+            exit;
+        }
+    }
+
     $token = bin2hex(random_bytes(16));
     $expires_at = (new DateTime('+1 hour'))->format('Y-m-d H:i:s');
 
+    // Dzēš visus esošos tokenus šim e-pastam, lai atspējotu vecās paroles atiestatīšanas saites
+    $deleteOldTokens = $db->prepare('DELETE FROM password_resets WHERE email = :email');
+    $deleteOldTokens->bindValue(':email', $email, SQLITE3_TEXT);
+    $deleteOldTokens->execute();
+
+    // Ievieto jaunu tokenu paroles atiestatīšanai
     $insert = $db->prepare('INSERT INTO password_resets (email, token, expires_at) VALUES (:email, :token, :expires_at)');
     $insert->bindValue(':email', $email, SQLITE3_TEXT);
     $insert->bindValue(':token', $token, SQLITE3_TEXT);
