@@ -2,7 +2,7 @@
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require '../vendor/autoload.php';
+require '../../vendor/autoload.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -17,9 +17,9 @@ if (!$email) {
 }
 
 try {
-    $db = new SQLite3('../Datubazes/client_signup.db');
+    $db = new SQLite3('../../Datubazes/admin_signup.db');
 
-    $stmt = $db->prepare('SELECT id FROM clients WHERE email = :email');
+    $stmt = $db->prepare('SELECT id FROM admin_signup WHERE email = :email');
     $stmt->bindValue(':email', $email, SQLITE3_TEXT);
     $result = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
 
@@ -28,8 +28,7 @@ try {
         exit;
     }
 
-    // Pārbauda, vai paroles atiestatīšanas tokens tika ģenerēts nesen (pēdējo 5 minūšu laikā)
-    $checkRecentToken = $db->prepare('SELECT expires_at FROM password_resets WHERE email = :email ORDER BY expires_at DESC LIMIT 1');
+    $checkRecentToken = $db->prepare('SELECT expires_at FROM password_resets_admin WHERE email = :email ORDER BY expires_at DESC LIMIT 1');
     $checkRecentToken->bindValue(':email', $email, SQLITE3_TEXT);
     $recentTokenResult = $checkRecentToken->execute()->fetchArray(SQLITE3_ASSOC);
 
@@ -37,14 +36,12 @@ try {
         $expiresAt = new DateTime($recentTokenResult['expires_at']);
         $now = new DateTime();
 
-        // Aprēķina tokena izveides laiku kā expires_at mīnus 1 stunda
         $creationTime = clone $expiresAt;
         $creationTime->modify('-1 hour');
 
         $interval = $now->getTimestamp() - $creationTime->getTimestamp();
 
-        // Ja tokens tika izveidots mazāk nekā pirms 2 minūtēm, noraida pieprasījumu
-        if ($interval < 120) { // 120 sekundes = 2 minūtes
+        if ($interval < 120) {
             echo json_encode(['error' => 'Jau nesen tika nosūtīta paroles atiestatīšanas saite. Lūdzu, uzgaidiet dažas minūtes pirms mēģināt vēlreiz.']);
             exit;
         }
@@ -54,19 +51,19 @@ try {
     $expires_at = (new DateTime('+1 hour'))->format('Y-m-d H:i:s');
 
     // Dzēš visus esošos tokenus šim e-pastam, lai atspējotu vecās paroles atiestatīšanas saites
-    $deleteOldTokens = $db->prepare('DELETE FROM password_resets WHERE email = :email');
+    $deleteOldTokens = $db->prepare('DELETE FROM password_resets_admin WHERE email = :email');
     $deleteOldTokens->bindValue(':email', $email, SQLITE3_TEXT);
     $deleteOldTokens->execute();
 
     // Ievieto jaunu tokenu paroles atiestatīšanai
-    $insert = $db->prepare('INSERT INTO password_resets (email, token, expires_at) VALUES (:email, :token, :expires_at)');
+    $insert = $db->prepare('INSERT INTO password_resets_admin (email, token, expires_at) VALUES (:email, :token, :expires_at)');
     $insert->bindValue(':email', $email, SQLITE3_TEXT);
     $insert->bindValue(':token', $token, SQLITE3_TEXT);
     $insert->bindValue(':expires_at', $expires_at, SQLITE3_TEXT);
     $insert->execute();
 
     $reset_link = sprintf(
-        '%s/vissdarbam/password_reset/reset-password-process.php?token=%s',
+        '%s/vissdarbam/admin/password_reset_admin/reset-password-process.php?token=%s',
         (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'],
         $token
     );
@@ -78,11 +75,11 @@ try {
         $mail->Host       = 'smtp.gmail.com';
         $mail->SMTPAuth   = true;
         $mail->Username   = 'naurissgg@gmail.com';
-        $mail->Password   = 'helc lwgt zcme ioej';
+        $mail->Password   = 'jbks qyqi mvxk gqth';
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port       = 587;
 
-        $mail->setFrom('naurissgg@gmail.com', 'Paroles atiestatisanas lietotne');
+        $mail->setFrom('naurissgg@gmail.com', 'Admin Paroles atiestatisana');
         $mail->addAddress($email);
 
         $mail->isHTML(false);

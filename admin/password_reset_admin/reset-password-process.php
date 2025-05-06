@@ -1,7 +1,7 @@
 <?php
 /*
 reset-password-process.php
-Apstrādā lietotāja paroles atiestatīšanas saiti, pārbauda tokenu, ļauj ievadīt jaunu paroli, atjaunina paroli
+Apstrādā administratora paroles atiestatīšanas saiti, pārbauda tokenu, ļauj ievadīt jaunu paroli, atjaunina paroli
 */
 
 session_start();
@@ -14,8 +14,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
 
     try {
-        $db = new SQLite3('../Datubazes/client_signup.db');
-        $stmt = $db->prepare('SELECT email, expires_at FROM password_resets WHERE token = :token');
+        $db = new SQLite3('../../Datubazes/admin_signup.db');
+        $stmt = $db->prepare('SELECT email, expires_at FROM password_resets_admin WHERE token = :token');
         $stmt->bindValue(':token', $token, SQLITE3_TEXT);
         $result = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
 
@@ -35,15 +35,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $_SESSION['reset_email'] = $result['email'];
         $_SESSION['reset_token'] = $token;
 
-        // Parāda formu jaunās paroles ievadei ar apstiprinājumu un acu ikonas pārslēgšanu
+        // Parāda formu jaunās paroles ievadei
         ?>
         <!DOCTYPE html>
         <html>
         <head>
-            <title>Paroles atiestatīšana</title>
-            <link href="../css/normalize.css" rel="stylesheet" type="text/css">
-            <link href="../css/main.css" rel="stylesheet" type="text/css">
-            <link href="../css/style.css" rel="stylesheet" type="text/css">
+            <title>Admin Paroles atiestatīšana</title>
+            <link href="../../css/normalize.css" rel="stylesheet" type="text/css">
+            <link href="../../css/main.css" rel="stylesheet" type="text/css">
+            <link href="../../css/style.css" rel="stylesheet" type="text/css">
         </head>
         <body>
             <div class="w-users-userformpagewrap full-page-wrapper">
@@ -52,51 +52,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         <h2 class="heading h3">Atiestatiet savu paroli</h2>
                     </div>
                     <form method="post" action="reset-password-process.php">
-                        <div class="form-field" style="margin-bottom: 5px;">
-                            <div style="position: relative;">
-                                <input type="password" id="new_password" name="new_password" class="text-field w-input" placeholder="Ievadiet jauno paroli" required minlength="8">
-                                <span id="toggle-new-password" style="cursor: pointer; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);">
-                                    <img src="../images/eye-icon.png" alt="Show Password" id="eye-icon-new" style="width: 20px; height: 20px;">
-                                </span>
-                            </div>
-                        </div>
-                        <div class="form-field" style="margin-bottom: 5px;">
-                            <div style="position: relative;">
-                                <input type="password" id="confirm_password" name="confirm_password" class="text-field w-input" placeholder="Apstipriniet jauno paroli" required minlength="8">
-                                <span id="toggle-confirm-password" style="cursor: pointer; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);">
-                                    <img src="../images/eye-icon.png" alt="Show Password" id="eye-icon-confirm" style="width: 20px; height: 20px;">
-                                </span>
-                            </div>
-                        </div>
+                <div class="form-field" style="margin-bottom: 5px;">
+                    <div style="position: relative;">
+                        <input type="password" id="new_password" name="new_password" class="text-field w-input" placeholder="Ievadiet jauno paroli" required minlength="8">
+                        <span id="toggle-new-password" style="cursor: pointer; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);">
+                            <img src="../../images/eye-icon.png" alt="Show Password" id="eye-icon-new" style="width: 20px; height: 20px;">
+                        </span>
+                    </div>
+                </div>
+                <div class="form-field" style="margin-bottom: 5px;">
+                    <div style="position: relative;">
+                        <input type="password" id="confirm_password" name="confirm_password" class="text-field w-input" placeholder="Apstipriniet jauno paroli" required minlength="8">
+                        <span id="toggle-confirm-password" style="cursor: pointer; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);">
+                            <img src="../../images/eye-icon.png" alt="Show Password" id="eye-icon-confirm" style="width: 20px; height: 20px;">
+                        </span>
+                    </div>
+                </div>
                         <input type="submit" value="Atiestatīt paroli" class="w-users-userformbutton button w-button">
                     </form>
                 </div>
             </div>
-            <script>
-                document.getElementById('toggle-new-password').addEventListener('click', function() {
-                    const passwordField = document.getElementById('new_password');
-                    const eyeIcon = document.getElementById('eye-icon-new');
-                    if (passwordField.type === 'password') {
-                        passwordField.type = 'text';
-                        eyeIcon.src = '../images/eye-close.png';
-                    } else {
-                        passwordField.type = 'password';
-                        eyeIcon.src = '../images/eye-icon.png';
-                    }
-                });
-                document.getElementById('toggle-confirm-password').addEventListener('click', function() {
-                    const passwordField = document.getElementById('confirm_password');
-                    const eyeIcon = document.getElementById('eye-icon-confirm');
-                    if (passwordField.type === 'password') {
-                        passwordField.type = 'text';
-                        eyeIcon.src = '../images/eye-close.png';
-                    } else {
-                        passwordField.type = 'password';
-                        eyeIcon.src = '../images/eye-icon.png';
-                    }
-                });
-            </script>
         </body>
+        <script>
+            document.getElementById('toggle-new-password').addEventListener('click', function() {
+                const passwordField = document.getElementById('new_password');
+                const eyeIcon = document.getElementById('eye-icon-new');
+                if (passwordField.type === 'password') {
+                    passwordField.type = 'text';
+                    eyeIcon.src = '../../images/eye-close.png';
+                } else {
+                    passwordField.type = 'password';
+                    eyeIcon.src = '../../images/eye-icon.png';
+                }
+            });
+            document.getElementById('toggle-confirm-password').addEventListener('click', function() {
+                const passwordField = document.getElementById('confirm_password');
+                const eyeIcon = document.getElementById('eye-icon-confirm');
+                if (passwordField.type === 'password') {
+                    passwordField.type = 'text';
+                    eyeIcon.src = '../../images/eye-close.png';
+                } else {
+                    passwordField.type = 'password';
+                    eyeIcon.src = '../../images/eye-icon.png';
+                }
+            });
+        </script>
         </html>
         <?php
         exit;
@@ -124,10 +124,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         <!DOCTYPE html>
         <html>
         <head>
-            <title>Paroles atiestatīšana</title>
-            <link href="../css/normalize.css" rel="stylesheet" type="text/css">
-            <link href="../css/main.css" rel="stylesheet" type="text/css">
-            <link href="../css/style.css" rel="stylesheet" type="text/css">
+            <title>Admin Paroles atiestatīšana</title>
+            <link href="../../css/normalize.css" rel="stylesheet" type="text/css">
+            <link href="../../css/main.css" rel="stylesheet" type="text/css">
+            <link href="../../css/style.css" rel="stylesheet" type="text/css">
             <style>
                 .error-message {
                     color: red;
@@ -149,7 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                             <div style="position: relative;">
                                 <input type="password" id="new_password" name="new_password" class="text-field w-input" placeholder="Ievadiet jauno paroli" required minlength="8">
                                 <span id="toggle-new-password" style="cursor: pointer; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);">
-                                    <img src="../images/eye-icon.png" alt="Show Password" id="eye-icon-new" style="width: 20px; height: 20px;">
+                                    <img src="../../images/eye-icon.png" alt="Show Password" id="eye-icon-new" style="width: 20px; height: 20px;">
                                 </span>
                             </div>
                         </div>
@@ -157,7 +157,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                             <div style="position: relative;">
                                 <input type="password" id="confirm_password" name="confirm_password" class="text-field w-input" placeholder="Apstipriniet jauno paroli" required minlength="8">
                                 <span id="toggle-confirm-password" style="cursor: pointer; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);">
-                                    <img src="../images/eye-icon.png" alt="Show Password" id="eye-icon-confirm" style="width: 20px; height: 20px;">
+                                    <img src="../../images/eye-icon.png" alt="Show Password" id="eye-icon-confirm" style="width: 20px; height: 20px;">
                                 </span>
                             </div>
                         </div>
@@ -171,10 +171,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     const eyeIcon = document.getElementById('eye-icon-new');
                     if (passwordField.type === 'password') {
                         passwordField.type = 'text';
-                        eyeIcon.src = '../images/eye-close.png';
+                        eyeIcon.src = '../../images/eye-close.png';
                     } else {
                         passwordField.type = 'password';
-                        eyeIcon.src = '../images/eye-icon.png';
+                        eyeIcon.src = '../../images/eye-icon.png';
                     }
                 });
                 document.getElementById('toggle-confirm-password').addEventListener('click', function() {
@@ -182,10 +182,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     const eyeIcon = document.getElementById('eye-icon-confirm');
                     if (passwordField.type === 'password') {
                         passwordField.type = 'text';
-                        eyeIcon.src = '../images/eye-close.png';
+                        eyeIcon.src = '../../images/eye-close.png';
                     } else {
                         passwordField.type = 'password';
-                        eyeIcon.src = '../images/eye-icon.png';
+                        eyeIcon.src = '../../images/eye-icon.png';
                     }
                 });
             </script>
@@ -199,10 +199,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $token = $_SESSION['reset_token'];
 
     try {
-        $db = new SQLite3('../Datubazes/client_signup.db');
+        $db = new SQLite3('../../Datubazes/admin_signup.db');
 
-        // Pārbauda, vai tokens joprojām ir derīgs un iegūst pašreizējās paroles hešu
-        $stmt = $db->prepare('SELECT expires_at, password FROM password_resets INNER JOIN clients ON password_resets.email = clients.email WHERE password_resets.token = :token AND password_resets.email = :email');
+        // Pārbauda, vai tokens joprojām ir derīgs
+        $stmt = $db->prepare('SELECT expires_at, password FROM password_resets_admin INNER JOIN admin_signup ON password_resets_admin.email = admin_signup.email WHERE password_resets_admin.token = :token AND password_resets_admin.email = :email');
         $stmt->bindValue(':token', $token, SQLITE3_TEXT);
         $stmt->bindValue(':email', $email, SQLITE3_TEXT);
         $result = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
@@ -227,10 +227,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             <!DOCTYPE html>
             <html>
             <head>
-                <title>Paroles atiestatīšana</title>
-                <link href="../css/normalize.css" rel="stylesheet" type="text/css">
-                <link href="../css/main.css" rel="stylesheet" type="text/css">
-                <link href="../css/style.css" rel="stylesheet" type="text/css">
+                <title>Admin Paroles atiestatīšana</title>
+                <link href="../../css/normalize.css" rel="stylesheet" type="text/css">
+                <link href="../../css/main.css" rel="stylesheet" type="text/css">
+                <link href="../../css/style.css" rel="stylesheet" type="text/css">
                 <style>
                     .error-message {
                         color: red;
@@ -252,7 +252,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                                 <div style="position: relative;">
                                     <input type="password" id="new_password" name="new_password" class="text-field w-input" placeholder="Ievadiet jauno paroli" required minlength="8">
                                     <span id="toggle-new-password" style="cursor: pointer; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);">
-                                        <img src="../images/eye-icon.png" alt="Show Password" id="eye-icon-new" style="width: 20px; height: 20px;">
+                                        <img src="../../images/eye-icon.png" alt="Show Password" id="eye-icon-new" style="width: 20px; height: 20px;">
                                     </span>
                                 </div>
                             </div>
@@ -260,7 +260,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                                 <div style="position: relative;">
                                     <input type="password" id="confirm_password" name="confirm_password" class="text-field w-input" placeholder="Apstipriniet jauno paroli" required minlength="8">
                                     <span id="toggle-confirm-password" style="cursor: pointer; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);">
-                                        <img src="../images/eye-icon.png" alt="Show Password" id="eye-icon-confirm" style="width: 20px; height: 20px;">
+                                        <img src="../../images/eye-icon.png" alt="Show Password" id="eye-icon-confirm" style="width: 20px; height: 20px;">
                                     </span>
                                 </div>
                             </div>
@@ -274,10 +274,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         const eyeIcon = document.getElementById('eye-icon-new');
                         if (passwordField.type === 'password') {
                             passwordField.type = 'text';
-                            eyeIcon.src = '../images/eye-close.png';
+                            eyeIcon.src = '../../images/eye-close.png';
                         } else {
                             passwordField.type = 'password';
-                            eyeIcon.src = '../images/eye-icon.png';
+                            eyeIcon.src = '../../images/eye-icon.png';
                         }
                     });
                     document.getElementById('toggle-confirm-password').addEventListener('click', function() {
@@ -285,10 +285,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         const eyeIcon = document.getElementById('eye-icon-confirm');
                         if (passwordField.type === 'password') {
                             passwordField.type = 'text';
-                            eyeIcon.src = '../images/eye-close.png';
+                            eyeIcon.src = '../../images/eye-close.png';
                         } else {
                             passwordField.type = 'password';
-                            eyeIcon.src = '../images/eye-icon.png';
+                            eyeIcon.src = '../../images/eye-icon.png';
                         }
                     });
                 </script>
@@ -298,20 +298,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             exit;
         }
         
-        // Atjaunina paroli clients tabulā
+        // Atjaunina paroli admin_signup tabulā
         $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
-        $update = $db->prepare('UPDATE clients SET password = :password WHERE email = :email');
+        $update = $db->prepare('UPDATE admin_signup SET password = :password WHERE email = :email');
         $update->bindValue(':password', $hashed_password, SQLITE3_TEXT);
         $update->bindValue(':email', $email, SQLITE3_TEXT);
         $update->execute();
 
-        // Dzēš tokenu no password_resets tabulas
-        $delete = $db->prepare('DELETE FROM password_resets WHERE token = :token');
+        // Dzēš tokenu no password_resets_admin tabulas
+        $delete = $db->prepare('DELETE FROM password_resets_admin WHERE token = :token');
         $delete->bindValue(':token', $token, SQLITE3_TEXT);
         $delete->execute();
 
-        // Notīra sesijas mainīgos un iznīcina sesiju, lai izrakstītu lietotāju no visām cilnēm
+        // Notīra sesijas mainīgos
         unset($_SESSION['reset_email'], $_SESSION['reset_token']);
+        // Iznīcina sesiju, lai izrakstītu lietotāju no visām cilnēm
         session_destroy();
 
         ?>
@@ -348,7 +349,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         </head>
         <body>
             <div class="success-message">
-                Jūsu parole ir veiksmīgi atiestatīta. Tagad varat <a href="../log-in.php">pieteikties</a>.
+                Jūsu parole ir veiksmīgi atiestatīta. Tagad varat <a href="../adminlogin.html">pieteikties</a>.
             </div>
         </body>
         </html>
