@@ -15,7 +15,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $productId = $_POST['id'];
         $nosaukums = $_POST['nosaukums'];
         $apraksts = $_POST['apraksts'];
-        $kategorija = $_POST['kategorija']; // Ensure this matches "KrasosanasApgerbs"
+        $kategorija = $_POST['kategorija']; 
         $cena = $_POST['cena'];
         $quantity = $_POST['quantity'];
         $sizes = isset($_POST['sizes']) ? implode(',', $_POST['sizes']) : null;

@@ -76,7 +76,7 @@ try {
             background-color: #f0f0f0;
         }
 
-        .logout-button, .toggle-button {
+.logout-button, .toggle-button {
             display: inline-block;
             padding: 12px 24px;
             margin: 10px;
@@ -88,7 +88,17 @@ try {
             font-weight: bold;
         }
 
-        .logout-button:hover, .toggle-button:hover {
+        .logout-button {
+            background-color: #dc3545; /* red */
+        }
+
+        .logout-button:hover {
+            background-color: #c82333; /* darker red */
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-button:hover {
             background-color: #555;
             transform: scale(1.05);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
@@ -170,6 +180,7 @@ try {
             color: white;
             border: none;
             padding: 5px 10px;
+            margin-top: 10px;
             border-radius: 4px;
             cursor: pointer;
         }
@@ -347,8 +358,72 @@ try {
             <th>Darbības</th>
         </tr>
         </thead>
-        <tbody>
+<tbody>
         </tbody>
+</table>
+
+<style>
+.size-badge {
+    display: inline-block;
+    background-color: #2c3e50;
+    color: white;
+    padding: 3px 8px;
+    margin: 2px 3px;
+    border-radius: 12px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+#product-table td:nth-child(8) {
+    max-width: 110px;
+    white-space: normal;
+    word-wrap: break-word;
+}
+</style>
+
+<script>
+fetch('get_products.php')
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const products = data.products.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); // Sort by newest
+            const tbody = document.querySelector("#product-table tbody");
+            tbody.innerHTML = ''; // Clear existing rows
+            products.forEach(product => {
+                const sizes = product.sizes || '';
+                const sizeArray = sizes.split(/[, ]+/).filter(s => s.trim() !== '');
+                const sizeBadges = sizeArray.map(s => `<span class="size-badge">${s}</span>`).join(' ');
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${product.id}</td>
+                    <td>${product.nosaukums}</td>
+                    <td>${product.apraksts}</td>
+            <td>
+                <img src="../${(function() {
+                    try {
+                        const images = JSON.parse(product.bilde);
+                        if (Array.isArray(images) && images.length > 0) {
+                            return images[0];
+                        }
+                        return product.bilde;
+                    } catch (e) {
+                        return product.bilde;
+                    }
+                })()}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 4px;">
+            </td>
+                    <td>${product.kategorija}</td>
+                    <td>${product.cena}€</td>
+                    <td>${product.quantity}</td>
+                    <td>${sizeBadges || 'Nav norādīts'}</td>
+                    <td>
+                        <a href="productedit.php?id=${product.id}" class="edit-button">Labot</a>
+                        <button class="delete-btn" onclick="deleteProduct(${product.id})">Dzēst</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+    });
+</script>
     </table>
     <?php endif; ?>
 
@@ -1192,8 +1267,8 @@ fetch('get_products.php')
                     <td>${product.quantity}</td>
                     <td>${product.sizes || 'Nav norādīts'}</td>
                     <td>
-                        <a href="productedit.html?id=${product.id}" class="edit-button">Labot</a>
-                        <button class="edit-button" onclick="deleteProduct(${product.id})">Dzēst</button>
+<a href="productedit.php?id=${product.id}" class="edit-button">Labot</a>
+                        <button class="delete-btn" onclick="deleteProduct(${product.id})">Dzēst</button>
                     </td>
                 `;
                 tbody.appendChild(row);
@@ -1207,14 +1282,14 @@ fetch('get_subscribers.php')
         if (data.success) {
             const subscribers = data.subscribers;
             const tbody = document.querySelector("#subscriber-table tbody");
-            subscribers.forEach(subscriber => {
+subscribers.forEach(subscriber => {
                 const row = document.createElement("tr");
                 row.innerHTML = `
                     <td>${subscriber.id}</td>
                     <td>${subscriber.email}</td>
                     <td>${subscriber.created_at}</td>
                     <td>
-                        <button class="edit-button" onclick="deleteSubscriber(${subscriber.id})">Dzēst</button>
+                        <button class="delete-btn" onclick="deleteSubscriber(${subscriber.id})">Dzēst</button>
                     </td>
                 `;
                 tbody.appendChild(row);
@@ -1228,7 +1303,7 @@ fetch('get_contacts.php')
     if (data.success) {
         const contacts = data.contacts;
         const tbody = document.querySelector("#contact-table tbody");
-        contacts.forEach(contact => {
+contacts.forEach(contact => {
             const row = document.createElement("tr");
             row.innerHTML = `
                 <td>${contact.id}</td>
@@ -1237,7 +1312,7 @@ fetch('get_contacts.php')
                 <td>${contact.email}</td>
                 <td>${contact.message}</td>
                 <td>
-                    <button class="edit-button" onclick="deleteContact(${contact.id})">Dzēst</button>
+                    <button class="delete-btn" onclick="deleteContact(${contact.id})">Dzēst</button>
                 </td>
             `;
             tbody.appendChild(row);

@@ -1,3 +1,10 @@
+<?php
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: adminlogin.html");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,36 +13,39 @@
     <title>Labot Produktu</title>
     <style>
         body {
-            font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #2c3e50, #bdc3c7);
+            background-color: #f5f5f5;
+            font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 20px;
         }
 
-        .form-container {
-            max-width: 800px;
+        .container, .form-container {
+            max-width: 600px;
             margin: 40px auto;
-            padding: 30px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
         h2 {
-            text-align: center;
-            color: #4A4A4A;
+            color: #333;
             margin-bottom: 30px;
+            font-size: 24px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         label {
             display: block;
             margin-bottom: 8px;
-            font-weight: bold;
-            color: #333;
+            color: #444;
+            font-weight: 600;
         }
 
         input[type="text"],
@@ -44,9 +54,17 @@
         select {
             width: 100%;
             padding: 12px;
-            border: 2px solid #007bff;
-            border-radius: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #fafafa;
+            transition: border-color 0.3s ease;
             font-size: 16px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #666;
+            background: white;
         }
 
         textarea {
@@ -56,33 +74,68 @@
 
         .button-group {
             display: flex;
-            justify-content: space-between;
+            gap: 15px;
             margin-top: 30px;
         }
 
-        .submit-btn, .back-btn {
-            padding: 12px 24px;
+        button, .submit-btn, .back-btn {
+            flex: 1;
+            padding: 14px;
             border: none;
-            border-radius: 5px;
+            border-radius: 4px;
             cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
         }
 
         .submit-btn {
-            background-color: #28a745;
+            background-color: #333;
             color: white;
         }
 
+        .submit-btn:hover {
+            background-color: #444;
+        }
+
         .back-btn {
-            background-color: #6c757d;
+            background-color: #666;
             color: white;
             text-decoration: none;
+            text-align: center;
+            display: inline-block;
+        }
+
+        .back-btn:hover {
+            background-color: #555;
         }
 
         .current-image {
             max-width: 200px;
             margin: 10px 0;
+        }
+
+        #sizes-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        #sizes-container div {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fafafa;
+            font-size: 14px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        #sizes-container input[type="checkbox"] {
+            margin: 0;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -107,7 +160,7 @@
                     <option value="Cimdi">Cimdi</option>
                     <option value="Apavi">Apavi</option>
                     <option value="Apgerbs">Apģērbs</option>
-                    <option value="Drosibas-sistemas">Drošības sistēmas</option> <!-- Ensure this matches the value in the database -->
+                    <option value="Drosibas-sistemas">Drošības sistēmas</option>
                     <option value="Gazmaskas">Gazmaskas</option>
                     <option value="Arapgerbs">Augstas redzamības apgerbs</option>
                     <option value="Austinas_kiveres_brilles">Austinas,kiveres,brilles</option>
@@ -132,7 +185,7 @@
             <div class="form-group" id="sizes-section" style="display: none;">
                 <label>Izmēri:</label>
                 <div id="sizes-container">
-                    <!-- Checkboxes will be dynamically populated based on the selected category -->
+                    
                 </div>
             </div>
 
@@ -171,7 +224,7 @@
 
         categoryElement.addEventListener('change', function () {
             const selectedCategory = this.value.toLowerCase();
-            sizesContainer.innerHTML = ''; // Clear previous checkboxes
+            sizesContainer.innerHTML = ''; // Notīra iepriekš atzīmētās izvēles rūtiņas
 
             if (sizesForCategories[selectedCategory]) {
                 sizesSection.style.display = 'block';
@@ -207,7 +260,7 @@
                     document.getElementById('cena').value = data.product.cena;
                     document.getElementById('quantity').value = data.product.quantity;
 
-                    // Correctly set the old image path
+                    // Pareizi iestata vecā attēla ceļu
                     if (data.product.bilde) {
                         document.getElementById('currentImage').src = '../' + data.product.bilde;
                         document.getElementById('currentImage').alt = data.product.nosaukums;
@@ -236,6 +289,14 @@
                             const wrapper = document.createElement('div');
                             wrapper.appendChild(checkbox);
                             wrapper.appendChild(label);
+
+                            // Uztaisa kad visu kasti var klikšķinat
+                            wrapper.style.cursor = 'pointer';
+                            wrapper.addEventListener('click', function(e) {
+                                if (e.target !== checkbox && e.target.tagName.toLowerCase() !== 'label') {
+                                    checkbox.checked = !checkbox.checked;
+                                }
+                            });
 
                             sizesContainer.appendChild(wrapper);
                         });

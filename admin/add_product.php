@@ -9,7 +9,6 @@ require_once 'auth_check.php'; // Pārbauda, vai lietotājs ir autorizēts
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Pievienot Produktu</title>
     <style>
-        /* Stila noteikumi lapas izkārtojumam un dizainam */
         body {
             background-color: #f5f5f5;
             font-family: 'Arial', sans-serif;
@@ -118,6 +117,30 @@ require_once 'auth_check.php'; // Pārbauda, vai lietotājs ir autorizēts
             background-color: #f0f0f0;
             border-color: #4a4a4a;
             color: #4a4a4a;
+        }
+
+        #sizes-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        #sizes-container div {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fafafa;
+            font-size: 14px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        #sizes-container input[type="checkbox"] {
+            margin: 0;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -236,6 +259,14 @@ require_once 'auth_check.php'; // Pārbauda, vai lietotājs ir autorizēts
                     const wrapper = document.createElement('div');
                     wrapper.appendChild(checkbox);
                     wrapper.appendChild(label);
+
+                    // Padara visu aploku klikšķināmu, lai pārslēgtu izvēles rūtiņu
+                    wrapper.style.cursor = 'pointer';
+                    wrapper.addEventListener('click', function(e) {
+                        if (e.target !== checkbox && e.target.tagName.toLowerCase() !== 'label') {
+                            checkbox.checked = !checkbox.checked;
+                        }
+                    });
 
                     sizesContainer.appendChild(wrapper);
                 });

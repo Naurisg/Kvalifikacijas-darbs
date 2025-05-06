@@ -10,197 +10,135 @@ require_once 'auth_check.php';
     <title>Rediģēt Klientu</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary-color: #2563eb;
-            --secondary-color: #1e40af;
-            --success-color: #059669;
-            --danger-color: #dc2626;
-            --background-color: #f3f4f6;
-            --card-background: #ffffff;
-            --text-primary: #1f2937;
-            --text-secondary: #6b7280;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
-
         body {
-            background: var(--background-color);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background-color: #f5f5f5;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
             padding: 20px;
         }
 
-        .edit-form {
-            width: 100%;
+        .container {
             max-width: 600px;
-            background: var(--card-background);
-            border-radius: 16px;
+            margin: 40px auto;
+            background: white;
             padding: 40px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .edit-form::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
         h2 {
-            color: var(--text-primary);
-            font-size: 28px;
-            font-weight: 600;
+            color: #333;
             margin-bottom: 30px;
+            font-size: 24px;
             text-align: center;
-            position: relative;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .form-group {
             margin-bottom: 25px;
-            position: relative;
         }
 
         label {
             display: block;
-            color: var(--text-secondary);
-            font-size: 14px;
-            font-weight: 500;
             margin-bottom: 8px;
-            transition: all 0.3s ease;
+            color: #444;
+            font-weight: 600;
         }
 
-        input {
+        input, select {
             width: 100%;
-            padding: 14px 20px;
-            border: 2px solid #e5e7eb;
-            border-radius: 10px;
-            font-size: 15px;
-            color: var(--text-primary);
-            background: #f9fafb;
-            transition: all 0.3s ease;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #fafafa;
+            transition: border-color 0.3s ease;
         }
 
-        input:focus {
-            border-color: var(--primary-color);
-            background: var(--card-background);
+        input:focus, select:focus {
             outline: none;
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+            border-color: #666;
+            background: white;
         }
 
-        .submit-btn {
-            width: 100%;
-            padding: 16px;
-            background: var(--primary-color);
-            color: white;
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px;
             border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 500;
+            border-radius: 4px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
         }
 
-        .submit-btn:hover {
-            background: var(--secondary-color);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.2);
+        button[type="submit"] {
+            background-color: #333;
+            color: white;
         }
 
-        .submit-btn:active {
-            transform: translateY(0);
+        button[type="submit"]:hover {
+            background-color: #444;
         }
 
-        .error-message {
-            color: var(--danger-color);
-            font-size: 14px;
-            margin-top: 5px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
+        button[type="button"] {
+            background-color: #666;
+            color: white;
         }
 
-        .success-message {
-            color: var(--success-color);
-            font-size: 14px;
-            margin-top: 5px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
+        button[type="button"]:hover {
+            background-color: #555;
         }
 
-        @media (max-width: 640px) {
-            .edit-form {
-                padding: 30px 20px;
-            }
-
-            h2 {
-                font-size: 24px;
-            }
-
-            input {
-                padding: 12px 16px;
-            }
+        .message {
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+            border-left: 4px solid;
         }
 
-        .back-btn {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        padding: 6px 12px;
-        background: #f3f4f6;
-        border: none;
-        border-radius: 6px;
-        color: var(--text-secondary);
-        font-size: 12px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        z-index: 10;
+        .success {
+            background-color: #f0f0f0;
+            border-color: #2d2d2d;
+            color: #2d2d2d;
         }
 
-        .back-btn:hover {
-            background: #e5e7eb;
-            color: var(--text-primary);
+        .error {
+            background-color: #f0f0f0;
+            border-color: #4a4a4a;
+            color: #4a4a4a;
         }
     </style>
 </head>
 <body>
-    <div class="edit-form">
-        <button class="back-btn" onclick="window.location.href='admin-panelis.php'">← Atpakaļ</button>
+    <div class="container">
         <h2>Rediģēt Klienta Datus</h2>
-        <form id="editForm">
+        <form method="POST" action="">
             <div class="form-group">
-                <label for="email">E-pasta Adrese</label>
+                <label for="email">E-pasts:</label>
                 <input type="email" id="email" name="email" required>
             </div>
             <div class="form-group">
-                <label for="name">Vārds</label>
+                <label for="name">Lietotājvārds:</label>
                 <input type="text" id="name" name="name" required>
             </div>
             <div class="form-group">
-                <label for="oldPassword">Pašreizējā Parole</label>
+                <label for="oldPassword">Pašreizējā parole</label>
                 <input type="password" id="oldPassword" name="oldPassword">
-                <div class="password-info">* Nepieciešama tikai paroles maiņai</div>
             </div>
             <div class="form-group">
-                <label for="password">Jaunā Parole</label>
+                <label for="password">Jaunā parole</label>
                 <input type="password" id="password" name="password">
-                <div class="password-info">* Atstāt tukšu, ja nevēlaties mainīt paroli</div>
             </div>
-            <button type="submit" class="submit-btn">Saglabāt Izmaiņas</button>
+            <div class="button-group">
+                <button type="submit">Saglabāt izmaiņas</button>
+                <button type="button" onclick="window.location.href='admin-panelis.php'">Atgriezties uz administrācijas paneli</button>
+            </div>
         </form>
     </div>
 
@@ -218,15 +156,11 @@ require_once 'auth_check.php';
                     }
                 });
 
-            document.getElementById('editForm').addEventListener('submit', function(e) {
+            document.querySelector('form').addEventListener('submit', function(e) {
                 e.preventDefault();
 
-                const formData = new FormData();
+                const formData = new FormData(this);
                 formData.append('id', clientId);
-                formData.append('email', document.getElementById('email').value);
-                formData.append('name', document.getElementById('name').value);
-                formData.append('oldPassword', document.getElementById('oldPassword').value);
-                formData.append('password', document.getElementById('password').value);
 
                 fetch('update_client.php', {
                     method: 'POST',
