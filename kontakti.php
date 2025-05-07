@@ -20,12 +20,25 @@
                 <div class="field-block"><label for="Email">E-pasts*</label><input class="text-field w-input" maxlength="256" name="Email" data-name="Email" placeholder="vissdarbam@email.com" type="email" id="Email" required=""></div>
                 <div class="field-block"><label for="Message">Tava ziņa</label><textarea placeholder="Raksti šeit....." maxlength="5000" data-name="Message" name="Message" id="Message" required="" class="text-area w-input"></textarea></div><input type="submit" data-wait="Lūdzu uzgaidiet.." class="button no-margin w-button" value="Nosūtīt!">
               </form>
-              <div class="form-success w-form-done">
-                <div>Your request has been submitted and we will get to you shortly.</div>
-              </div>
-              <div class="form-error w-form-fail">
-                <div>Oops! Something went wrong. Please fill in the required fields and try again.</div>
-              </div>
+              <div id="contact-message" style="margin-top:10px; font-weight:bold;"></div>
+              <script>
+                (function() {
+                  function getQueryParam(param) {
+                    var urlParams = new URLSearchParams(window.location.search);
+                    return urlParams.get(param);
+                  }
+                  var messageDiv = document.getElementById('contact-message');
+                  var success = getQueryParam('success');
+                  var error = getQueryParam('error');
+                  if (success === '1') {
+                    messageDiv.style.color = 'green';
+                    messageDiv.textContent = 'Jūsu ziņa ir veiksmīgi nosūtīta! Mēs ar jums sazināsimies drīz.';
+                  } else if (error === '1') {
+                    messageDiv.style.color = 'red';
+                    messageDiv.textContent = 'Radās kļūda, lūdzu mēģiniet vēlreiz.';
+                  }
+                })();
+              </script>
             </div>
           </div>
         </div>

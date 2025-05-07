@@ -359,19 +359,54 @@
           <p class="text large">Sekojiet jaunumiem par produktiem un saņemiet jaunākos piedāvājumus!</p>
           <div class="spacer _16"></div>
           <div class="email-form center-align w-form">
-            <form id="subscribe-form" name="wf-form-Subscribe-Form" data-name="Subscribe Form" method="get" class="email-form" data-wf-page-id="66f12005df0203b01c953eb0" data-wf-element-id="4b7eae9c-8abc-9b14-e6a2-0d470afd457b">
-              <div class="email-subscribe">
-                  <input class="text-field no-margin w-input" maxlength="256" name="Email-2" data-name="Email 2" placeholder="Ievadiet savu e-pastu" type="email" id="subscribe-email" required="">
-                  <input type="submit" data-wait="Lūdzu uzgaidiet..." class="button dark w-button" value="Abonēt">
-              </div>
-          </form>
+<form id="subscribe-form" name="wf-form-Subscribe-Form" data-name="Subscribe Form" method="post" action="subscribe.php" class="email-form" data-wf-page-id="66f12005df0203b01c953eb0" data-wf-element-id="4b7eae9c-8abc-9b14-e6a2-0d470afd457b">
+  <div class="email-subscribe">
+      <input class="text-field no-margin w-input" maxlength="256" name="email" data-name="Email 2" placeholder="Ievadiet savu e-pastu" type="email" id="subscribe-email" required="">
+      <input type="submit" data-wait="Lūdzu uzgaidiet..." class="button dark w-button" value="Abonēt">
+  </div>
+</form>
+<div id="subscribe-message" style="margin-top:10px; font-weight:bold;"></div>
+<script>
+document.getElementById('subscribe-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+    var emailInput = document.getElementById('subscribe-email');
+    var email = emailInput.value;
+    var messageDiv = document.getElementById('subscribe-message');
+    messageDiv.textContent = '';
+    if (!email) {
+        messageDiv.textContent = 'Lūdzu ievadiet derīgu e-pastu.';
+        return;
+    }
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'subscribe.php', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                try {
+                    var response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        messageDiv.style.color = 'green';
+                        messageDiv.textContent = response.message;
+                        emailInput.value = '';
+                    } else {
+                        messageDiv.style.color = 'red';
+                        messageDiv.textContent = response.message;
+                    }
+                } catch (e) {
+                    messageDiv.style.color = 'red';
+                    messageDiv.textContent = 'Radās kļūda apstrādājot atbildi.';
+                }
+            } else {
+                messageDiv.style.color = 'red';
+                messageDiv.textContent = 'Radās kļūda nosūtot pieprasījumu.';
+            }
+        }
+    };
+    xhr.send('email=' + encodeURIComponent(email));
+});
+</script>
           
-            <div class="form-success dark w-form-done">
-              <div>You&#x27;re all signed up.</div>
-            </div>
-            <div class="w-form-fail">
-              <div>Oops! Something went wrong while submitting the form.</div>
-            </div>
           </div>
         </div>
       </div>

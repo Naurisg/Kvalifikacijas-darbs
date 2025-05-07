@@ -27,11 +27,13 @@ try {
     $stmt->execute();
 
     // Pārvirza uz veiksmes lapu
-    header("Location: kontakti.html?success=1");
+    header("Location: kontakti.php?success=1");
+    exit();
 } catch (PDOException $e) {
     // Pārvirza uz kļūdas lapu
-    header("Location: kontakti.html?error=1");
+    header("Location: kontakti.php?error=1");
+    exit();
     // Izvada PDOException kļūdas ziņojumu
-    echo $e->getMessage();
+    // echo $e->getMessage();
 }
 ?>

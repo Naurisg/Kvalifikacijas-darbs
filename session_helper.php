@@ -1,7 +1,30 @@
 <?php
 // Funkcija, kas pārbauda, vai sesijas lietotāja ID eksistē datubāzē
-function validate_session_user() {
+
+// Drošas sesijas startēšanas funkcija
+function secure_session_start() {
+    $secure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
+    $httponly = true;
+
+// Izmanto stingro režīmu, lai novērstu neinicializētu sesijas ID izmantošanu
+    ini_set('session.use_strict_mode', 1);
+
+//sesijas sīkdatnes parametri
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'domain' => $_SERVER['HTTP_HOST'],
+        'secure' => $secure,
+        'httponly' => $httponly,
+        'samesite' => 'Lax' 
+    ]);
+
     session_start();
+}
+
+// Aizstāj session_start() izsaukumus šajā failā ar secure_session_start()
+function validate_session_user() {
+    secure_session_start();
     // Ja sesijas lietotāja ID nav iestatīts, pāradresē uz pieteikšanās lapu
     if (!isset($_SESSION['user_id'])) {
         header("Location: log-in.php");
