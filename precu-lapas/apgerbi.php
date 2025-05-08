@@ -44,6 +44,7 @@
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         let allProducts = [];
+        let currentProduct = null;
         
         fetch('fetch_category_products.php?category=Apgerbs')
             .then(response => response.json())
@@ -96,17 +97,17 @@
 
             products.forEach(product => {
                 container.innerHTML += `
-                    <div class="product-card" onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">
-                        <img src="../${product.bilde}" alt="${product.nosaukums}">
+                    <div class="product-card">
+                        <img src="../${product.bilde}" alt="${product.nosaukums}" onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">
                         <div class="product-info">
-                            <h3>${product.nosaukums}</h3>
-                            <p>${product.apraksts}</p>
-                            <p class="price">€${product.cena}</p>
+                            <h3 onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">${product.nosaukums}</h3>
+                            <p onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">${product.apraksts}</p>
+                            <p class="price" onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">€${product.cena}</p>
                             <div class="product-buttons">
-                                <button class="add-to-cart" onclick="addToCart(${product.id}); event.stopPropagation();">
+                                <button class="add-to-cart" onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')}, true)">
                                     <i class="fas fa-shopping-cart"></i>
                                 </button>
-                                <button class="buy-now" onclick="buyNow(${product.id}); event.stopPropagation();">Pirkt tagad</button>
+                                <button class="buy-now" onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')}, true)">Pirkt tagad</button>
                             </div>
                         </div>
                     </div>
@@ -115,9 +116,10 @@
         }
     });
 
-    function showProductModal(product) {
+    function showProductModal(product, focusOnAddToCart = false) {
         const modal = document.getElementById('product-modal');
         const modalBody = modal.querySelector('.modal-body');
+        currentProduct = product;
         
         modalBody.innerHTML = `
             <div class="modal-product-details">
@@ -139,16 +141,21 @@
                         <input type="number" id="quantity-input" min="1" max="${product.quantity}" value="1">
                     </div>
                     <div class="modal-buttons">
-                        <button class="add-to-cart" onclick="addToCart(${product.id});">
+                        <button class="add-to-cart" onclick="addToCart()">
                             <i class="fas fa-shopping-cart"></i>
                         </button>
-                        <button class="buy-now" onclick="buyNow(${product.id});">Pirkt tagad</button>
+                        <button class="buy-now" onclick="buyNow()">Pirkt tagad</button>
                     </div>
                 </div>
             </div>
         `;
         
         modal.style.display = 'block';
+        
+        if (focusOnAddToCart) {
+            const addToCartBtn = modal.querySelector('.add-to-cart');
+            addToCartBtn.focus();
+        }
     }
 
     document.addEventListener('click', function(event) {
@@ -158,11 +165,13 @@
         }
     });
 
-    function addToCart(productId) {
-        const selectedSize = document.getElementById('size-select').value || 'Nav norādīts';
+    function addToCart() {
+        if (!currentProduct) return;
+        
+        const selectedSize = document.getElementById('size-select')?.value || 'Nav norādīts';
         const quantityInput = document.getElementById('quantity-input');
-        const quantity = parseInt(quantityInput.value, 10) || 1;
-        const maxQuantity = parseInt(quantityInput.max, 10);
+        const quantity = quantityInput ? parseInt(quantityInput.value, 10) || 1 : 1;
+        const maxQuantity = quantityInput ? parseInt(quantityInput.max, 10) : Infinity;
 
         if (quantity > maxQuantity) {
             alert(`Maksimālais pieejamais daudzums ir ${maxQuantity}.`);
@@ -174,12 +183,17 @@
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ id: productId, size: selectedSize, quantity: quantity }),
+            body: JSON.stringify({ 
+                id: currentProduct.id, 
+                size: selectedSize, 
+                quantity: quantity 
+            }),
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 alert('Produkts pievienots grozam!');
+                document.getElementById('product-modal').style.display = 'none';
             } else {
                 alert(data.message || 'Kļūda pievienojot produktu grozam.');
             }
@@ -190,8 +204,43 @@
         });
     }
 
-    function buyNow(productId) {
-        console.log('Buying product:', productId);
+    function buyNow() {
+        if (!currentProduct) return;
+        
+        const selectedSize = document.getElementById('size-select')?.value || 'Nav norādīts';
+        const quantityInput = document.getElementById('quantity-input');
+        const quantity = quantityInput ? parseInt(quantityInput.value, 10) || 1 : 1;
+        const maxQuantity = quantityInput ? parseInt(quantityInput.max, 10) : Infinity;
+
+        if (quantity > maxQuantity) {
+            alert(`Maksimālais pieejamais daudzums ir ${maxQuantity}.`);
+            return;
+        }
+
+        // First add to cart, then redirect to checkout
+        fetch('/Vissdarbam/grozs/add_to_cart.php', { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+                id: currentProduct.id, 
+                size: selectedSize, 
+                quantity: quantity 
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = '/Vissdarbam/grozs/adress.php';
+            } else {
+                alert(data.message || 'Kļūda pievienojot produktu grozam.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Kļūda pievienojot produktu grozam.');
+        });
     }
     </script>
 </body>
