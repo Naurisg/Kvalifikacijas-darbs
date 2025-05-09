@@ -38,6 +38,7 @@ TO DO:
 - [x] Izveidot kad admins vai moderators var pievienot jaunus produktus
 - [ ] pievienot visus produktu aprakstus
 - [ ] Salikt produktus
+- [x] Vairāku attēlu pievienošana veidojot produktu
 - [x] Pievienot klienta login
 - [x] Pielikt opciju pievienot grozam
 - [x] Pievienot opciju nopirkt preci
