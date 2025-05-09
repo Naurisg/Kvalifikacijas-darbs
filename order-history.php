@@ -748,6 +748,9 @@ unset($order);
                     products = JSON.parse(products);
                 }
                 products.forEach(product => {
+                    const images = product.bilde ? product.bilde.split(',') : []; // Handle multiple images
+                    const firstImage = images.length > 0 ? images[0].trim() : 'placeholder.jpg'; // Use the first image or fallback
+
                     const itemPrice = parseFloat(product.cena) || 0;
                     const quantity = parseInt(product.quantity) || 0;
                     const itemTotal = itemPrice * quantity;
@@ -755,7 +758,7 @@ unset($order);
                     
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td><img src="${product.bilde || 'placeholder.jpg'}" alt="${product.nosaukums}"></td>
+                        <td><img src="${firstImage}" alt="${product.nosaukums}" style="max-width: 60px; max-height: 60px; object-fit: contain;"></td>
                         <td>${product.nosaukums}</td>
                         <td>${quantity}</td>
                         <td>${product.size || 'N/A'}</td>

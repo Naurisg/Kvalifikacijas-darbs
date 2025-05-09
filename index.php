@@ -123,15 +123,6 @@
         align-items: flex-start;
     }
 
-    .modal-product-details img {
-        width: 300px;
-        height: 300px;
-        object-fit: contain;
-        border-radius: 8px;
-        background: #f5f5f5;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    }
-
     .modal-product-info {
         flex: 1;
         display: flex;
@@ -221,6 +212,35 @@
 
     .modal-buttons .add-to-cart:hover {
         color: gray;
+    }
+
+    .modal-carousel {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .carousel-images {
+        display: flex;
+        position: relative;
+    }
+
+    .carousel-image {
+        transition: opacity 0.3s ease;
+    }
+
+    .carousel-btn {
+        background-color: #333;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+        border-radius: 4px;
+        font-size: 12px;
+    }
+
+    .carousel-btn:hover {
+        background-color: #555;
     }
   </style>
 </head>
@@ -425,9 +445,19 @@ function showProductModal(product) {
     const modalBody = modal.querySelector('.modal-body');
     currentProduct = product;
 
+    const images = product.bilde.split(',');
+
     modalBody.innerHTML = `
         <div class="modal-product-details">
-            <img src="${product.bilde}" alt="${product.nosaukums}">
+            <div class="modal-carousel">
+                ${images.length > 1 ? `<button class="carousel-btn prev-btn" onclick="showPrevModalImage()">&#9664;</button>` : ''}
+                <div class="carousel-images">
+                    ${images.map((image, index) => `
+                        <img src="${image}" class="carousel-image" style="display: ${index === 0 ? 'block' : 'none'}; width: 300px; height: 300px; object-fit: contain; border-radius: 8px;">
+                    `).join('')}
+                </div>
+                ${images.length > 1 ? `<button class="carousel-btn next-btn" onclick="showNextModalImage()">&#9654;</button>` : ''}
+            </div>
             <div class="modal-product-info">
                 <h2>${product.nosaukums}</h2>
                 <p class="modal-description">${product.apraksts}</p>
@@ -458,16 +488,38 @@ function showProductModal(product) {
     modal.style.display = 'flex';
 }
 
+function showPrevModalImage() {
+    const carousel = document.querySelector('.modal-carousel .carousel-images');
+    const images = carousel.querySelectorAll('.carousel-image');
+    let currentIndex = Array.from(images).findIndex(img => img.style.display === 'block');
+    images[currentIndex].style.display = 'none';
+    currentIndex = (currentIndex - 1 + images.length) % images.length;
+    images[currentIndex].style.display = 'block';
+}
+
+function showNextModalImage() {
+    const carousel = document.querySelector('.modal-carousel .carousel-images');
+    const images = carousel.querySelectorAll('.carousel-image');
+    let currentIndex = Array.from(images).findIndex(img => img.style.display === 'block');
+    images[currentIndex].style.display = 'none';
+    currentIndex = (currentIndex + 1) % images.length;
+    images[currentIndex].style.display = 'block';
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     fetch('fetch_latest_products.php')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 const container = document.getElementById('latest-products-container');
+                container.innerHTML = ''; // Clear container before adding products
                 data.products.forEach(product => {
+                    const images = product.bilde ? product.bilde.split(',') : []; // Handle multiple images or empty field
+                    const firstImage = images.length > 0 ? images[0].trim() : 'images/placeholder.png'; // Fallback to placeholder if no image
+
                     container.innerHTML += `
                         <div class="product-card" onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">
-                            <img src="${product.bilde}" loading="lazy" alt="${product.nosaukums}">
+                            <img src="${firstImage}" loading="lazy" alt="${product.nosaukums}">
                             <div class="product-info">
                                 <h3>${product.nosaukums}</h3>
                                 <p>${product.apraksts}</p>
@@ -476,14 +528,19 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <button class="add-to-cart" onclick="event.stopPropagation(); showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">
                                         <i class="fas fa-shopping-cart"></i>
                                     </button>
+                                    <button class="buy-now" onclick="event.stopPropagation(); showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')}, true)">
+                                        Pirkt tagad
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     `;
                 });
+            } else {
+                console.error('Failed to fetch products:', data.message);
             }
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => console.error('Error fetching products:', error));
 
     document.addEventListener('click', function(event) {
         const modal = document.getElementById('product-modal');
@@ -516,6 +573,38 @@ function addToCart() {
         if (data.success) {
             alert('Produkts pievienots grozam!');
             document.getElementById('product-modal').style.display = 'none';
+        } else {
+            alert(data.message || 'Kļūda pievienojot produktu grozam.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Kļūda pievienojot produktu grozam.');
+    });
+}
+
+function buyNow() {
+    if (!currentProduct) return;
+
+    const selectedSize = document.getElementById('size-select')?.value || 'Nav norādīts';
+    const quantityInput = document.getElementById('quantity-input');
+    const quantity = quantityInput ? parseInt(quantityInput.value, 10) || 1 : 1;
+
+    fetch('/Vissdarbam/grozs/add_to_cart.php', { 
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+            id: currentProduct.id, 
+            size: selectedSize, 
+            quantity: quantity 
+        }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = '/Vissdarbam/grozs/adress.php';
         } else {
             alert(data.message || 'Kļūda pievienojot produktu grozam.');
         }

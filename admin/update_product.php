@@ -20,65 +20,60 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $quantity = $_POST['quantity'];
         $sizes = isset($_POST['sizes']) ? implode(',', $_POST['sizes']) : null;
 
-        // Validate required fields
+        // Pārbauda obligātos laukus
         if (empty($productId) || empty($nosaukums) || empty($apraksts) || empty($kategorija) || empty($cena) || empty($quantity)) {
             throw new Exception("Visi lauki ir obligāti jāaizpilda.");
         }
 
-        // Handle image upload if new image is provided
-        if (isset($_FILES['bilde']) && $_FILES['bilde']['error'] === 0) {
-            $fileName = time() . '_' . basename($_FILES['bilde']['name']);
-            $uploadDir = '../images/products/';
-            $filePath = $uploadDir . $fileName;
+        // Iegūst pašreizējos attēlus no datubāzes
+        $stmt = $db->prepare("SELECT bilde FROM products WHERE id = :id");
+        $stmt->execute([':id' => $productId]);
+        $oldProduct = $stmt->fetch(PDO::FETCH_ASSOC);
+        $currentImages = $oldProduct ? explode(',', $oldProduct['bilde']) : [];
 
-            // Ensure the upload directory exists
+        // Apstrādā attēlu augšupielādi, ja ir pievienoti jauni attēli
+        $uploadedImages = [];
+        $uploadDir = '../images/products/';
+
+        if (isset($_FILES['bilde']) && !empty($_FILES['bilde']['name'][0])) {
+            // Pārliecinās, ka augšupielādes direktorija pastāv
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0777, true);
             }
 
-            // Get old image to delete
-            $stmt = $db->prepare("SELECT bilde FROM products WHERE id = :id");
-            $stmt->execute([':id' => $productId]);
-            $oldProduct = $stmt->fetch(PDO::FETCH_ASSOC);
+            foreach ($_FILES['bilde']['tmp_name'] as $key => $tmp_name) {
+                if ($_FILES['bilde']['error'][$key] === 0) {
+                    $fileName = time() . '_' . basename($_FILES['bilde']['name'][$key]);
+                    $filePath = $uploadDir . $fileName;
 
-            if (move_uploaded_file($_FILES['bilde']['tmp_name'], $filePath)) {
-                // Delete old image
-                if ($oldProduct && $oldProduct['bilde']) {
-                    $oldImagePath = '../' . $oldProduct['bilde'];
-                    if (file_exists($oldImagePath)) {
-                        unlink($oldImagePath);
+                    if (move_uploaded_file($tmp_name, $filePath)) {
+                        $uploadedImages[] = 'images/products/' . $fileName;
                     }
                 }
-
-                $sql = "UPDATE products SET nosaukums = :nosaukums, apraksts = :apraksts, 
-                        kategorija = :kategorija, cena = :cena, quantity = :quantity, sizes = :sizes, bilde = :bilde 
-                        WHERE id = :id";
-                $params = [
-                    ':nosaukums' => $nosaukums,
-                    ':apraksts' => $apraksts,
-                    ':kategorija' => $kategorija,
-                    ':cena' => $cena,
-                    ':quantity' => $quantity,
-                    ':sizes' => $sizes,
-                    ':bilde' => 'images/products/' . $fileName,
-                    ':id' => $productId
-                ];
-            } else {
-                throw new Exception("Neizdevās augšupielādēt jauno attēlu.");
             }
-        } else {
-            $sql = "UPDATE products SET nosaukums = :nosaukums, apraksts = :apraksts, 
-                    kategorija = :kategorija, cena = :cena, quantity = :quantity, sizes = :sizes WHERE id = :id";
-            $params = [
-                ':nosaukums' => $nosaukums,
-                ':apraksts' => $apraksts,
-                ':kategorija' => $kategorija,
-                ':cena' => $cena,
-                ':quantity' => $quantity,
-                ':sizes' => $sizes,
-                ':id' => $productId
-            ];
         }
+
+        // Apvieno esošos attēlus ar jaunajiem (vai izmanto tikai jaunos, ja tiek aizstāti)
+        $allImages = !empty($uploadedImages) ? $uploadedImages : $currentImages;
+        
+        // $allImages = !empty($uploadedImages) ? $uploadedImages : $currentImages;
+        
+        $imagesString = implode(',', $allImages);
+
+        $sql = "UPDATE products SET nosaukums = :nosaukums, apraksts = :apraksts, 
+                kategorija = :kategorija, cena = :cena, quantity = :quantity, sizes = :sizes, bilde = :bilde 
+                WHERE id = :id";
+        
+        $params = [
+            ':nosaukums' => $nosaukums,
+            ':apraksts' => $apraksts,
+            ':kategorija' => $kategorija,
+            ':cena' => $cena,
+            ':quantity' => $quantity,
+            ':sizes' => $sizes,
+            ':bilde' => $imagesString,
+            ':id' => $productId
+        ];
 
         $stmt = $db->prepare($sql);
         $stmt->execute($params);

@@ -14,7 +14,7 @@ try {
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($user && password_verify($password, $user['password'])) {
-        session_regenerate_id(true); // Regenerate session ID to prevent session fixation
+        session_regenerate_id(true); 
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['user_email'] = $user['email'];
         echo json_encode(['success' => true, 'redirect' => 'index.html']);

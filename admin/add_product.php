@@ -142,6 +142,79 @@ require_once 'auth_check.php'; // Pārbauda, vai lietotājs ir autorizēts
             margin: 0;
             cursor: pointer;
         }
+
+        .image-upload-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .image-preview-wrapper {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            border: 1px dashed #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f9f9f9;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .remove-image-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(255,0,0,0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .remove-image-btn:hover {
+            background: rgba(255,0,0,0.9);
+            transform: scale(1.1);
+        }
+
+        .add-image-btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 120px;
+            height: 120px;
+            border: 2px dashed #999;
+            border-radius: 8px;
+            background-color: #f0f0f0;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 24px;
+            color: #666;
+        }
+
+        .add-image-btn:hover {
+            background-color: #e0e0e0;
+            border-color: #666;
+        }
+
+        .hidden-file-input {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -162,13 +235,13 @@ require_once 'auth_check.php'; // Pārbauda, vai lietotājs ir autorizēts
 
             <!-- Produkta attēlu augšupielādes sadaļa -->
             <div class="form-group">
-                <label for="bilde">Bildes:</label>
-                <div id="image-upload-container" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                    <label class="image-upload-label" style="cursor: pointer; font-size: 24px; font-weight: bold; color: #333; border: 1px solid #ddd; width: 100px; height: 100px; display: flex; justify-content: center; align-items: center; background: #fafafa;">
-                        +
-                        <input type="file" name="bilde[]" accept="image/*" onchange="addImage(event)" style="display: none;" />
-                    </label>
+                <label>Bildes:</label>
+                <div class="image-upload-container" id="imageUploadContainer">
+                    <div class="add-image-btn" id="addImageBtn">
+                        + Pievienot bildi
+                    </div>
                 </div>
+                <input type="file" id="bildeInput" name="bilde[]" accept="image/*" multiple class="hidden-file-input" />
             </div>
 
             <!-- Produkta kategorijas izvēles lauks -->
@@ -176,7 +249,6 @@ require_once 'auth_check.php'; // Pārbauda, vai lietotājs ir autorizēts
                 <label for="kategorija">Kategorija:</label>
                 <select id="kategorija" name="kategorija" required>
                     <option value="">Izvēlieties kategoriju</option>
-                    <!-- Kategoriju saraksts -->
                     <option value="Cimdi">Cimdi</option>
                     <option value="Apavi">Apavi</option>
                     <option value="Apgerbs">Apģērbs</option>
@@ -221,64 +293,101 @@ require_once 'auth_check.php'; // Pārbauda, vai lietotājs ir autorizēts
     </div>
 
     <script>
-        // Izmēru sadaļas un kategoriju izvēles funkcionalitāte
-        const sizesSection = document.getElementById('sizes-section');
-        const sizesContainer = document.getElementById('sizes-container');
-        const categoryElement = document.getElementById('kategorija');
-
-        // Izmēru saraksts dažādām kategorijām
-        const sizesForCategories = {
-            cimdi: ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'],
-            apavi: ['35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47', '48'],
-            apgerbs: ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL'],
-            drosibas_sistemas: ['S', 'M', 'L', 'XL', '2XL'],
-            gazmaskas: ['Standarta', 'Liela', 'Maza'],
-            arapgerbs: ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'],
-            jakas: ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL'],
-            krasosanasapgerbs: ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL']
-        };
-
-        // Mainot kategoriju, tiek ģenerēti atbilstošie izmēri
-        categoryElement.addEventListener('change', function () {
-            const selectedCategory = this.value.toLowerCase();
-            sizesContainer.innerHTML = ''; // Notīra iepriekšējos izmērus
-
-            if (sizesForCategories[selectedCategory]) {
-                sizesSection.style.display = 'block';
-                sizesForCategories[selectedCategory].forEach(size => {
-                    const checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.name = 'sizes[]';
-                    checkbox.value = size;
-                    checkbox.id = `size-${size}`;
-
-                    const label = document.createElement('label');
-                    label.htmlFor = `size-${size}`;
-                    label.textContent = size;
-
-                    const wrapper = document.createElement('div');
-                    wrapper.appendChild(checkbox);
-                    wrapper.appendChild(label);
-
-                    // Padara visu aploku klikšķināmu, lai pārslēgtu izvēles rūtiņu
-                    wrapper.style.cursor = 'pointer';
-                    wrapper.addEventListener('click', function(e) {
-                        if (e.target !== checkbox && e.target.tagName.toLowerCase() !== 'label') {
-                            checkbox.checked = !checkbox.checked;
-                        }
-                    });
-
-                    sizesContainer.appendChild(wrapper);
-                });
-            } else {
-                sizesSection.style.display = 'none';
-            }
+        // Attēlu augšupielādes funkcionalitāte
+        const addImageBtn = document.getElementById('addImageBtn');
+        const bildeInput = document.getElementById('bildeInput');
+        const imageUploadContainer = document.getElementById('imageUploadContainer');
+        const form = document.getElementById('addProductForm');
+        
+        // Masīvs, lai saglabātu visus atlasītos failus
+        let selectedFiles = [];
+        
+        // Izsauc faila ievadi, kad tiek noklikšķināts uz pievienošanas pogas
+        addImageBtn.addEventListener('click', () => {
+            bildeInput.click();
         });
-
-        // Forma tiek iesniegta, izmantojot AJAX pieprasījumu
-        document.getElementById('addProductForm').addEventListener('submit', function (e) {
+        
+        // Apstrādā faila atlasi
+        bildeInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            
+            // Pievieno jaunus failus mūsu selectedFiles masīvam
+            selectedFiles = [...selectedFiles, ...files];
+            
+            // Update the preview
+            updateImagePreviews();
+            
+            // Atjauno faila ievadi, lai ļautu atkārtoti atlasīt tos pašus failus
+            bildeInput.value = '';
+        });
+        
+        // Funkcija attēlu priekšskatījumu atjaunināšanai
+        function updateImagePreviews() {
+            // Notīra esošos priekšskatījumus (izņemot pievienošanas pogu)
+            while (imageUploadContainer.firstChild) {
+                imageUploadContainer.removeChild(imageUploadContainer.firstChild);
+            }
+            
+            // Pievieno priekšskatījumu katram atlasītajam failam
+            selectedFiles.forEach((file, index) => {
+                if (!file.type.match('image.*')) return;
+                
+                const reader = new FileReader();
+                
+                reader.onload = (e) => {
+                    const previewWrapper = document.createElement('div');
+                    previewWrapper.className = 'image-preview-wrapper';
+                    previewWrapper.dataset.index = index;
+                    
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'image-preview';
+                    
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'remove-image-btn';
+                    removeBtn.innerHTML = '×';
+                    removeBtn.addEventListener('click', (event) => {
+                        event.stopPropagation();
+                        removeImage(index);
+                    });
+                    
+                    previewWrapper.appendChild(img);
+                    previewWrapper.appendChild(removeBtn);
+                    imageUploadContainer.appendChild(previewWrapper);
+                };
+                
+                reader.readAsDataURL(file);
+            });
+            
+            // Pievieno pievienošanas pogu atpakaļ beigās
+            imageUploadContainer.appendChild(addImageBtn);
+        }
+        
+        // Funkcija attēla dzēšanai
+        function removeImage(index) {
+            selectedFiles.splice(index, 1);
+            updateImagePreviews();
+        }
+        
+        // Apstrādā formas iesniegšanu
+        form.addEventListener('submit', (e) => {
             e.preventDefault();
-            const formData = new FormData(this);
+            
+            // Pārbauda, vai ir izvēlēts vismaz viens attēls
+            if (selectedFiles.length === 0) {
+                alert('Lūdzu, pievienojiet vismaz vienu bildi!');
+                return;
+            }
+            
+            // Izveido FormData un pievieno visus laukus
+            const formData = new FormData(form);
+            
+            // Pievieno visus atlasītos failus
+            selectedFiles.forEach((file, index) => {
+                formData.append('bilde[]', file);
+            });
+            
+            //Nosūta uz serveri
             fetch('save_product.php', {
                 method: 'POST',
                 body: formData
@@ -298,68 +407,56 @@ require_once 'auth_check.php'; // Pārbauda, vai lietotājs ir autorizēts
             });
         });
 
-        // Funkcija attēlu pievienošanai un priekšskatīšanai
-        function addImage(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const container = document.getElementById('image-upload-container');
+        // Izmēra izvēles funkcionalitāte (no sākotnējā koda)
+        const sizesSection = document.getElementById('sizes-section');
+        const sizesContainer = document.getElementById('sizes-container');
+        const categoryElement = document.getElementById('kategorija');
 
-                    // Izveido jaunu attēla priekšskatījuma kvadrātu
-                    const imageWrapper = document.createElement('div');
-                    imageWrapper.style.width = '100px';
-                    imageWrapper.style.height = '100px';
-                    imageWrapper.style.border = '1px solid #ddd';
-                    imageWrapper.style.borderRadius = '4px';
-                    imageWrapper.style.overflow = 'hidden';
-                    imageWrapper.style.position = 'relative';
-                    imageWrapper.style.display = 'flex';
-                    imageWrapper.style.justifyContent = 'center';
-                    imageWrapper.style.alignItems = 'center';
-                    imageWrapper.style.background = '#fafafa';
+        const sizesForCategories = {
+            cimdi: ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'],
+            apavi: ['35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47', '48'],
+            apgerbs: ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL'],
+            'drosibas-sistemas': ['S', 'M', 'L', 'XL', '2XL'],
+            gazmaskas: ['Standarta', 'Liela', 'Maza'],
+            arapgerbs: ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'],
+            jakas: ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL'],
+            krasosanasapgerbs: ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL']
+        };
 
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    img.style.width = '100%';
-                    img.style.height = '100%';
-                    img.style.objectFit = 'cover';
+        categoryElement.addEventListener('change', function() {
+            const selectedCategory = this.value.toLowerCase();
+            sizesContainer.innerHTML = '';
 
-                    // Pievieno pogu attēla noņemšanai
-                    const removeBtn = document.createElement('button');
-                    removeBtn.textContent = '×';
-                    removeBtn.style.position = 'absolute';
-                    removeBtn.style.top = '5px';
-                    removeBtn.style.right = '5px';
-                    removeBtn.style.background = 'rgba(0,0,0,0.5)';
-                    removeBtn.style.color = 'white';
-                    removeBtn.style.border = 'none';
-                    removeBtn.style.borderRadius = '50%';
-                    removeBtn.style.width = '25px';
-                    removeBtn.style.height = '25px';
-                    removeBtn.style.cursor = 'pointer';
-                    removeBtn.style.display = 'none'; // Sākotnēji paslēpta
-                    removeBtn.style.justifyContent = 'center';
-                    removeBtn.style.alignItems = 'center';
-                    removeBtn.onclick = function() {
-                        container.removeChild(imageWrapper);
-                    };
+            if (sizesForCategories[selectedCategory]) {
+                sizesSection.style.display = 'block';
+                sizesForCategories[selectedCategory].forEach(size => {
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.name = 'sizes[]';
+                    checkbox.value = size;
+                    checkbox.id = `size-${size}`;
 
-                    // Parāda noņemšanas pogu, kad pele ir virs attēla
-                    imageWrapper.onmouseover = function() {
-                        removeBtn.style.display = 'flex';
-                    };
-                    imageWrapper.onmouseout = function() {
-                        removeBtn.style.display = 'none';
-                    };
+                    const label = document.createElement('label');
+                    label.htmlFor = `size-${size}`;
+                    label.textContent = size;
 
-                    imageWrapper.appendChild(img);
-                    imageWrapper.appendChild(removeBtn);
-                    container.insertBefore(imageWrapper, container.lastElementChild);
-                };
-                reader.readAsDataURL(file);
+                    const wrapper = document.createElement('div');
+                    wrapper.appendChild(checkbox);
+                    wrapper.appendChild(label);
+
+                    wrapper.style.cursor = 'pointer';
+                    wrapper.addEventListener('click', function(e) {
+                        if (e.target !== checkbox && e.target.tagName.toLowerCase() !== 'label') {
+                            checkbox.checked = !checkbox.checked;
+                        }
+                    });
+
+                    sizesContainer.appendChild(wrapper);
+                });
+            } else {
+                sizesSection.style.display = 'none';
             }
-        }
+        });
     </script>
 </body>
 </html>

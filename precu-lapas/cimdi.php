@@ -8,6 +8,36 @@
     <title>Cimdi | Darba Apģērbi</title>
     <link rel="stylesheet" href="/Vissdarbam/css/style.css">
     <link rel="stylesheet" href="precu.style.css">
+    <style>
+        .modal-carousel {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .carousel-images {
+            display: flex;
+            position: relative;
+        }
+
+        .carousel-image {
+            transition: opacity 0.3s ease;
+        }
+
+        .carousel-btn {
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .carousel-btn:hover {
+            background-color: #555;
+        }
+    </style>
 </head>
 <body>
     <div class="shop-container">
@@ -81,7 +111,7 @@
         function displayProducts(products) {
             const container = document.getElementById('products-container');
             container.innerHTML = '';
-            
+
             if (!document.getElementById('product-modal')) {
                 document.body.insertAdjacentHTML('beforeend', `
                     <div id="product-modal" class="modal" style="display: none;">
@@ -94,9 +124,12 @@
             }
 
             products.forEach(product => {
+                const images = product.bilde.split(','); // Handle multiple images
+                const firstImage = images.length > 0 ? images[0].trim() : 'images/placeholder.png'; // Use the first image or fallback
+
                 container.innerHTML += `
                     <div class="product-card">
-                        <img src="/Vissdarbam/${product.bilde}" alt="${product.nosaukums}" onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">
+                        <img src="/Vissdarbam/${firstImage}" alt="${product.nosaukums}" onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">
                         <div class="product-info">
                             <h3 onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">${product.nosaukums}</h3>
                             <p onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">${product.apraksts}</p>
@@ -118,10 +151,20 @@
         const modal = document.getElementById('product-modal');
         const modalBody = modal.querySelector('.modal-body');
         currentProduct = product;
-        
+
+        const images = product.bilde.split(',');
+
         modalBody.innerHTML = `
             <div class="modal-product-details">
-                <img src="/Vissdarbam/${product.bilde}" alt="${product.nosaukums}">
+                <div class="modal-carousel">
+                    ${images.length > 1 ? `<button class="carousel-btn prev-btn" onclick="showPrevModalImage()">&#9664;</button>` : ''}
+                    <div class="carousel-images">
+                        ${images.map((image, index) => `
+                            <img src="/Vissdarbam/${image.trim()}" class="carousel-image" style="display: ${index === 0 ? 'block' : 'none'}; width: 300px; height: 300px; object-fit: contain; border-radius: 8px;">
+                        `).join('')}
+                    </div>
+                    ${images.length > 1 ? `<button class="carousel-btn next-btn" onclick="showNextModalImage()">&#9654;</button>` : ''}
+                </div>
                 <div class="modal-product-info">
                     <h2>${product.nosaukums}</h2>
                     <p class="modal-description">${product.apraksts}</p>
@@ -154,6 +197,24 @@
             const addToCartBtn = modal.querySelector('.add-to-cart');
             addToCartBtn.focus();
         }
+    }
+
+    function showPrevModalImage() {
+        const carousel = document.querySelector('.modal-carousel .carousel-images');
+        const images = carousel.querySelectorAll('.carousel-image');
+        let currentIndex = Array.from(images).findIndex(img => img.style.display === 'block');
+        images[currentIndex].style.display = 'none';
+        currentIndex = (currentIndex - 1 + images.length) % images.length;
+        images[currentIndex].style.display = 'block';
+    }
+
+    function showNextModalImage() {
+        const carousel = document.querySelector('.modal-carousel .carousel-images');
+        const images = carousel.querySelectorAll('.carousel-image');
+        let currentIndex = Array.from(images).findIndex(img => img.style.display === 'block');
+        images[currentIndex].style.display = 'none';
+        currentIndex = (currentIndex + 1) % images.length;
+        images[currentIndex].style.display = 'block';
     }
 
     document.addEventListener('click', function(event) {

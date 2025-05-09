@@ -398,17 +398,14 @@ fetch('get_products.php')
                     <td>${product.nosaukums}</td>
                     <td>${product.apraksts}</td>
             <td>
-                <img src="../${(function() {
+                ${(function() {
                     try {
-                        const images = JSON.parse(product.bilde);
-                        if (Array.isArray(images) && images.length > 0) {
-                            return images[0];
-                        }
-                        return product.bilde;
+                        const images = product.bilde.split(',');
+                        return images.map(image => `<img src="../${image}" style="width: 50px; height: 50px; object-fit: cover; margin-right: 5px; border-radius: 4px;">`).join('');
                     } catch (e) {
-                        return product.bilde;
+                        return `<img src="../${product.bilde}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">`;
                     }
-                })()}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 4px;">
+                })()}
             </td>
                     <td>${product.kategorija}</td>
                     <td>${product.cena}€</td>
@@ -998,14 +995,17 @@ function showOrderDetails(order) {
     try {
         const products = Array.isArray(order.products) ? order.products : [];
         products.forEach(product => {
+            const images = product.bilde ? product.bilde.split(',') : []; // Handle multiple images
+            const firstImage = images.length > 0 ? images[0].trim() : 'placeholder.jpg'; // Use the first image or fallback
+
             const itemPrice = parseFloat(product.cena || 0);
             const quantity = parseInt(product.quantity || 0);
             const itemTotal = itemPrice * quantity;
             totalPrice += itemTotal;
-            
+
             const row = document.createElement('tr');
             row.innerHTML = `
-<td><img src="../${product.bilde || 'placeholder.jpg'}" alt="${product.nosaukums}" style="max-width: 60px; max-height: 60px; object-fit: contain;"></td>
+                <td><img src="../${firstImage}" alt="${product.nosaukums}" style="max-width: 60px; max-height: 60px; object-fit: contain;"></td>
                 <td>${product.nosaukums || 'N/A'}</td>
                 <td>${quantity}</td>
                 <td>${product.size || 'N/A'}</td>
@@ -1250,17 +1250,14 @@ fetch('get_products.php')
                     <td>${product.nosaukums}</td>
                     <td>${product.apraksts}</td>
             <td>
-                <img src="../${(function() {
+                ${(function() {
                     try {
-                        const images = JSON.parse(product.bilde);
-                        if (Array.isArray(images) && images.length > 0) {
-                            return images[0];
-                        }
-                        return product.bilde;
+                        const images = product.bilde.split(',');
+                        return images.map(image => `<img src="../${image}" style="width: 50px; height: 50px; object-fit: cover; margin-right: 5px; border-radius: 4px;">`).join('');
                     } catch (e) {
-                        return product.bilde;
+                        return `<img src="../${product.bilde}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">`;
                     }
-                })()}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 4px;">
+                })()}
             </td>
                     <td>${product.kategorija}</td>
                     <td>${product.cena}€</td>

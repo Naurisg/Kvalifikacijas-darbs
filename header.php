@@ -353,10 +353,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
           <img src="/Vissdarbam/images/pasutijumi.png" alt="Pasūtījumu vēsture" class="sidebar-icon">
           <span>Pasūtījumu vēsture</span>
         </a>
-        <a href="/Vissdarbam/settings.php" class="sidebar-link <?php echo $current_page == 'settings.php' ? 'active' : ''; ?>">
-          <img src="/Vissdarbam/images/settings.png" alt="Iestatījumi" class="sidebar-icon">
-          <span>Iestatījumi</span>
-        </a>
       </div>
       
       <div class="night-mode-toggle" id="nightModeToggle">

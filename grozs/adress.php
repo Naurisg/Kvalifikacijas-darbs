@@ -356,11 +356,16 @@ try {
         <h3>Jūsu pasūtījums</h3>
         <ul>
           <?php foreach ($cart as $product): ?>
+            <?php 
+              $images = isset($product['bilde']) ? explode(',', $product['bilde']) : []; 
+              $firstImage = !empty($images) ? trim($images[0]) : 'images/placeholder.png'; // Fallback to placeholder if no image
+            ?>
             <li class="cart-item">
-              <img src="../<?php echo htmlspecialchars($product['bilde']); ?>" alt="<?php echo htmlspecialchars($product['nosaukums']); ?>">
+              <img src="../<?php echo htmlspecialchars($firstImage); ?>" alt="<?php echo htmlspecialchars($product['nosaukums']); ?>">
               <div class="cart-item-details">
                 <h3><?php echo htmlspecialchars($product['nosaukums']); ?></h3>
                 <p>Cena: €<?php echo htmlspecialchars($product['cena']); ?></p>
+                <p>Izmērs: <?php echo htmlspecialchars($product['size'] ?? 'Nav norādīts'); ?></p>
                 <p>Daudzums: <?php echo htmlspecialchars($product['quantity'] ?? 1); ?></p>
               </div>
             </li>

@@ -210,8 +210,12 @@ foreach ($cart as $product) {
     <?php if (!empty($cart)): ?>
       <ul class="cart-list">
         <?php foreach ($cart as $index => $product): ?>
+          <?php 
+            $images = isset($product['bilde']) ? explode(',', $product['bilde']) : []; 
+            $firstImage = !empty($images) ? trim($images[0]) : 'images/placeholder.png'; // Fallback to placeholder if no image
+          ?>
           <li class="cart-item">
-            <img src="../<?php echo htmlspecialchars($product['bilde']); ?>" alt="<?php echo htmlspecialchars($product['nosaukums']); ?>" width="100"> <!-- Adjusted paths -->
+            <img src="../<?php echo htmlspecialchars($firstImage); ?>" alt="<?php echo htmlspecialchars($product['nosaukums']); ?>" width="100">
             <div class="cart-item-details">
               <h3><?php echo htmlspecialchars($product['nosaukums']); ?></h3>
               <p>Cena: €<?php echo htmlspecialchars($product['cena']); ?></p>

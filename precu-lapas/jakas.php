@@ -8,6 +8,40 @@
     <title>Darba Jakas | Darba Apģērbi</title>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="precu.style.css">
+    <style>
+        .modal-carousel {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .carousel-images {
+            display: flex;
+            position: relative;
+        }
+
+        .carousel-image {
+            transition: opacity 0.3s ease;
+            width: 300px;
+            height: 300px;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .carousel-btn {
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .carousel-btn:hover {
+            background-color: #555;
+        }
+    </style>
 </head>
 <body>
     <div class="shop-container">
@@ -33,25 +67,25 @@
 
             <div class="filter-section">
                 <h3>Sezona</h3>
-                <label><input type="checkbox" value="Vasaras"> Vasaras</label><br>
-                <label><input type="checkbox" value="Ziemas"> Ziemas</label><br>
-                <label><input type="checkbox" value="Universālas"> Universālas</label>
+                <label><input type="checkbox" class="season-filter" value="Vasaras"> Vasaras</label><br>
+                <label><input type="checkbox" class="season-filter" value="Ziemas"> Ziemas</label><br>
+                <label><input type="checkbox" class="season-filter" value="Universālas"> Universālas</label>
             </div>
 
             <div class="filter-section">
                 <h3>Tips</h3>
-                <label><input type="checkbox" value="Softshell"> Softshell jakas</label><br>
-                <label><input type="checkbox" value="Siltinātās"> Siltinātās jakas</label><br>
-                <label><input type="checkbox" value="Vējjakas"> Vējjakas</label><br>
-                <label><input type="checkbox" value="Lietus"> Lietus jakas</label>
+                <label><input type="checkbox" class="type-filter" value="Softshell"> Softshell jakas</label><br>
+                <label><input type="checkbox" class="type-filter" value="Siltinātās"> Siltinātās jakas</label><br>
+                <label><input type="checkbox" class="type-filter" value="Vējjakas"> Vējjakas</label><br>
+                <label><input type="checkbox" class="type-filter" value="Lietus"> Lietus jakas</label>
             </div>
 
             <div class="filter-section">
                 <h3>Krāsa</h3>
-                <label><input type="checkbox" value="Melna"> Melna</label><br>
-                <label><input type="checkbox" value="Zila"> Zila</label><br>
-                <label><input type="checkbox" value="Pelēka"> Pelēka</label><br>
-                <label><input type="checkbox" value="Hi-Vis"> Hi-Vis</label>
+                <label><input type="checkbox" class="color-filter" value="Melna"> Melna</label><br>
+                <label><input type="checkbox" class="color-filter" value="Zila"> Zila</label><br>
+                <label><input type="checkbox" class="color-filter" value="Pelēka"> Pelēka</label><br>
+                <label><input type="checkbox" class="color-filter" value="Hi-Vis"> Hi-Vis</label>
             </div>
         </aside>
 
@@ -67,6 +101,7 @@
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         let allProducts = [];
+        let currentProduct = null;
         
         fetch('fetch_category_products.php?category=Jakas')
             .then(response => response.json())
@@ -79,7 +114,7 @@
 
         document.querySelector('.search-bar').addEventListener('input', () => filterProducts());
         document.querySelector('.price-range').addEventListener('input', () => filterProducts());
-        document.querySelectorAll('.size-filter').forEach(checkbox => {
+        document.querySelectorAll('.size-filter, .season-filter, .type-filter, .color-filter').forEach(checkbox => {
             checkbox.addEventListener('change', () => filterProducts());
         });
 
@@ -87,6 +122,9 @@
             const searchTerm = document.querySelector('.search-bar').value.toLowerCase();
             const maxPrice = parseFloat(document.querySelector('.price-range').value);
             const selectedSizes = Array.from(document.querySelectorAll('.size-filter:checked')).map(cb => cb.value);
+            const selectedSeasons = Array.from(document.querySelectorAll('.season-filter:checked')).map(cb => cb.value);
+            const selectedTypes = Array.from(document.querySelectorAll('.type-filter:checked')).map(cb => cb.value);
+            const selectedColors = Array.from(document.querySelectorAll('.color-filter:checked')).map(cb => cb.value);
 
             const filteredProducts = allProducts.filter(product => {
                 const matchesSearch = product.nosaukums.toLowerCase().includes(searchTerm) ||
@@ -94,7 +132,14 @@
                 const matchesPrice = parseFloat(product.cena) <= maxPrice;
                 const matchesSize = selectedSizes.length === 0 || 
                                     selectedSizes.some(size => product.sizes && product.sizes.split(',').includes(size));
-                return matchesSearch && matchesPrice && matchesSize;
+                const matchesSeason = selectedSeasons.length === 0 || 
+                                     selectedSeasons.some(season => product.season && product.season.includes(season));
+                const matchesType = selectedTypes.length === 0 || 
+                                   selectedTypes.some(type => product.type && product.type.includes(type));
+                const matchesColor = selectedColors.length === 0 || 
+                                    selectedColors.some(color => product.color && product.color.includes(color));
+                
+                return matchesSearch && matchesPrice && matchesSize && matchesSeason && matchesType && matchesColor;
             });
 
             displayProducts(filteredProducts);
@@ -105,6 +150,11 @@
         function displayProducts(products) {
             const container = document.getElementById('products-container');
             container.innerHTML = '';
+
+            if (products.length === 0) {
+                container.innerHTML = '<p>Nav pieejamu produktu šajā kategorijā.</p>';
+                return;
+            }
             
             if (!document.getElementById('product-modal')) {
                 document.body.insertAdjacentHTML('beforeend', `
@@ -118,18 +168,21 @@
             }
 
             products.forEach(product => {
+                const images = product.bilde.split(',');
+                const firstImage = images.length > 0 ? images[0].trim() : 'images/placeholder.png';
+
                 container.innerHTML += `
-                    <div class="product-card" onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">
-                        <img src="../${product.bilde}" alt="${product.nosaukums}">
+                    <div class="product-card">
+                        <img src="../${firstImage}" alt="${product.nosaukums}" onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">
                         <div class="product-info">
-                            <h3>${product.nosaukums}</h3>
-                            <p>${product.apraksts}</p>
-                            <p class="price">€${product.cena}</p>
+                            <h3 onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">${product.nosaukums}</h3>
+                            <p onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">${product.apraksts}</p>
+                            <p class="price" onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">€${product.cena}</p>
                             <div class="product-buttons">
-                                 <button class="add-to-cart" onclick="addToCart(${product.id}); event.stopPropagation();">
+                                <button class="add-to-cart" onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')}, true)">
                                     <i class="fas fa-shopping-cart"></i>
                                 </button>
-                                <button class="buy-now" onclick="event.stopPropagation(); buyNow(${product.id})">Pirkt tagad</button>
+                                <button class="buy-now" onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')}, true)">Pirkt tagad</button>
                             </div>
                         </div>
                     </div>
@@ -138,40 +191,77 @@
         }
     });
 
-    function showProductModal(product) {
+    function showProductModal(product, focusOnAddToCart = false) {
         const modal = document.getElementById('product-modal');
         const modalBody = modal.querySelector('.modal-body');
-        
+        currentProduct = product;
+
+        const images = product.bilde.split(',');
+
         modalBody.innerHTML = `
             <div class="modal-product-details">
-                <img src="../${product.bilde}" alt="${product.nosaukums}">
+                <div class="modal-carousel">
+                    ${images.length > 1 ? `<button class="carousel-btn prev-btn" onclick="showPrevModalImage()">&#9664;</button>` : ''}
+                    <div class="carousel-images">
+                        ${images.map((image, index) => `
+                            <img src="../${image.trim()}" class="carousel-image" style="display: ${index === 0 ? 'block' : 'none'}">
+                        `).join('')}
+                    </div>
+                    ${images.length > 1 ? `<button class="carousel-btn next-btn" onclick="showNextModalImage()">&#9654;</button>` : ''}
+                </div>
                 <div class="modal-product-info">
                     <h2>${product.nosaukums}</h2>
                     <p class="modal-description">${product.apraksts}</p>
                     <p class="modal-price">€${product.cena}</p>
+                    <p><strong>Sezona:</strong> ${product.season || 'Nav norādīts'}</p>
+                    <p><strong>Tips:</strong> ${product.type || 'Nav norādīts'}</p>
+                    <p><strong>Krāsa:</strong> ${product.color || 'Nav norādīts'}</p>
                     <p><strong>Pieejamie izmēri:</strong> ${product.sizes ? product.sizes.replace(/,/g, ', ') : 'Nav pieejami'}</p>
                     <p><strong>Pieejamais daudzums:</strong> ${product.quantity}</p>
                     <div>
                         <label for="size-select">Izvēlieties izmēru:</label>
                         <select id="size-select">
-                            ${product.sizes ? product.sizes.split(',').map(size => `<option value="${size}">${size}</option>`).join('') : '<option disabled>Nav pieejami</option>'}
+                            ${product.sizes ? product.sizes.split(',').map(size => `<option value="${size.trim()}">${size.trim()}</option>`).join('') : '<option disabled>Nav pieejami</option>'}
                         </select>
                     </div>
                     <div>
                         <label for="quantity-input">Daudzums:</label>
                         <input type="number" id="quantity-input" min="1" max="${product.quantity}" value="1">
                     </div>
-<div class="modal-buttons">
-                        <button class="add-to-cart" onclick="addToCart(${product.id})">
+                    <div class="modal-buttons">
+                        <button class="add-to-cart" onclick="addToCart()">
                             <i class="fas fa-shopping-cart"></i>
                         </button>
-                        <button class="buy-now" onclick="buyNow(${product.id})">Pirkt tagad</button>
+                        <button class="buy-now" onclick="buyNow()">Pirkt tagad</button>
                     </div>
                 </div>
             </div>
         `;
         
         modal.style.display = 'block';
+        
+        if (focusOnAddToCart) {
+            const addToCartBtn = modal.querySelector('.add-to-cart');
+            addToCartBtn.focus();
+        }
+    }
+
+    function showPrevModalImage() {
+        const carousel = document.querySelector('.modal-carousel .carousel-images');
+        const images = carousel.querySelectorAll('.carousel-image');
+        let currentIndex = Array.from(images).findIndex(img => img.style.display === 'block');
+        images[currentIndex].style.display = 'none';
+        currentIndex = (currentIndex - 1 + images.length) % images.length;
+        images[currentIndex].style.display = 'block';
+    }
+
+    function showNextModalImage() {
+        const carousel = document.querySelector('.modal-carousel .carousel-images');
+        const images = carousel.querySelectorAll('.carousel-image');
+        let currentIndex = Array.from(images).findIndex(img => img.style.display === 'block');
+        images[currentIndex].style.display = 'none';
+        currentIndex = (currentIndex + 1) % images.length;
+        images[currentIndex].style.display = 'block';
     }
 
     document.addEventListener('click', function(event) {
@@ -181,11 +271,13 @@
         }
     });
 
-    function addToCart(productId) {
-        const selectedSize = document.getElementById('size-select').value || 'Nav norādīts';
+    function addToCart() {
+        if (!currentProduct) return;
+        
+        const selectedSize = document.getElementById('size-select')?.value || 'Nav norādīts';
         const quantityInput = document.getElementById('quantity-input');
-        const quantity = parseInt(quantityInput.value, 10) || 1;
-        const maxQuantity = parseInt(quantityInput.max, 10);
+        const quantity = quantityInput ? parseInt(quantityInput.value, 10) || 1 : 1;
+        const maxQuantity = quantityInput ? parseInt(quantityInput.max, 10) : Infinity;
 
         if (quantity > maxQuantity) {
             alert(`Maksimālais pieejamais daudzums ir ${maxQuantity}.`);
@@ -197,12 +289,17 @@
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ id: productId, size: selectedSize, quantity: quantity }),
+            body: JSON.stringify({ 
+                id: currentProduct.id, 
+                size: selectedSize, 
+                quantity: quantity 
+            }),
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 alert('Produkts pievienots grozam!');
+                document.getElementById('product-modal').style.display = 'none';
             } else {
                 alert(data.message || 'Kļūda pievienojot produktu grozam.');
             }
@@ -213,8 +310,42 @@
         });
     }
 
-    function buyNow(productId) {
-        console.log('Buying product:', productId);
+    function buyNow() {
+        if (!currentProduct) return;
+        
+        const selectedSize = document.getElementById('size-select')?.value || 'Nav norādīts';
+        const quantityInput = document.getElementById('quantity-input');
+        const quantity = quantityInput ? parseInt(quantityInput.value, 10) || 1 : 1;
+        const maxQuantity = quantityInput ? parseInt(quantityInput.max, 10) : Infinity;
+
+        if (quantity > maxQuantity) {
+            alert(`Maksimālais pieejamais daudzums ir ${maxQuantity}.`);
+            return;
+        }
+
+        fetch('/Vissdarbam/grozs/add_to_cart.php', { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+                id: currentProduct.id, 
+                size: selectedSize, 
+                quantity: quantity 
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = '/Vissdarbam/grozs/adress.php';
+            } else {
+                alert(data.message || 'Kļūda pievienojot produktu grozam.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Kļūda pievienojot produktu grozam.');
+        });
     }
     </script>
 </body>
