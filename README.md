@@ -3,7 +3,7 @@ TO DO:
 - [X] Izveidot datubāzi mājas lapai
 - [x] Pievienot header ar logo kreisajā malā un pogām kas atrodas labajā pusē
 - [x] Pievienot Image main page
-- [ ] Pievienot animācijas visam projektam
+- [x] Pievienot animācijas visam projektam
 - [x] Izveidot "Logo uzdruka" lapu
 - [x] Izveidot kad pedejie 4 produkti kas pievienoti admin paneli paradas Preču jaunumi sadaļā sakuma lapā
 - [x] Izveidot produktu kataloga lapu
@@ -38,6 +38,7 @@ TO DO:
 - [x] Izveidot kad admins vai moderators var pievienot jaunus produktus
 - [ ] pievienot visus produktu aprakstus
 - [ ] Salikt produktus
+- [x] Vairāku attēlu pievienošana veidojot produktu
 - [x] Pievienot klienta login
 - [x] Pielikt opciju pievienot grozam
 - [x] Pievienot opciju nopirkt preci
