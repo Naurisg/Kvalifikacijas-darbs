@@ -320,6 +320,28 @@ try {
                 max-height: 70vh;
             }
         }
+
+        /* stils izpardošanas pogai */
+        .soldout-button {
+            padding: 12px 24px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+        }
+        .soldout-button.active, .soldout-button:active {
+            background-color: #a71d2a;
+        }
+        .soldout-button:hover {
+            background-color: #c82333;
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -463,6 +485,7 @@ fetch('get_products.php')
             <option value="Instrumenti">Instrumenti</option>
         </select>
         <button class="add-button" onclick="addNewProduct()">Pievienot +</button>
+        <button id="soldOutBtn" class="soldout-button" onclick="toggleSoldOut()">Izpārdotie</button>
     </div>
     <table id="product-table">
         <thead>
@@ -792,6 +815,13 @@ function filterProducts() {
         const row = rows[i];
         const cells = row.getElementsByTagName('td');
         let found = false;
+
+        // Pārbauda, vai soldOutActive ir ieslēgts un daudzums ir 0
+        const quantity = cells[6] ? parseInt(cells[6].textContent) : null;
+        if (soldOutActive && quantity !== 0) {
+            row.style.display = 'none';
+            continue;
+        }
 
         for (let j = 0; j < cells.length - 1; j++) {
             const cellText = cells[j].textContent.toLowerCase();
@@ -1348,6 +1378,19 @@ window.onclick = function(event) {
     if (event.target === modal) {
         closeOrderModal();
     }
+}
+
+let soldOutActive = false;
+
+function toggleSoldOut() {
+    soldOutActive = !soldOutActive;
+    const btn = document.getElementById('soldOutBtn');
+    if (soldOutActive) {
+        btn.classList.add('active');
+    } else {
+        btn.classList.remove('active');
+    }
+    filterProducts();
 }
 </script>
 

@@ -73,6 +73,34 @@ try {
     // Ģenerē unikālu pasūtījuma ID
     $orderId = uniqid('order_');
 
+    // Atjaunina produktu daudzumu datubāzē pēc veiksmīga maksājuma
+    $productDb = new PDO('sqlite:../Datubazes/products.db');
+    $productDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    foreach ($cart as $product) {
+        $productId = isset($product['id']) ? $product['id'] : null;
+        $quantityBought = isset($product['quantity']) ? intval($product['quantity']) : 0;
+
+        if ($productId && $quantityBought > 0) {
+            // Iegūst pašreizējo daudzumu
+            $stmt = $productDb->prepare("SELECT quantity FROM products WHERE id = :id");
+            $stmt->execute([':id' => $productId]);
+            $currentProduct = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($currentProduct) {
+                $currentQuantity = intval($currentProduct['quantity']);
+                $newQuantity = max(0, $currentQuantity - $quantityBought);
+
+                // Atjaunina daudzumu
+                $updateStmt = $productDb->prepare("UPDATE products SET quantity = :quantity WHERE id = :id");
+                $updateStmt->execute([
+                    ':quantity' => $newQuantity,
+                    ':id' => $productId
+                ]);
+            }
+        }
+    }
+
     // Izveido jaunu pasūtījumu
     $newOrder = [
         'order_id' => $orderId,

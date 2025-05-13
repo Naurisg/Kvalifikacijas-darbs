@@ -165,6 +165,7 @@
             products.forEach(product => {
                 const images = product.bilde.split(',');
                 const firstImage = images.length > 0 ? images[0].trim() : 'images/placeholder.png';
+                const isOutOfStock = parseInt(product.quantity) === 0;
 
                 container.innerHTML += `
                     <div class="product-card">
@@ -173,11 +174,12 @@
                             <h3 onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">${product.nosaukums}</h3>
                             <p onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">${product.apraksts}</p>
                             <p class="price" onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">€${product.cena}</p>
+                            ${isOutOfStock ? `<p style="color: red; font-weight: bold;">Izpārdots</p>` : ''}
                             <div class="product-buttons">
-                                <button class="add-to-cart" onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')}, true)">
+                                <button class="add-to-cart" onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')}, true)" ${isOutOfStock ? 'disabled' : ''}>
                                     <i class="fas fa-shopping-cart"></i>
                                 </button>
-                                <button class="buy-now" onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')}, true)">Pirkt tagad</button>
+                                <button class="buy-now" onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')}, true)" ${isOutOfStock ? 'disabled' : ''}>Pirkt tagad</button>
                             </div>
                         </div>
                     </div>
@@ -192,6 +194,7 @@
         currentProduct = product;
 
         const images = product.bilde.split(',');
+        const isOutOfStock = parseInt(product.quantity) === 0;
 
         modalBody.innerHTML = `
             <div class="modal-product-details">
@@ -208,6 +211,7 @@
                     <h2>${product.nosaukums}</h2>
                     <p class="modal-description">${product.apraksts}</p>
                     <p class="modal-price">€${product.cena}</p>
+                    ${isOutOfStock ? `<p style="color: red; font-weight: bold;">Izpārdots</p>` : ''}
                     <p><strong>Tips:</strong> ${product.type || 'Nav norādīts'}</p>
                     <p><strong>Krāsa:</strong> ${product.color || 'Nav norādīts'}</p>
                     <p><strong>Papildaprīkojums:</strong> ${product.features ? product.features.replace(/,/g, ', ') : 'Nav'}</p>
@@ -215,19 +219,19 @@
                     <p><strong>Pieejamais daudzums:</strong> ${product.quantity}</p>
                     <div>
                         <label for="size-select">Izvēlieties izmēru:</label>
-                        <select id="size-select">
+                        <select id="size-select" ${isOutOfStock ? 'disabled' : ''}>
                             ${product.sizes ? product.sizes.split(',').map(size => `<option value="${size.trim()}">${size.trim()}</option>`).join('') : '<option disabled>Nav pieejami</option>'}
                         </select>
                     </div>
                     <div>
                         <label for="quantity-input">Daudzums:</label>
-                        <input type="number" id="quantity-input" min="1" max="${product.quantity}" value="1">
+                        <input type="number" id="quantity-input" min="1" max="${product.quantity}" value="1" ${isOutOfStock ? 'disabled' : ''}>
                     </div>
                     <div class="modal-buttons">
-                        <button class="add-to-cart" onclick="addToCart()">
+                        <button class="add-to-cart" onclick="addToCart()" ${isOutOfStock ? 'disabled' : ''}>
                             <i class="fas fa-shopping-cart"></i>
                         </button>
-                        <button class="buy-now" onclick="buyNow()">Pirkt tagad</button>
+                        <button class="buy-now" onclick="buyNow()" ${isOutOfStock ? 'disabled' : ''}>Pirkt tagad</button>
                     </div>
                 </div>
             </div>
@@ -235,7 +239,7 @@
         
         modal.style.display = 'block';
         
-        if (focusOnAddToCart) {
+        if (focusOnAddToCart && !isOutOfStock) {
             const addToCartBtn = modal.querySelector('.add-to-cart');
             addToCartBtn.focus();
         }

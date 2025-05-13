@@ -151,8 +151,9 @@
             }
 
             products.forEach(product => {
-                const images = product.bilde.split(','); // Handle multiple images
-                const firstImage = images.length > 0 ? images[0].trim() : 'images/placeholder.png'; // Use the first image or fallback
+                const images = product.bilde.split(',');
+                const firstImage = images.length > 0 ? images[0].trim() : 'images/placeholder.png';
+                const isOutOfStock = parseInt(product.quantity) === 0;
 
                 container.innerHTML += `
                     <div class="product-card">
@@ -161,11 +162,12 @@
                             <h3 onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">${product.nosaukums}</h3>
                             <p onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">${product.apraksts}</p>
                             <p class="price" onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">€${product.cena}</p>
+                            ${isOutOfStock ? `<p style="color: red; font-weight: bold;">Izpārdots</p>` : ''}
                             <div class="product-buttons">
-                                <button class="add-to-cart" onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')}, true)">
+                                <button class="add-to-cart" onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')}, true)" ${isOutOfStock ? 'disabled' : ''}>
                                     <i class="fas fa-shopping-cart"></i>
                                 </button>
-                                <button class="buy-now" onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')}, true)">Pirkt tagad</button>
+                                <button class="buy-now" onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')}, true)" ${isOutOfStock ? 'disabled' : ''}>Pirkt tagad</button>
                             </div>
                         </div>
                     </div>
@@ -180,6 +182,7 @@
         currentProduct = product;
 
         const images = product.bilde.split(',');
+        const isOutOfStock = parseInt(product.quantity) === 0;
 
         modalBody.innerHTML = `
             <div class="modal-product-details">
@@ -199,16 +202,17 @@
                     ${product.category ? `<p><strong>Kategorija:</strong> ${product.category}</p>` : ''}
                     ${product.brand ? `<p><strong>Zīmols:</strong> ${product.brand}</p>` : ''}
                     ${product.application ? `<p><strong>Pielietojums:</strong> ${product.application}</p>` : ''}
+                    ${isOutOfStock ? `<p style="color: red; font-weight: bold;">Izpārdots</p>` : ''}
                     <p><strong>Pieejamais daudzums:</strong> ${product.quantity}</p>
                     <div>
                         <label for="quantity-input">Daudzums:</label>
-                        <input type="number" id="quantity-input" min="1" max="${product.quantity}" value="1">
+                        <input type="number" id="quantity-input" min="1" max="${product.quantity}" value="1" ${isOutOfStock ? 'disabled' : ''}>
                     </div>
                     <div class="modal-buttons">
-                        <button class="add-to-cart" onclick="addToCart()">
+                        <button class="add-to-cart" onclick="addToCart()" ${isOutOfStock ? 'disabled' : ''}>
                             <i class="fas fa-shopping-cart"></i>
                         </button>
-                        <button class="buy-now" onclick="buyNow()">Pirkt tagad</button>
+                        <button class="buy-now" onclick="buyNow()" ${isOutOfStock ? 'disabled' : ''}>Pirkt tagad</button>
                     </div>
                 </div>
             </div>
@@ -216,7 +220,7 @@
         
         modal.style.display = 'block';
         
-        if (focusOnAddToCart) {
+        if (focusOnAddToCart && !isOutOfStock) {
             const addToCartBtn = modal.querySelector('.add-to-cart');
             addToCartBtn.focus();
         }
