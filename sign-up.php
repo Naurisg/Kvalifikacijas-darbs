@@ -34,7 +34,7 @@
         <div class="w-users-userformheader form-card-header">
           <h2 class="heading h3">Reģistrācija</h2>
         </div>
-        <input placeholder="Your email" id="wf-sign-up-email" maxlength="256" name="Email" class="text-field w-input" type="email" autocomplete="username" required="">
+        <input placeholder="Jūsu e-pasts" id="wf-sign-up-email" maxlength="256" name="Email" class="text-field w-input" type="email" autocomplete="username" required="">
         <input class="text-field w-input" maxlength="256" name="field" data-name="field" placeholder="Vārds" type="text" id="wf-sign-up-name" required="">
         <div style="position: relative;">
           <input placeholder="Your password" id="wf-sign-up-password" maxlength="256" name="Password" class="text-field w-input" type="password" required="">

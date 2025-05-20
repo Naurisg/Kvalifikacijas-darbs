@@ -152,7 +152,7 @@ try {
             border-radius: 5px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 13px;
             transition: all 0.3s ease;
             margin-left: 10px;
         }
@@ -330,7 +330,7 @@ try {
             border-radius: 5px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 13px;
             transition: all 0.3s ease;
             margin-left: 10px;
         }
@@ -374,7 +374,7 @@ try {
             <th>ID</th>
             <th>Epasts</th>
             <th>Vārds</th>
-            <th>Role</th>
+            <th>Pakāpe</th>
             <th>Apstiprināts</th>
             <th>Izveidots</th>
             <th>Darbības</th>
@@ -457,7 +457,7 @@ fetch('get_products.php')
         <th>ID</th>
         <th>Epasts</th>
         <th>Vārds</th>
-        <th>Apstiprināts</th>
+        <!-- <th>Apstiprināts</th>  Noņemts -->
         <th>Izveidots</th>
         <th>Darbības</th>
     </tr>
@@ -979,7 +979,6 @@ function loadOrders() {
                     <td>${totalPrice.toFixed(2)} EUR</td>
                     <td>${order.status || 'Gaida apstiprinājumu'}</td>
                     <td>
-                        <button class="edit-button" onclick="showOrderDetails(${JSON.stringify(order).replace(/"/g, '&quot;')})">Skatīt</button>
                         <button class="delete-btn" onclick="deleteOrder('${order.id}', '${order.client_name}')">Dzēst</button>
                     </td>
                 `;
@@ -1139,8 +1138,8 @@ fetch('get_admins.php')
 <td>${admin.name}</td>
 <td>
     <select class="role-select" onchange="updateRole(${admin.id}, this.value)">
-        <option value="admin" ${admin.role === 'admin' ? 'selected' : ''}>Admin</option>
-        <option value="moderator" ${admin.role === 'moderator' ? 'selected' : ''}>Moderator</option>
+        <option value="admin" ${admin.role === 'admin' ? 'selected' : ''}>Admins</option>
+        <option value="moderator" ${admin.role === 'moderator' ? 'selected' : ''}>Moderātors</option>
     </select>
 </td>
 <td>${admin.approved ? 'Jā' : 'Nē'}</td>
@@ -1245,7 +1244,6 @@ fetch('get_clients.php')
                 <td>${client.id}</td>
                 <td>${client.email}</td>
                 <td>${client.name}</td>
-                <td>${client.approved ? 'Jā' : 'Nē'}</td>
                 <td>${client.created_at}</td>
                 <td>
                     <a href="useredit.php?id=${client.id}" class="edit-button">Rediģēt</a>

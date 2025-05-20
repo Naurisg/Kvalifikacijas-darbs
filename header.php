@@ -14,6 +14,13 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         document.querySelector(".profile-link").style.display = "inline-flex";
         document.querySelector(".cart-link").style.display = "inline-flex";
+        // Paslēpt reģistrēties pogu, ja ielogojies
+        var regLink = document.getElementById("registerLink");
+        if (regLink) regLink.style.display = "none";
+      } else {
+        // Parādīt reģistrēties pogu, ja nav ielogojies
+        var regLink = document.getElementById("registerLink");
+        if (regLink) regLink.style.display = "inline-block";
       }
     })
     .catch(error => {
@@ -172,17 +179,19 @@ $current_page = basename($_SERVER['PHP_SELF']);
     
     /* Active page indicator */
     .active-page {
-      background-color: black;
-      color: white;
-      border-radius: 5px;
-      padding: 5px 10px;
-      border: 2px solid white;
+      position: relative;
+      color: #333;
+      font-weight: 600;
     }
 
-    .active-page:hover {
-      background-color: white;
-      color: black;
-      border: 2px solid black;
+    .active-page:after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: #333;
     }
     
     /* Menu button animation */
@@ -194,54 +203,109 @@ $current_page = basename($_SERVER['PHP_SELF']);
       transform: rotate(90deg);
     }
     
-    /* Night mode toggle */
-    .night-mode-toggle {
+    /* New Header Styles */
+    .nav-bar {
+      background-color: #fff;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+      padding: 10px 0;
+      position: sticky;
+      top: 0;
+      z-index: 999;
+    }
+    
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    .logo-div {
+      flex: 0 0 auto;
+    }
+    
+    .logo {
+      height: 50px;
+      width: auto;
+      transition: transform 0.3s;
+    }
+    
+    .logo:hover {
+      transform: scale(1.05);
+    }
+    
+    .navbar {
       display: flex;
       align-items: center;
-      cursor: pointer;
-      margin-top: 30px;
-      padding: 12px 15px;
-      border-radius: 8px;
-      background-color: #f8f8f8;
     }
     
-    .night-mode-toggle:hover {
-      background-color: #f0f0f0;
-    }
-    
-    /* Language switcher */
-    .language-switcher {
-      margin-top: 20px;
-      border-top: 1px solid #eee;
-      padding-top: 20px;
-    }
-    
-    .language-options {
+    .nav-menu {
       display: flex;
+      align-items: center;
       gap: 10px;
-      margin-top: 10px;
     }
     
-    .language-option {
-      padding: 8px 12px;
-      border-radius: 6px;
-      cursor: pointer;
+    .nav-link {
+      display: flex;
+      align-items: center;
+      padding: 8px 10px;
+      color: #555;
+      text-decoration: none;
+      font-weight: 500;
       transition: all 0.2s;
-      border: 1px solid #ddd;
+      border-radius: 6px;
       font-size: 14px;
     }
     
-    .language-option:hover {
-      background-color: #f0f0f0;
+    .nav-link:hover {
+      color: #000;
+      background-color: #f5f5f5;
     }
     
-    .language-option.active {
-      background-color: #2c3e50;
-      color: white;
-      border-color: #2c3e50;
+    .user-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 15px;
+      padding-left: 15px;
+      border-left: 1px solid #eee;
+    }
+    
+    .user-action-link {
+      display: flex;
+      align-items: center;
+      padding: 6px;
+      border-radius: 50%;
+      transition: all 0.2s;
+    }
+    
+    .user-action-link:hover {
+      background-color: #f5f5f5;
+      transform: scale(1.1);
+    }
+    
+    .user-action-link .nav-text {
+      display: none;
     }
     
     /* Responsive adjustments */
+    @media (max-width: 1024px) {
+      .nav-menu {
+        gap: 8px;
+      }
+      
+      .nav-link {
+        padding: 6px 8px;
+        font-size: 13px;
+      }
+      
+      .logo {
+        height: 45px;
+      }
+    }
+    
     @media (max-width: 767px) {
       #sidebar .content {
         width: 280px;
@@ -251,6 +315,28 @@ $current_page = basename($_SERVER['PHP_SELF']);
       .sidebar-link {
         padding: 10px 12px;
         font-size: 14px;
+      }
+      
+      .nav-menu {
+        gap: 6px;
+      }
+      
+      .nav-text {
+        display: none;
+      }
+      
+      .nav-link {
+        padding: 6px;
+      }
+      
+      .user-actions {
+        margin-left: 10px;
+        padding-left: 10px;
+        gap: 6px;
+      }
+      
+      .logo {
+        height: 40px;
       }
     }
   </style>
@@ -289,49 +375,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
         .catch(error => {
           console.error("Error:", error);
         });
-      
-      // Night mode toggle functionality
-      const nightModeToggle = document.getElementById("nightModeToggle");
-      if (nightModeToggle) {
-        nightModeToggle.addEventListener("click", function() {
-          document.body.classList.toggle("night-mode");
-          localStorage.setItem("nightMode", document.body.classList.contains("night-mode"));
-        });
-        
-        // Check for saved preference
-        if (localStorage.getItem("nightMode") === "true") {
-          document.body.classList.add("night-mode");
-        }
-      }
-      
-      // Language switcher functionality
-      const languageOptions = document.querySelectorAll('.language-option');
-      languageOptions.forEach(option => {
-        option.addEventListener('click', function() {
-          // Remove active class from all options
-          languageOptions.forEach(opt => opt.classList.remove('active'));
-          
-          // Add active class to clicked option
-          this.classList.add('active');
-          
-          // Get selected language
-          const lang = this.getAttribute('data-lang');
-          
-          // Save to localStorage
-          localStorage.setItem('preferredLanguage', lang);
-          
-          // Here you would typically reload the page with the new language
-          // or make an AJAX call to update content
-          console.log('Language changed to:', lang);
-          
-          // For demo purposes, we'll just show an alert
-          alert(`Language changed to ${lang.toUpperCase()}. In a real implementation, this would reload the page with the selected language.`);
-        });
-      });
-      
-      // Set initial language based on localStorage or browser language
-      const preferredLanguage = localStorage.getItem('preferredLanguage') || 'lv';
-      document.querySelector(`.language-option[data-lang="${preferredLanguage}"]`).classList.add('active');
     });
   </script>
 </head>
@@ -341,33 +384,18 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <div class="content">
       <span id="closeSidebar" class="close-btn" title="Aizvērt">&times;</span>
       <div class="sidebar-nav">
-        <a href="/Vissdarbam/user-account.php" class="sidebar-link profile-link <?php echo $current_page == 'user-account.php' ? 'active' : ''; ?>" style="display: none;">
+        <a href="/Vissdarbam/user-account" class="sidebar-link profile-link <?php echo $current_page == 'user-account.php' ? 'active' : ''; ?>" style="display: none;">
           <img src="/Vissdarbam/images/profile-user.png" alt="Profils" class="sidebar-icon">
           <span>Profils</span>
         </a>
-        <a href="/Vissdarbam/grozs/grozs.php" class="sidebar-link <?php echo $current_page == 'grozs.php' ? 'active' : ''; ?>">
+        <a href="/Vissdarbam/grozs/grozs" class="sidebar-link <?php echo $current_page == 'grozs.php' ? 'active' : ''; ?>">
           <img src="/Vissdarbam/images/Grozs.png" alt="Grozs" class="sidebar-icon">
           <span>Grozs</span>
         </a>
-        <a href="/Vissdarbam/order-history.php" class="sidebar-link <?php echo $current_page == 'order-history.php' ? 'active' : ''; ?>">
+        <a href="/Vissdarbam/order-history" class="sidebar-link <?php echo $current_page == 'order-history.php' ? 'active' : ''; ?>">
           <img src="/Vissdarbam/images/pasutijumi.png" alt="Pasūtījumu vēsture" class="sidebar-icon">
           <span>Pasūtījumu vēsture</span>
         </a>
-      </div>
-      
-      <div class="night-mode-toggle" id="nightModeToggle">
-        <img src="/Vissdarbam/images/night-mode.png" alt="Tumšais režīms" class="sidebar-icon">
-        <span>Tumšais režīms</span>
-      </div>
-      
-      <!-- valodas maiņa -->
-      <div class="language-switcher">
-        <div style="font-weight: 500; margin-bottom: 8px;">Valodas maiņa</div>
-        <div class="language-options">
-          <div class="language-option" data-lang="lv" title="Latviešu">LV</div>
-          <div class="language-option" data-lang="en" title="English">EN</div>
-          <div class="language-option" data-lang="ru" title="Русский">RU</div>
-        </div>
       </div>
     </div>
   </div>
@@ -376,36 +404,43 @@ $current_page = basename($_SERVER['PHP_SELF']);
   <div data-collapse="small" data-animation="default" data-duration="400" data-easing="ease" data-easing2="ease" role="banner" class="nav-bar w-nav">
     <div class="nav-container w-container">
       <div class="logo-div">
-        <a href="/Vissdarbam/index.php" aria-current="page" class="nav-logo w-inline-block w--current">
+        <a href="/Vissdarbam/index" aria-current="page" class="nav-logo w-inline-block w--current">
           <img src="/Vissdarbam/images/Logo.png" width="125" sizes="(max-width: 479px) 50vw, 125px" srcset="/Vissdarbam/images/Logo-p-500.png 500w, /Vissdarbam/images/Logo-p-800.png 800w, /Vissdarbam/images/Logo.png 960w" alt="Logo" class="logo">
         </a>
       </div>
       <nav role="navigation" class="navbar w-nav-menu">
         <div class="search-banner"></div>
         <div class="nav-menu">
-          <a href="/Vissdarbam/index.php" class="nav-link w-nav-link <?php echo $current_page == 'index.php' ? 'active-page' : ''; ?>">
+          <a href="/Vissdarbam/index" class="nav-link w-nav-link <?php echo $current_page == 'index.php' ? 'active-page' : ''; ?>">
             <span class="nav-text">Sākums</span>
           </a>
-          <a href="/Vissdarbam/precu-katalogs.php" class="nav-link w-nav-link <?php echo $current_page == 'precu-katalogs.php' ? 'active-page' : ''; ?>">
+          <a href="/Vissdarbam/precu-katalogs" class="nav-link w-nav-link <?php echo $current_page == 'precu-katalogs.php' ? 'active-page' : ''; ?>">
             <span class="nav-text">Preču Katalogs</span>
           </a>
-          <a href="/Vissdarbam/logo-uzdruka.php" class="nav-link w-nav-link <?php echo $current_page == 'logo-uzdruka.php' ? 'active-page' : ''; ?>">
+          <a href="/Vissdarbam/logo-uzdruka" class="nav-link w-nav-link <?php echo $current_page == 'logo-uzdruka.php' ? 'active-page' : ''; ?>">
             <span class="nav-text">Logo uzdruka</span>
           </a>
-          <a href="/Vissdarbam/par-mums.php" class="nav-link w-nav-link <?php echo $current_page == 'par-mums.php' ? 'active-page' : ''; ?>">
+          <a href="/Vissdarbam/par-mums" class="nav-link w-nav-link <?php echo $current_page == 'par-mums.php' ? 'active-page' : ''; ?>">
             <span class="nav-text">Par mums</span>
           </a>
-          <a href="/Vissdarbam/kontakti.php" class="nav-link w-nav-link <?php echo $current_page == 'kontakti.php' ? 'active-page' : ''; ?>">
+          <a href="/Vissdarbam/kontakti" class="nav-link w-nav-link <?php echo $current_page == 'kontakti.php' ? 'active-page' : ''; ?>">
             <span class="nav-text">Kontakti</span>
           </a>
-          <a href="/Vissdarbam/reviews.php" class="nav-link w-nav-link <?php echo $current_page == 'reviews.php' ? 'active-page' : ''; ?>">
+          <a href="/Vissdarbam/reviews" class="nav-link w-nav-link <?php echo $current_page == 'reviews.php' ? 'active-page' : ''; ?>">
             <span class="nav-text">Atsauksmes</span>
           </a>
-          <a href="/Vissdarbam/log-in.php" class="nav-link w-nav-link header-login-link <?php echo $current_page == 'log-in.php' ? 'active-page' : ''; ?>">
+        </div>
+        
+        <div class="user-actions">
+          <a href="/Vissdarbam/log-in" class="user-action-link w-nav-link header-login-link <?php echo $current_page == 'log-in.php' ? 'active-page' : ''; ?>" title="Ienākt">
             <img src="/Vissdarbam/images/login.png" alt="Ienākt" class="header-icon">
             <span class="nav-text">Ienākt</span>
           </a>
-          <a id="menuButton" class="nav-link w-nav-link" style="display: none;" title="Izvēlne">
+          <a href="/Vissdarbam/sign-up" id="registerLink" class="user-action-link w-nav-link" style="display:none;" title="Reģistrēties">
+            <img src="/Vissdarbam/images/register.png" alt="Reģistrēties" class="header-icon">
+            <span class="nav-text">Reģistrēties</span>
+          </a>
+          <a id="menuButton" class="user-action-link w-nav-link" style="display: none;" title="Izvēlne">
             <img src="/Vissdarbam/images/menu.png" alt="Izvēlne" class="header-icon">
           </a>
         </div>

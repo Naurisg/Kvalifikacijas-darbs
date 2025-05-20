@@ -31,7 +31,7 @@
         </div>
         <input type="submit" data-wait="Please wait..." class="w-users-userformbutton button w-button" value="Ienākt">
         <div class="w-users-userformfooter form-card-footer"><span>Nav izveidots konts?</span>
-          <a href="sign-up.html">Reģistrēties</a>
+          <a href="sign-up.php">Reģistrēties</a>
         </div>
       </form>
       <div style="display:none" data-wf-user-form-error="true" class="w-users-userformerrorstate form-error w-form-fail">

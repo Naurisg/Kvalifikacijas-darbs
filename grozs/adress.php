@@ -324,7 +324,7 @@ try {
             <input type="text" id="address" name="address" required>
           </div>
           <div class="form-group">
-            <label for="address2">Dzīvoklis, istaba, utt. (nav obligāts)</label>
+            <label for="address2">Dzīvoklis, nummurs. (nav obligāts)</label>
             <input type="text" id="address2" name="address2">
           </div>
           <div class="form-row">
