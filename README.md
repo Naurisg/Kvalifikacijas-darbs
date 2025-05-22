@@ -20,6 +20,7 @@ TO DO:
 - [x] Izveidot opciju apstiprināt sūtijumu no admin panel un kad to redz lietotāja pusē
 - [x] Izveidot Atsauksmes page
 - [x] Izveidot Noteikumi page
+- [x] Izveidot privātuma politiku
 - [x] Pievienot footer
 - [x] Izveidot order-history kur lietotājs var apskatīt veiktos pasūtijumus
 - [x] Izveidot user profile kur lietotājam iespējams rediģēt savu informāciju
