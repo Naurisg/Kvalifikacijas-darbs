@@ -1,7 +1,7 @@
 TO DO:
 - [X] Izveidot plānu projektam
 - [X] Izveidot datubāzi mājas lapai
-- [x] Pievienot header ar logo kreisajā malā un pogām kas atrodas labajā pusē
+- [x] Pievienot header ar logo kreisajā malā un pogām
 - [x] Pievienot Image main page
 - [x] Pievienot animācijas visam projektam
 - [x] Izveidot "Logo uzdruka" lapu
