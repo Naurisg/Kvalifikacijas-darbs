@@ -126,7 +126,10 @@ foreach ($orders as &$order) {
 
     $order['total_price'] = 0;
 
-    if (isset($order['items'])) {
+    // Use saved total_amount if available
+    if (isset($order['total_amount'])) {
+        $order['total_price'] = floatval($order['total_amount']);
+    } else if (isset($order['items'])) {
         if (is_string($order['items'])) {
             $items = json_decode($order['items'], true);
         } else {
@@ -431,8 +434,11 @@ unset($order);
                     <strong>Datums:</strong> <span id="modalOrderDate"></span><br>
                     <strong>Statuss:</strong> <span id="modalOrderStatus"></span>
                 </div>
-                <div class="modal-total">
-                    Kopējā summa: <span id="modalTotalPrice">0.00</span> EUR
+                <div class="modal-total" style="line-height: 1.6;">
+                    <div><strong>Preču summa:</strong> <span id="modalItemsPrice">0.00</span> EUR</div>
+                    <div><strong>PVN (21%):</strong> <span id="modalVatAmount">0.00</span> EUR</div>
+                    <div><strong>Piegādes cena:</strong> <span id="modalShippingPrice">0.00</span></div>
+                    <div><strong>Kopējā summa:</strong> <span id="modalTotalPrice">0.00</span> EUR</div>
                 </div>
             </div>
 
@@ -722,7 +728,7 @@ unset($order);
         function showOrderDetails(order) {
             const orderDetailsTable = document.getElementById('orderDetailsTable');
             orderDetailsTable.innerHTML = '';
-            let totalPrice = 0;
+            let itemsPrice = 0;
 
             document.getElementById('modalOrderId').textContent = order.order_id;
             document.getElementById('modalOrderDate').textContent = order.created_at;
@@ -748,14 +754,14 @@ unset($order);
                     products = JSON.parse(products);
                 }
                 products.forEach(product => {
-                    const images = product.bilde ? product.bilde.split(',') : []; // Handle multiple images
-                    const firstImage = images.length > 0 ? images[0].trim() : 'placeholder.jpg'; // Use the first image or fallback
+                    const images = product.bilde ? product.bilde.split(',') : [];
+                    const firstImage = images.length > 0 ? images[0].trim() : 'placeholder.jpg';
 
                     const itemPrice = parseFloat(product.cena) || 0;
                     const quantity = parseInt(product.quantity) || 0;
                     const itemTotal = itemPrice * quantity;
-                    totalPrice += itemTotal;
-                    
+                    itemsPrice += itemTotal;
+
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td><img src="${firstImage}" alt="${product.nosaukums}" style="max-width: 60px; max-height: 60px; object-fit: contain;"></td>
@@ -768,7 +774,26 @@ unset($order);
                     orderDetailsTable.appendChild(row);
                 });
 
-                document.getElementById('modalTotalPrice').textContent = totalPrice.toFixed(2);
+                // Calculate VAT and shipping based on itemsPrice
+                const vatAmount = itemsPrice * 0.21;
+                let shippingPrice = 10;
+                let shippingDisplay = "10.00 EUR";
+                if (itemsPrice >= 100) {
+                    shippingPrice = 0;
+                    shippingDisplay = "Bezmaksas";
+                }
+                // Use saved total_amount for modal total price if available
+                let modalTotalPrice = itemsPrice + vatAmount + shippingPrice;
+                if (order.total_amount) {
+                    modalTotalPrice = parseFloat(order.total_amount);
+                }
+
+                // Set modal fields
+                document.getElementById('modalItemsPrice').textContent = itemsPrice.toFixed(2);
+                document.getElementById('modalVatAmount').textContent = vatAmount.toFixed(2);
+                document.getElementById('modalShippingPrice').textContent = shippingDisplay;
+                document.getElementById('modalTotalPrice').textContent = modalTotalPrice.toFixed(2);
+
                 document.getElementById('orderModal').style.display = 'block';
                 document.body.style.overflow = 'hidden'; 
             } catch (error) {

@@ -30,6 +30,7 @@ document.addEventListener("DOMContentLoaded", function() {
 </script>';
 $current_page = basename($_SERVER['PHP_SELF']);
 ?>
+
 <!DOCTYPE html>
 <html lang="lv">
 <head>
@@ -355,7 +356,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
       menuButton.addEventListener("click", toggleSidebar);
       closeBtn.addEventListener("click", toggleSidebar);
       
-      // Close sidebar when clicking outside
+      // Aizver sidebar kad noklikšķina ārpus tā
       sidebar.addEventListener("click", function(e) {
         if (e.target === sidebar) {
           toggleSidebar();

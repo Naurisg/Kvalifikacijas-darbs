@@ -44,12 +44,12 @@
         </div>
         <label class="w-checkbox checkbox-field">
           <input class="w-checkbox-input check-box" name="Checkbox" type="checkbox" id="wf-sign-up-accept-privacy" required="">
-          <span class="checkbox-label w-form-label" for="Checkbox">Apstiprinu kad dati ir pareizi!</span>
+          <span class="checkbox-label w-form-label" for="Checkbox">Piekrītu lietošanas noteikumiem!</span>
         </label>
         <input data-wait="Mazliet uzgaidiet.." type="submit" class="w-users-userformbutton button w-button" value="Reģistrēties">
         <div class="w-users-userformfooter form-card-footer">
           <span>Vai jums jau ir konts?</span>
-          <a href="log-in.php">Log In</a>
+          <a href="log-in">Log In</a>
         </div>
       </form>
     </div>

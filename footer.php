@@ -38,6 +38,15 @@
             Svētdiena Slēgts
           </p>
         </div>
+        <div class="footer-links-container">
+          <h5 class="footer-header">Apmaksas veidi</h5>
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; align-items: center; margin-top: 10px;">
+            <img src="/Vissdarbam/images/mastercard.png" alt="Mastercard" style="height:32px;max-width:70px;justify-self:center;">
+            <img src="/Vissdarbam/images/visa.jpg" alt="Visa" style="height:32px;max-width:70px;justify-self:center;">
+            <img src="/Vissdarbam/images/americanexpress.png" alt="American Express" style="height:32px;max-width:70px;justify-self:center;">
+            <img src="/Vissdarbam/images/googlepay.png" alt="Google Pay" style="height:32px;max-width:70px;justify-self:center;">
+          </div>
+        </div>
       </div>
     </div>
     <section>

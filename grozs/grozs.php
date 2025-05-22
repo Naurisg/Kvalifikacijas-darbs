@@ -232,7 +232,25 @@ foreach ($cart as $product) {
         <?php endforeach; ?>
       </ul>
       <div class="cart-total">
-        <h3>Kopējā summa: €<?php echo number_format($totalPrice, 2); ?></h3>
+        <div class="cart-total">Preču summa: €<?php echo number_format($totalPrice, 2); ?></div>
+        <?php
+          // PVN (VAT) 21% no Preču summa
+          $pvn = $totalPrice * 0.21;
+          $delivery = ($totalPrice >= 100) ? 0 : 10;
+          $finalTotal = $totalPrice + $pvn + $delivery;
+        ?>
+        <div class="cart-total">PVN (21%): €<?php echo number_format($pvn, 2); ?></div>
+        <div class="cart-total">
+          Piegādes cena: 
+          <?php if ($delivery == 0): ?>
+            <span style="color:green;font-weight:bold;">Bezmaksas</span>
+          <?php else: ?>
+            €<?php echo number_format($delivery, 2); ?>
+          <?php endif; ?>
+        </div>
+        <div class="cart-total" style="margin-top:10px;">
+          <strong>Kopējā cena: €<?php echo number_format($finalTotal, 2); ?></strong>
+        </div>
         <button class="checkout-button" onclick="window.location.href='adress.php'">Noformēt sūtījumu</button>
       </div>
     <?php else: ?>

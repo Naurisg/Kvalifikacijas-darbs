@@ -70,6 +70,9 @@ try {
         $totalAmount += $price * $quantity;
     }
 
+    // Izmanto faktiski samaksāto summu no Stripe sesijas (amount_total centos)
+    $paidAmount = isset($session->amount_total) ? $session->amount_total / 100 : $totalAmount;
+
     // Ģenerē unikālu pasūtījuma ID
     $orderId = uniqid('order_');
 
@@ -105,7 +108,7 @@ try {
     $newOrder = [
         'order_id' => $orderId,
         'items' => $cart,
-        'total_amount' => $totalAmount,
+        'total_amount' => $paidAmount,
         'created_at' => date('Y-m-d H:i:s'),
         'status' => 'Pending',
         'address' => $address

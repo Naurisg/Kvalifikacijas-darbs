@@ -371,9 +371,24 @@ try {
             </li>
           <?php endforeach; ?>
         </ul>
-        
+        <?php
+          // PVN (VAT) 21% no Preču summas
+          $pvn = $totalPrice * 0.21;
+          $delivery = ($totalPrice >= 100) ? 0 : 10;
+          $finalTotal = $totalPrice + $pvn + $delivery;
+        ?>
+        <div class="order-total">Preču summa: €<?php echo number_format($totalPrice, 2); ?></div>
+        <div class="order-total">PVN (21%): €<?php echo number_format($pvn, 2); ?></div>
         <div class="order-total">
-          <p>Kopējā summa: €<?php echo number_format($totalPrice, 2); ?></p>
+          Piegādes cena: 
+          <?php if ($delivery == 0): ?>
+            <span style="color:green;font-weight:bold;">Bezmaksas</span>
+          <?php else: ?>
+            €<?php echo number_format($delivery, 2); ?>
+          <?php endif; ?>
+        </div>
+        <div class="order-total" style="margin-top:10px;">
+          <strong>Kopējā cena: €<?php echo number_format($finalTotal, 2); ?></strong>
         </div>
       </div>
     </div>
@@ -441,7 +456,7 @@ try {
     document.getElementById('addressForm').addEventListener('submit', function (e) {
         e.preventDefault();
 
-        // Collect form data
+        // Iegūst formu datus
         const formData = {
             name: document.getElementById('name').value,
             email: document.getElementById('email').value,

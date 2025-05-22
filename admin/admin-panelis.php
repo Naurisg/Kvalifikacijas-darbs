@@ -606,9 +606,12 @@ fetch('get_products.php')
                     <option value="Atcelts">Atcelts</option>
                 </select>
             </div>
-            <div class="modal-total">
-                Kopējā summa: <span id="modalTotalPrice">0.00</span> EUR
-            </div>
+            <div class="modal-total" style="line-height: 1.6;">
+            <div>Preču summa: <span id="modalItemsPrice">0.00</span> EUR</div>
+            <div>PVN (21%): <span id="modalVatAmount">0.00</span> EUR</div>
+            <div>Piegādes cena: <span id="modalShippingPrice">0.00</span></div>
+            <div>Kopējā summa: <span id="modalTotalPrice">0.00</span> EUR</div>
+        </div>
         </div>
 
         <div class="modal-address" style="margin-bottom: 20px;">
@@ -1000,7 +1003,7 @@ function showOrderDetails(order) {
     currentOrderId = order.id;
     const orderDetailsTable = document.getElementById('orderDetailsTable');
     orderDetailsTable.innerHTML = '';
-    let totalPrice = 0;
+    let itemsPrice = 0;
 
     document.getElementById('modalOrderId').textContent = order.id;
     document.getElementById('modalClientName').textContent = order.client_name;
@@ -1024,13 +1027,13 @@ function showOrderDetails(order) {
     try {
         const products = Array.isArray(order.products) ? order.products : [];
         products.forEach(product => {
-            const images = product.bilde ? product.bilde.split(',') : []; // Handle multiple images
-            const firstImage = images.length > 0 ? images[0].trim() : 'placeholder.jpg'; // Use the first image or fallback
+            const images = product.bilde ? product.bilde.split(',') : [];
+            const firstImage = images.length > 0 ? images[0].trim() : 'placeholder.jpg';
 
             const itemPrice = parseFloat(product.cena || 0);
             const quantity = parseInt(product.quantity || 0);
             const itemTotal = itemPrice * quantity;
-            totalPrice += itemTotal;
+            itemsPrice += itemTotal;
 
             const row = document.createElement('tr');
             row.innerHTML = `
@@ -1044,11 +1047,30 @@ function showOrderDetails(order) {
             orderDetailsTable.appendChild(row);
         });
 
-        // Atjaunina kopējo cenu modālā
-        document.getElementById('modalTotalPrice').textContent = totalPrice.toFixed(2);
+        // Aprēķina PVN un piegādes cenu pēc preču summas
+        const vatAmount = itemsPrice * 0.21;
+        let shippingPrice = 10;
+        let shippingDisplay = "10.00 EUR";
+        if (itemsPrice >= 100) {
+            shippingPrice = 0;
+            shippingDisplay = "Bezmaksas";
+        }
+        // Ja ir saglabāta total_amount, izmanto to kā kopējo summu modālī
+        let modalTotalPrice = itemsPrice + vatAmount + shippingPrice;
+        if (order.total_amount) {
+            modalTotalPrice = parseFloat(order.total_amount);
+        }
+
+        // Uzstāda vērtības modāla laukiem
+        document.getElementById('modalItemsPrice').textContent = itemsPrice.toFixed(2);
+        document.getElementById('modalVatAmount').textContent = vatAmount.toFixed(2);
+        document.getElementById('modalShippingPrice').textContent = shippingDisplay;
+        document.getElementById('modalTotalPrice').textContent = modalTotalPrice.toFixed(2);
+
         document.getElementById('orderModal').style.display = 'block';
         document.body.style.overflow = 'hidden';
     } catch (error) {
+        // Kļūda ielādējot pasūtījuma preces
         console.error('Kļūda ielādējot pasūtījuma preces:', error);
         alert('Kļūda ielādējot pasūtījuma detaļas.');
     }
@@ -1281,11 +1303,13 @@ fetch('get_products.php')
                 ${(function() {
                     try {
                         const images = product.bilde.split(',');
+
                         return images.map(image => `<img src="../${image}" style="width: 50px; height: 50px; object-fit: cover; margin-right: 5px; border-radius: 4px;">`).join('');
                     } catch (e) {
                         return `<img src="../${product.bilde}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">`;
                     }
                 })()}
+
             </td>
                     <td>${product.kategorija}</td>
                     <td>${product.cena}€</td>
