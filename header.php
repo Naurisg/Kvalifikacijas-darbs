@@ -1,5 +1,5 @@
 <?php
-// Check if user is logged in
+// Pārbauda, vai lietotājs ir ielogojies
 echo '<script>
 document.addEventListener("DOMContentLoaded", function() {
   fetch("/Vissdarbam/check-login-status.php")
@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", function() {
       }
     })
     .catch(error => {
-      console.error("Error:", error);
+      console.error("Kļūda:", error);
     });
 });
 </script>';
@@ -52,7 +52,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
   <style>
-    /* Enhanced Scrollbar */
+    /* Uzlabotā ritjosla */
     ::-webkit-scrollbar {
       width: 10px;
       height: 10px;
@@ -70,7 +70,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
       background: #a8a8a8;
     }
     
-    /* Modern Sidebar */
+    /*Sidebar */
     #sidebar {
       display: none;
       position: fixed;
@@ -161,7 +161,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
       opacity: 0.8;
     }
     
-    /* Header improvements */
     .header-icon {
       width: 20px;
       height: 20px;
@@ -178,7 +177,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
       vertical-align: middle;
     }
     
-    /* Active page indicator */
+    /* Aktīvais lapas stils */
     .active-page {
       position: relative;
       color: #333;
@@ -195,7 +194,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
       background-color: #333;
     }
     
-    /* Menu button animation */
+    /* Menu pogas animācija */
     #menuButton {
       transition: all 0.3s ease;
     }
@@ -204,7 +203,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
       transform: rotate(90deg);
     }
     
-    /* New Header Styles */
     .nav-bar {
       background-color: #fff;
       box-shadow: 0 2px 15px rgba(0,0,0,0.1);
@@ -291,7 +289,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
       display: none;
     }
     
-    /* Responsive adjustments */
+    /* Responsivitāte */
     @media (max-width: 1024px) {
       .nav-menu {
         gap: 8px;
@@ -307,80 +305,174 @@ $current_page = basename($_SERVER['PHP_SELF']);
       }
     }
     
+    /* Mobilie stili (≤ 767px)*/
     @media (max-width: 767px) {
       #sidebar .content {
         width: 280px;
         padding: 20px;
       }
-      
       .sidebar-link {
         padding: 10px 12px;
         font-size: 14px;
       }
-      
+      /* Paslēpt parasto navigāciju*/
       .nav-menu {
-        gap: 6px;
+        display: none !important;
+      }
+      /* Pēc noklusējuma paslēpt mobilo izvēlni, rādīt tikai tad, kad ir .active */
+      .mobile-menu {
+        display: none !important;
+      }
+      .mobile-menu.active {
+        display: flex !important;
+        opacity: 1;
+      }
+      /* Burgera izvēlnes stili */
+      .burger-menu {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        width: 30px;
+        height: 21px;
+        cursor: pointer;
+        margin-left: 15px;
       }
       
-      .nav-text {
+      .burger-line {
+        width: 100%;
+        height: 3px;
+        background-color: #333;
+        border-radius: 3px;
+        transition: all 0.3s ease;
+      }
+      
+      /* Burgera izvēlnes animācija */
+      .burger-menu.active .burger-line:nth-child(1) {
+        transform: translateY(9px) rotate(45deg);
+      }
+      
+      .burger-menu.active .burger-line:nth-child(2) {
+        opacity: 0;
+      }
+      
+      .burger-menu.active .burger-line:nth-child(3) {
+        transform: translateY(-9px) rotate(-45deg);
+      }
+      
+      /* Mobilās izvēlnes pārklājums */
+      .mobile-menu {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.9);
+        z-index: 1000;
         display: none;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
       }
       
-      .nav-link {
-        padding: 6px;
+      .mobile-menu.active {
+        display: flex;
+        opacity: 1;
+      }
+      
+      /* Mobilā izvēlnes saturs */
+      .mobile-menu-content {
+        background: white;
+        width: 90%;
+        max-width: 350px;
+        border-radius: 10px;
+        padding: 30px 20px;
+        transform: translateY(20px);
+        transition: transform 0.3s ease;
+      }
+      
+      .mobile-menu.active .mobile-menu-content {
+        transform: translateY(0);
+      }
+      
+      /* Mobilās navigācijas saites */
+      .mobile-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      .mobile-nav-link {
+        padding: 12px 15px;
+        color: #333;
+        text-decoration: none;
+        font-size: 18px;
+        border-radius: 5px;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+      }
+      
+      .mobile-nav-link:hover {
+        background-color: #f5f5f5;
+      }
+      
+      .mobile-nav-link.active {
+        background-color: #f0f0f0;
+        font-weight: 600;
+      }
+      
+      .mobile-nav-icon {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+      }
+      
+      /* Izvēršanas poga */
+      .mobile-menu-close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        color: white;
+        font-size: 30px;
+        cursor: pointer;
+      }
+      
+      /* Pielāgot galvenes izkārtojumu */
+      .nav-container {
+        padding: 0 15px !important;
+      }
+      
+      .navbar {
+        width: auto;
       }
       
       .user-actions {
-        margin-left: 10px;
-        padding-left: 10px;
-        gap: 6px;
+        margin-left: auto;
+        border-left: none !important;
+        padding-left: 0 !important;
       }
       
+      /* Slēpt tekstu lietotāja darbībās */
+      .user-action-link .nav-text {
+        display: none !important;
+      }
+      
+      /* pataisa logo mazliet mazaku */
       .logo {
-        height: 40px;
+        height: 35px !important;
+      }
+    }
+    @media (min-width: 768px) {
+      .mobile-menu,
+      .burger-menu {
+        display: none !important;
       }
     }
   </style>
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const menuButton = document.getElementById("menuButton");
-      const sidebar = document.getElementById("sidebar");
-      const closeBtn = document.getElementById("closeSidebar");
-      
-      // Toggle sidebar
-      function toggleSidebar() {
-        sidebar.classList.toggle("open");
-        document.body.style.overflow = sidebar.classList.contains("open") ? "hidden" : "";
-      }
-      
-      menuButton.addEventListener("click", toggleSidebar);
-      closeBtn.addEventListener("click", toggleSidebar);
-      
-      // Aizver sidebar kad noklikšķina ārpus tā
-      sidebar.addEventListener("click", function(e) {
-        if (e.target === sidebar) {
-          toggleSidebar();
-        }
-      });
-      
-      // Check login status for menu button
-      fetch("/Vissdarbam/check-login-status.php")
-        .then(response => response.json())
-        .then(data => {
-          if (data.loggedIn) {
-            menuButton.style.display = "inline-block";
-          } else {
-            menuButton.style.display = "none";
-          }
-        })
-        .catch(error => {
-          console.error("Error:", error);
-        });
-    });
-  </script>
 </head>
 <body>
-  <!-- Sidebars -->
+  <!-- Sānu izvēlnes -->
   <div id="sidebar">
     <div class="content">
       <span id="closeSidebar" class="close-btn" title="Aizvērt">&times;</span>
@@ -401,13 +493,19 @@ $current_page = basename($_SERVER['PHP_SELF']);
     </div>
   </div>
   
-  <!-- Header navigacija -->
+  <!-- Galvenes navigācija -->
   <div data-collapse="small" data-animation="default" data-duration="400" data-easing="ease" data-easing2="ease" role="banner" class="nav-bar w-nav">
     <div class="nav-container w-container">
       <div class="logo-div">
         <a href="/Vissdarbam/index" aria-current="page" class="nav-logo w-inline-block w--current">
           <img src="/Vissdarbam/images/Logo.png" width="125" sizes="(max-width: 479px) 50vw, 125px" srcset="/Vissdarbam/images/Logo-p-500.png 500w, /Vissdarbam/images/Logo-p-800.png 800w, /Vissdarbam/images/Logo.png 960w" alt="Logo" class="logo">
         </a>
+      </div>
+      <!-- Pievieno burgera izvēlnes pogu šeit, vienmēr DOM -->
+      <div class="burger-menu" id="burgerMenuBtn" style="display:none;">
+        <span class="burger-line"></span>
+        <span class="burger-line"></span>
+        <span class="burger-line"></span>
       </div>
       <nav role="navigation" class="navbar w-nav-menu">
         <div class="search-banner"></div>
@@ -448,5 +546,172 @@ $current_page = basename($_SERVER['PHP_SELF']);
       </nav>
     </div>
   </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const menuButton = document.getElementById("menuButton");
+      const sidebar = document.getElementById("sidebar");
+      const closeBtn = document.getElementById("closeSidebar");
+      
+      // Sānu izvēlnes pārslēgšana
+      function toggleSidebar() {
+        sidebar.classList.toggle("open");
+        document.body.style.overflow = sidebar.classList.contains("open") ? "hidden" : "";
+      }
+      
+      menuButton.addEventListener("click", toggleSidebar);
+      closeBtn.addEventListener("click", toggleSidebar);
+      
+      // Aizver sānu izvēlni, kad noklikšķina ārpus tās
+      sidebar.addEventListener("click", function(e) {
+        if (e.target === sidebar) {
+          toggleSidebar();
+        }
+      });
+      
+      // Pārbauda ielogoties statusu izvēlnes pogai
+      fetch("/Vissdarbam/check-login-status.php")
+        .then(response => response.json())
+        .then(data => {
+          if (data.loggedIn) {
+            menuButton.style.display = "inline-block";
+          } else {
+            menuButton.style.display = "none";
+          }
+        })
+        .catch(error => {
+          console.error("Kļūda:", error);
+        });
+
+      // Rāda burgera izvēlni tikai mobilajās ierīcēs
+      function toggleBurgerVisibility() {
+        var burger = document.getElementById('burgerMenuBtn');
+        // Labojums: paslēpj arī mobilo izvēlni, ja maina uz darbvirsmu
+        if (window.innerWidth <= 767) {
+          burger.style.display = 'flex';
+        } else {
+          burger.style.display = 'none';
+          // Aizver mobilo izvēlni, ja tā ir atvērta
+          burger.classList.remove('active');
+          var mobileMenu = document.querySelector('.mobile-menu');
+          if (mobileMenu) {
+            mobileMenu.classList.remove('active');
+            document.body.style.overflow = '';
+          }
+        }
+      }
+      toggleBurgerVisibility();
+      window.addEventListener('resize', toggleBurgerVisibility);
+
+      // Burgera izvēlnes atvēršanas/aizvēršanas loģika
+      var burgerMenu = document.getElementById('burgerMenuBtn');
+      var mobileMenu = document.querySelector('.mobile-menu');
+      if (burgerMenu && mobileMenu) {
+        burgerMenu.addEventListener('click', function() {
+          burgerMenu.classList.toggle('active');
+          mobileMenu.classList.toggle('active');
+          document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
+        });
+        mobileMenu.querySelector('.mobile-menu-close').addEventListener('click', function() {
+          burgerMenu.classList.remove('active');
+          mobileMenu.classList.remove('active');
+          document.body.style.overflow = '';
+        });
+        mobileMenu.querySelectorAll('.mobile-nav-link').forEach(link => {
+          link.addEventListener('click', function() {
+            burgerMenu.classList.remove('active');
+            mobileMenu.classList.remove('active');
+            document.body.style.overflow = '';
+          });
+        });
+      }
+    });
+  </script>
+  <!-- Pievieno mobilo izvēlni HTML dokumenta beigās -->
+  <div class="mobile-menu">
+    <span class="mobile-menu-close">&times;</span>
+    <div class="mobile-menu-content">
+      <nav class="mobile-nav" id="mobileNavLinks">
+        <!-- Redzams tikai mobilajās ierīcēs, kad .mobile-menu.active ir iestatīts ar JS -->
+        <a href="/Vissdarbam/index" class="mobile-nav-link <?php echo $current_page == 'index.php' ? 'active' : ''; ?>">
+          Sākums
+        </a>
+        <a href="/Vissdarbam/precu-katalogs" class="mobile-nav-link <?php echo $current_page == 'precu-katalogs.php' ? 'active' : ''; ?>">
+          Preču Katalogs
+        </a>
+        <a href="/Vissdarbam/logo-uzdruka" class="mobile-nav-link <?php echo $current_page == 'logo-uzdruka.php' ? 'active' : ''; ?>">
+          Logo uzdruka
+        </a>
+        <a href="/Vissdarbam/par-mums" class="mobile-nav-link <?php echo $current_page == 'par-mums.php' ? 'active' : ''; ?>">
+          Par mums
+        </a>
+        <a href="/Vissdarbam/kontakti" class="mobile-nav-link <?php echo $current_page == 'kontakti.php' ? 'active' : ''; ?>">
+          Kontakti
+        </a>
+        <a href="/Vissdarbam/reviews" class="mobile-nav-link <?php echo $current_page == 'reviews.php' ? 'active' : ''; ?>">
+          Atsauksmes
+        </a>
+        <hr style="border: none; border-top: 3px solid #eee; margin: 15px 0;">
+        <!-- Autorizācijas/lietošanas saites tiks apstrādātas ar JS zemāk -->
+        <a href="/Vissdarbam/log-in" id="mobileLoginLink" class="mobile-nav-link <?php echo $current_page == 'log-in.php' ? 'active' : ''; ?>">
+          <img src="/Vissdarbam/images/login.png" alt="Ienākt" style="width:20px;height:20px;vertical-align:middle;margin-right:8px;"> Ienākt
+        </a>
+        <a href="/Vissdarbam/sign-up" id="mobileRegisterLink" class="mobile-nav-link <?php echo $current_page == 'sign-up.php' ? 'active' : ''; ?>">
+          <img src="/Vissdarbam/images/register.png" alt="Reģistrēties" style="width:20px;height:20px;vertical-align:middle;margin-right:8px;"> Reģistrēties
+        </a>
+        <a href="/Vissdarbam/user-account" id="mobileProfileLink" class="mobile-nav-link <?php echo $current_page == 'user-account.php' ? 'active' : ''; ?>" style="display:none;">
+          <img src="/Vissdarbam/images/profile-user.png" alt="Profils" style="width:20px;height:20px;vertical-align:middle;margin-right:8px;"> Profils
+        </a>
+        <a href="/Vissdarbam/grozs/grozs" id="mobileCartLink" class="mobile-nav-link <?php echo $current_page == 'grozs.php' ? 'active' : ''; ?>" style="display:none;">
+          <img src="/Vissdarbam/images/Grozs.png" alt="Grozs" style="width:20px;height:20px;vertical-align:middle;margin-right:8px;"> Grozs
+        </a>
+        <a href="/Vissdarbam/order-history" id="mobileOrderHistoryLink" class="mobile-nav-link <?php echo $current_page == 'order-history.php' ? 'active' : ''; ?>" style="display:none;">
+          <img src="/Vissdarbam/images/pasutijumi.png" alt="Pasūtījumu vēsture" style="width:20px;height:20px;vertical-align:middle;margin-right:8px;"> Pasūtījumu vēsture
+        </a>
+      </nav>
+    </div>
+  </div>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Mobilās navigācijas ielogoties/izlogoties/profils loģika
+      fetch("/Vissdarbam/check-login-status.php")
+        .then(response => response.json())
+        .then(data => {
+          // Mobilās navigācijas elementi
+          var mobileLoginLink = document.getElementById("mobileLoginLink");
+          var mobileRegisterLink = document.getElementById("mobileRegisterLink");
+          var mobileProfileLink = document.getElementById("mobileProfileLink");
+          var mobileCartLink = document.getElementById("mobileCartLink");
+          var mobileOrderHistoryLink = document.getElementById("mobileOrderHistoryLink");
+          if (data.loggedIn) {
+            // Maina ielogoties uz izlogoties
+            if (mobileLoginLink) {
+              mobileLoginLink.innerHTML = '<img src="/Vissdarbam/images/logout.png" alt="Izlogoties" style="width:20px;height:20px;vertical-align:middle;margin-right:8px;"> Izlogoties';
+              mobileLoginLink.href = "/Vissdarbam/log-out.php";
+              mobileLoginLink.title = "Izlogoties";
+            }
+            // Paslēpj reģistrēties, rāda profilu/grozs/pasūtījumu vēsturi
+            if (mobileRegisterLink) mobileRegisterLink.style.display = "none";
+            if (mobileProfileLink) mobileProfileLink.style.display = "flex";
+            if (mobileCartLink) mobileCartLink.style.display = "flex";
+            if (mobileOrderHistoryLink) mobileOrderHistoryLink.style.display = "flex";
+          } else {
+            // Rāda ielogoties/reģistrēties, paslēpj profilu/grozs/pasūtījumu vēsturi
+            if (mobileLoginLink) {
+              mobileLoginLink.innerHTML = '<img src="/Vissdarbam/images/login.png" alt="Ienākt" style="width:20px;height:20px;vertical-align:middle;margin-right:8px;"> Ienākt';
+              mobileLoginLink.href = "/Vissdarbam/log-in";
+              mobileLoginLink.title = "Ienākt";
+            }
+            if (mobileRegisterLink) mobileRegisterLink.style.display = "flex";
+            if (mobileProfileLink) mobileProfileLink.style.display = "none";
+            if (mobileCartLink) mobileCartLink.style.display = "none";
+            if (mobileOrderHistoryLink) mobileOrderHistoryLink.style.display = "none";
+          }
+        })
+        .catch(error => {
+          console.error("Kļūda:", error);
+        });
+    });
+  </script>
 </body>
 </html>

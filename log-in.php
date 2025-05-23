@@ -29,6 +29,7 @@
             <img src="images/eye-icon.png" alt="Show Password" id="eye-icon" style="width: 20px; height: 20px;">
           </span>
         </div>
+        <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"></div>
         <input type="submit" data-wait="Please wait..." class="w-users-userformbutton button w-button" value="Ienākt">
         <div class="w-users-userformfooter form-card-footer"><span>Nav izveidots konts?</span>
           <a href="sign-up.php">Reģistrēties</a>
@@ -42,11 +43,20 @@
   </div>
   <script src="https://d3e54v103j8qbb.cloudfront.net/js/jquery-3.5.1.min.dc5e7f18c8.js?site=66f12005df0203b01c953e53" type="text/javascript" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
   <script src="js/script.js" type="text/javascript"></script>
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
   <script>
     document.getElementById('loginForm').addEventListener('submit', function(event) {
-      event.preventDefault(); // Prevent default form submission
+      event.preventDefault(); //  Novērš formu no noklusējuma iesniegšanas
 
-      const formData = new FormData(this); // Gather form data
+      const formData = new FormData(this); // Iegūst form datus
+
+      // Iegūt reCAPTCHA atbildes tokenu
+      const recaptchaResponse = grecaptcha.getResponse();
+      if (!recaptchaResponse) {
+        alert('Lūdzu, apstipriniet, ka neesat robots.');
+        return;
+      }
+      formData.append('g-recaptcha-response', recaptchaResponse);
 
       fetch('process-login.php', {
         method: 'POST',
@@ -68,20 +78,20 @@
       });
     });
 
-    // Add "show password" toggle functionality
+    // pievieno notikumu, lai parādītu vai paslēptu paroli
     document.getElementById('toggle-password').addEventListener('click', function() {
       const passwordField = document.getElementById('wf-log-in-password');
       const eyeIcon = document.getElementById('eye-icon');
       if (passwordField.type === 'password') {
         passwordField.type = 'text';
-        eyeIcon.src = 'images/eye-close.png'; // Change to "eye-slash" icon
+        eyeIcon.src = 'images/eye-close.png'; // Nomaina uz "aizvērtā acs" ikonu
       } else {
         passwordField.type = 'password';
-        eyeIcon.src = 'images/eye-icon.png'; // Change back to "eye" icon
+        eyeIcon.src = 'images/eye-icon.png'; // Nomaina uz "atvērtā acs" ikonu
       }
     });
 
-    // Check if user is logged in and update header
+    // Pārbauda, vai lietotājs ir pieteicies
     document.addEventListener('DOMContentLoaded', function() {
       fetch('check-login-status.php')
         .then(response => response.json())
