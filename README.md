@@ -1,7 +1,7 @@
 TO DO:
 - [X] Izveidot plānu projektam
 - [X] Izveidot datubāzi mājas lapai
-- [x] Pievienot header ar logo kreisajā malā un pogām kas atrodas labajā pusē
+- [x] Pievienot header ar logo kreisajā malā un pogām
 - [x] Pievienot Image main page
 - [x] Pievienot animācijas visam projektam
 - [x] Izveidot "Logo uzdruka" lapu
@@ -19,7 +19,8 @@ TO DO:
 - [x] Izveidot kad admin redz veiktos pasūtijumus
 - [x] Izveidot opciju apstiprināt sūtijumu no admin panel un kad to redz lietotāja pusē
 - [x] Izveidot Atsauksmes page
-- [ ] Izveidot Noteikumi page??
+- [x] Izveidot Noteikumi page
+- [x] Izveidot privātuma politiku
 - [x] Pievienot footer
 - [x] Izveidot order-history kur lietotājs var apskatīt veiktos pasūtijumus
 - [x] Izveidot user profile kur lietotājam iespējams rediģēt savu informāciju
@@ -43,8 +44,6 @@ TO DO:
 - [x] Pielikt opciju pievienot grozam
 - [x] Pievienot opciju nopirkt preci
 - [x] Pievienot search bar pie produktiem iekš jau kādas no kategorijām
-- [ ] Pievienot dark mode
-- [ ] uztaisīt lai darkmode paliek pēc refresh
 - [x] pievienotas preces grozam nepazud pēc page reload
 - [x] Pievienot opciju nopirkt preci mājas lapā
 - [ ] Iespejams pievienot opciju kad nopērkot klients preci tam atnāk pavadzīme epastā vai kads paziņojums par pirkumu
