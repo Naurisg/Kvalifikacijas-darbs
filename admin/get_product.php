@@ -10,11 +10,11 @@ if (!isset($_GET['id'])) {
 $product_id = $_GET['id'];
 
 try {
-    $db = new PDO('sqlite:../Datubazes/products.db');
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    // Iekļauj datubāzes savienojumu no db_connect.php
+    require_once '../db_connect.php';
 
-    $stmt = $db->prepare("SELECT * FROM products WHERE id = :id");
-    $stmt->execute(['id' => $product_id]);
+    $stmt = $pdo->prepare("SELECT * FROM products WHERE id = :id");
+    $stmt->execute([':id' => $product_id]);
     $product = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($product) {

@@ -1,5 +1,6 @@
 <?php
 require '../vendor/autoload.php';
+require_once '../db_connect.php';
 session_start();
 
 if (!isset($_SESSION['user_id'])) {
@@ -30,11 +31,8 @@ try {
         throw new Exception('Maksājums nav pabeigts. Lūdzu, aizpildiet maksājumu, lai turpinātu.');
     }
 
-    $db = new PDO('sqlite:../Datubazes/client_signup.db');
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
     // Iegūst lietotāja datus
-    $stmt = $db->prepare('SELECT cart, orders FROM clients WHERE id = :user_id');
+    $stmt = $pdo->prepare('SELECT cart, orders FROM clients WHERE id = :user_id');
     $stmt->execute([':user_id' => $_SESSION['user_id']]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -77,16 +75,14 @@ try {
     $orderId = uniqid('order_');
 
     // Atjaunina produktu daudzumu datubāzē pēc veiksmīga maksājuma
-    $productDb = new PDO('sqlite:../Datubazes/products.db');
-    $productDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
+    // Use $pdo for product updates as well
     foreach ($cart as $product) {
         $productId = isset($product['id']) ? $product['id'] : null;
         $quantityBought = isset($product['quantity']) ? intval($product['quantity']) : 0;
 
         if ($productId && $quantityBought > 0) {
             // Iegūst pašreizējo daudzumu
-            $stmt = $productDb->prepare("SELECT quantity FROM products WHERE id = :id");
+            $stmt = $pdo->prepare("SELECT quantity FROM products WHERE id = :id");
             $stmt->execute([':id' => $productId]);
             $currentProduct = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -95,7 +91,7 @@ try {
                 $newQuantity = max(0, $currentQuantity - $quantityBought);
 
                 // Atjaunina daudzumu
-                $updateStmt = $productDb->prepare("UPDATE products SET quantity = :quantity WHERE id = :id");
+                $updateStmt = $pdo->prepare("UPDATE products SET quantity = :quantity WHERE id = :id");
                 $updateStmt->execute([
                     ':quantity' => $newQuantity,
                     ':id' => $productId
@@ -117,7 +113,7 @@ try {
     $orders[] = $newOrder;
 
     // Atjauno pasūtījumus un notīra grozu datubāzē
-    $updateStmt = $db->prepare('UPDATE clients SET orders = :orders, cart = :cart WHERE id = :user_id');
+    $updateStmt = $pdo->prepare('UPDATE clients SET orders = :orders, cart = :cart WHERE id = :user_id');
     $updateStmt->execute([
         ':orders' => json_encode($orders),
         ':cart' => json_encode([]),

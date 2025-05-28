@@ -2,41 +2,47 @@
 session_start();
 include '../header.php';
 
+// Ja lietotājs nav autorizējies
 if (!isset($_SESSION['user_id'])) {
     header('Location: ../login.php');
     exit();
 }
 
-try {
-    $clientDb = new PDO('sqlite:../Datubazes/client_signup.db');
-    $clientDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+// Iegūst bagātināto grozu no sesijas
+$cart = $_SESSION['cart'] ?? [];
 
-    // Iegūst cart, name, email, and phone no datubāzes
-    $stmt = $clientDb->prepare('SELECT cart, name, email, phone FROM clients WHERE id = :user_id');
+// Ja grozs ir tukšs — pāradresē atpakaļ
+if (empty($cart)) {
+    header('Location: grozs.php');
+    exit();
+}
+
+// Lietotāja dati no sesijas vai pēc vajadzības no datubāzes
+require '../db_connect.php';
+try {
+    $stmt = $pdo->prepare('SELECT name, email, phone FROM clients WHERE id = :user_id');
     $stmt->execute([':user_id' => $_SESSION['user_id']]);
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    $cart = $result['cart'] ? json_decode($result['cart'], true) : [];
     $userData = [
         'name' => $result['name'] ?? '',
         'email' => $result['email'] ?? '',
         'phone' => $result['phone'] ?? ''
     ];
-    
-    if (empty($cart)) {
-        header('Location: grozs.php');
-        exit();
-    }
-    
-    $totalPrice = 0;
-    foreach ($cart as $product) {
-        $totalPrice += $product['cena'] * ($product['quantity'] ?? 1);
-    }
-} catch (PDOException $e) {
-    echo '<p>Kļūda ielādējot grozu: ' . htmlspecialchars($e->getMessage()) . '</p>';
-    exit();
+} catch (Exception $e) {
+    $userData = ['name' => '', 'email' => '', 'phone' => ''];
+}
+
+// Aprēķina kopējo cenu
+$totalPrice = 0;
+foreach ($cart as $product) {
+    $quantity = isset($product['quantity']) ? (int)$product['quantity'] : 1;
+    $price = isset($product['cena']) ? (float)$product['cena'] : 0;
+    $totalPrice += $price * $quantity;
 }
 ?>
+
+
 <!DOCTYPE html>
 <html lang="lv" data-wf-page="66f12005df0203b01c953ebe" data-wf-site="66f12005df0203b01c953e53">
 <head>

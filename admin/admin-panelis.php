@@ -8,9 +8,9 @@ if (!isset($_SESSION['user_id'])) {
 $user_role = $_SESSION['user_role'] ?? '';
 $admin_id = $_SESSION['user_id'] ?? '';
 
+require_once '../db_connect.php';
+
 try {
-    $pdo = new PDO('sqlite:../Datubazes/admin_signup.db');
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $stmt = $pdo->prepare('SELECT name FROM admin_signup WHERE id = :id');
     $stmt->execute(['id' => $admin_id]);
     $admin = $stmt->fetch(PDO::FETCH_ASSOC);

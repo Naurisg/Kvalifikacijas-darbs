@@ -2,13 +2,13 @@
 header('Content-Type: application/json');
 
 try {
-    $db = new PDO('sqlite:../Datubazes/subscribers.db');
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
+    // Iekļauj datubāzes savienojumu no db_connect.php
+    require_once '../db_connect.php';
+
     $id = $_POST['id'];
-    $stmt = $db->prepare("DELETE FROM subscribers WHERE id = :id");
-    $stmt->execute(['id' => $id]);
-    
+    $stmt = $pdo->prepare("DELETE FROM subscribers WHERE id = :id");
+    $stmt->execute([':id' => $id]);
+
     echo json_encode(['success' => true]);
 } catch (PDOException $e) {
     echo json_encode(['success' => false, 'message' => $e->getMessage()]);

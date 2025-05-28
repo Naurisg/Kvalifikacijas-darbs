@@ -1,17 +1,16 @@
 <?php
 require_once 'auth_check.php';
 
+require_once '../db_connect.php';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
-        $db = new PDO('sqlite:../Datubazes/client_signup.db');
-        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
         $email = $_POST['email'];
         $name = $_POST['name'];
         $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
         $accept_privacy_policy = $_POST['accept_privacy_policy'];
 
-        $stmt = $db->prepare("INSERT INTO clients (email, name, password, accept_privacy_policy) VALUES (:email, :name, :password, :accept_privacy_policy)");
+        $stmt = $pdo->prepare("INSERT INTO clients (email, name, password, accept_privacy_policy) VALUES (:email, :name, :password, :accept_privacy_policy)");
         $stmt->execute([
             'email' => $email,
             'name' => $name,

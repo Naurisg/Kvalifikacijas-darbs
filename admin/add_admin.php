@@ -1,28 +1,27 @@
 <?php
 require_once 'auth_check.php';
 
+require_once '../db_connect.php';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    try {
-        $db = new PDO('sqlite:../Datubazes/admin_signup.db');
-        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        try {
+            $name = $_POST['name'];
+            $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+            $email = $_POST['email'];
+            $role = $_POST['role'];
 
-        $name = $_POST['name'];
-        $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-        $email = $_POST['email'];
-        $role = $_POST['role'];
+            $stmt = $pdo->prepare("INSERT INTO admin_signup (name, password, email, role) VALUES (:name, :password, :email, :role)");
+            $stmt->execute([
+                'name' => $name,
+                'password' => $password,
+                'email' => $email,
+                'role' => $role
+            ]);
 
-        $stmt = $db->prepare("INSERT INTO admin_signup (name, password, email, role) VALUES (:name, :password, :email, :role)");
-        $stmt->execute([
-            'name' => $name,
-            'password' => $password,
-            'email' => $email,
-            'role' => $role
-        ]);
-
-        $success_message = "Administrators veiksmīgi pievienots!";
-    } catch(PDOException $e) {
-        $error_message = "Kļūda: " . $e->getMessage();
-    }
+            $success_message = "Administrators veiksmīgi pievienots!";
+        } catch(PDOException $e) {
+            $error_message = "Kļūda: " . $e->getMessage();
+        }
 }
 ?>
 

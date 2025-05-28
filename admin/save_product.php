@@ -15,32 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 try {
-    // Izveido savienojumu ar datubāzi
-    $db = new PDO('sqlite:../Datubazes/products.db');
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
-    // Pārbauda un izveido tabulu, ja tā neeksistē
-    $db->exec('PRAGMA foreign_keys = OFF;');
-    $db->exec('CREATE TABLE IF NOT EXISTS products (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nosaukums TEXT NOT NULL,
-        apraksts TEXT NOT NULL,
-        bilde TEXT NOT NULL,
-        kategorija TEXT NOT NULL,
-        cena DECIMAL(10,2) NOT NULL,
-        quantity INTEGER DEFAULT 0 NOT NULL,
-        sizes TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )');
-
-    // Pārbauda un pievieno trūkstošās kolonnas
-    $columns = $db->query("PRAGMA table_info(products)")->fetchAll(PDO::FETCH_COLUMN, 1);
-    if (!in_array('quantity', $columns)) {
-        $db->exec('ALTER TABLE products ADD COLUMN quantity INTEGER DEFAULT 0 NOT NULL');
-    }
-    if (!in_array('sizes', $columns)) {
-        $db->exec('ALTER TABLE products ADD COLUMN sizes TEXT');
-    }
+    // Iekļauj datubāzes savienojumu no db_connect.php
+    require_once '../db_connect.php';
 
     // Validē obligātos laukus
     $required_fields = ['nosaukums', 'apraksts', 'kategorija', 'cena', 'quantity'];
@@ -131,7 +107,7 @@ try {
     $bilde_path = implode(',', $image_paths);
 
     // Sagatavo SQL pieprasījumu produkta pievienošanai
-    $stmt = $db->prepare('INSERT INTO products (nosaukums, apraksts, bilde, kategorija, cena, quantity, sizes) 
+    $stmt = $pdo->prepare('INSERT INTO products (nosaukums, apraksts, bilde, kategorija, cena, quantity, sizes) 
                          VALUES (:nosaukums, :apraksts, :bilde, :kategorija, :cena, :quantity, :sizes)');
 
     // Izpilda pieprasījumu ar datiem

@@ -1,6 +1,8 @@
 <?php
 session_start();
 
+require_once 'db_connect.php';
+
 if (isset($_GET['fetch_review']) && $_GET['fetch_review'] == '1' && isset($_GET['order_id'])) {
     if (!isset($_SESSION['user_id'])) {
         http_response_code(403);
@@ -8,10 +10,9 @@ if (isset($_GET['fetch_review']) && $_GET['fetch_review'] == '1' && isset($_GET[
         exit();
     }
     try {
-        $reviewsDb = new PDO('sqlite:Datubazes/reviews.db');
-        $reviewsDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        global $pdo;
 
-        $stmt = $reviewsDb->prepare('SELECT review_text, images, rating FROM reviews WHERE user_id = :user_id AND order_id = :order_id');
+        $stmt = $pdo->prepare('SELECT review_text, images, rating FROM reviews WHERE user_id = :user_id AND order_id = :order_id');
         $stmt->execute([
             ':user_id' => $_SESSION['user_id'],
             ':order_id' => $_GET['order_id']
@@ -34,8 +35,7 @@ if (isset($_GET['fetch_review']) && $_GET['fetch_review'] == '1' && isset($_GET[
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id'], $_POST['review_text'], $_POST['rating'])) {
     try {
-        $reviewsDb = new PDO('sqlite:Datubazes/reviews.db');
-        $reviewsDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        global $pdo;
 
         $uploadedImages = [];
         if (!empty($_FILES['review_images']['name'][0])) {
@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id'], $_POST['r
         }
         $imagesJson = json_encode($uploadedImages);
 
-        $insertStmt = $reviewsDb->prepare('INSERT INTO reviews (user_id, order_id, review_text, images, rating) VALUES (:user_id, :order_id, :review_text, :images, :rating)');
+        $insertStmt = $pdo->prepare('INSERT INTO reviews (user_id, order_id, review_text, images, rating) VALUES (:user_id, :order_id, :review_text, :images, :rating)');
         $insertStmt->execute([
             ':user_id' => $_SESSION['user_id'],
             ':order_id' => $_POST['order_id'],
@@ -80,6 +80,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id'], $_POST['r
 
 include 'header.php';
 
+require_once 'db_connect.php';
+
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit();
@@ -87,10 +89,9 @@ if (!isset($_SESSION['user_id'])) {
 
 // Iegūst sūtījumus no datubāzes
 try {
-    $clientDb = new PDO('sqlite:Datubazes/client_signup.db');
-    $clientDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    global $pdo;
 
-    $stmt = $clientDb->prepare('SELECT orders FROM clients WHERE id = :user_id');
+    $stmt = $pdo->prepare('SELECT orders FROM clients WHERE id = :user_id');
     $stmt->execute([':user_id' => $_SESSION['user_id']]);
     $orders = $stmt->fetchColumn();
     $orders = $orders ? json_decode($orders, true) : [];
@@ -101,10 +102,7 @@ try {
     });
 
     // Pieslēdzas atsauksmju datubāzei, lai pārbaudītu esošās atsauksmes
-    $reviewsDb = new PDO('sqlite:Datubazes/reviews.db');
-    $reviewsDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    $reviewCheckStmt = $reviewsDb->prepare('SELECT COUNT(*) FROM reviews WHERE user_id = :user_id AND order_id = :order_id');
+    $reviewCheckStmt = $pdo->prepare('SELECT COUNT(*) FROM reviews WHERE user_id = :user_id AND order_id = :order_id');
     
 foreach ($orders as &$order) {
     // Debug: Log the address data to verify
@@ -148,7 +146,7 @@ foreach ($orders as &$order) {
     $order['has_review'] = $reviewCheckStmt->fetchColumn() > 0;
 }
 unset($order); 
-    
+
 } catch (Exception $e) {
     $orders = [];
 }

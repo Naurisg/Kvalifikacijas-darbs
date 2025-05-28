@@ -22,23 +22,39 @@
               </form>
               <div id="contact-message" style="margin-top:10px; font-weight:bold;"></div>
               <script>
-                (function() {
-                  function getQueryParam(param) {
-                    var urlParams = new URLSearchParams(window.location.search);
-                    return urlParams.get(param);
-                  }
-                  var messageDiv = document.getElementById('contact-message');
-                  var success = getQueryParam('success');
-                  var error = getQueryParam('error');
-                  if (success === '1') {
-                    messageDiv.style.color = 'green';
-                    messageDiv.textContent = 'Jūsu ziņa ir veiksmīgi nosūtīta! Mēs ar jums sazināsimies drīz.';
-                  } else if (error === '1') {
-                    messageDiv.style.color = 'red';
-                    messageDiv.textContent = 'Radās kļūda, lūdzu mēģiniet vēlreiz.';
-                  }
-                })();
-              </script>
+(function() {
+  function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+  }
+
+  const messageDiv = document.getElementById('contact-message');
+  const success = getQueryParam('success');
+  const error = getQueryParam('error');
+
+  if (success === '1') {
+    messageDiv.style.color = 'green';
+    messageDiv.textContent = 'Jūsu ziņa ir veiksmīgi nosūtīta! Mēs ar jums sazināsimies drīz.';
+  } else if (error === '1') {
+    messageDiv.style.color = 'red';
+    messageDiv.textContent = 'Radās kļūda, lūdzu mēģiniet vēlreiz.';
+  }
+
+  // Paslēpj ziņu pēc 5 sekundēm
+  if (success === '1' || error === '1') {
+    setTimeout(() => {
+      messageDiv.style.transition = "opacity 0.5s ease";
+      messageDiv.style.opacity = 0;
+
+      // Pilnībā izņem no DOM pēc 0.5s (kad izbalē)
+      setTimeout(() => {
+        messageDiv.remove();
+      }, 500);
+    }, 3000); // 5 sekundes
+  }
+})();
+</script>
+
             </div>
           </div>
         </div>

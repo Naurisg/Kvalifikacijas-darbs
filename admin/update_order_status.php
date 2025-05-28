@@ -10,11 +10,11 @@ try {
     $orderId = $input['order_id'];
     $newStatus = $input['status'];
 
-    $db = new PDO('sqlite:../Datubazes/client_signup.db');
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    // Iekļauj datubāzes savienojumu no db_connect.php
+    require_once '../db_connect.php';
 
     // Find the client that has this order
-    $stmt = $db->prepare('SELECT id, orders FROM clients');
+    $stmt = $pdo->prepare('SELECT id, orders FROM clients');
     $stmt->execute();
     $clients = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -36,7 +36,7 @@ try {
         unset($order);
         if ($updated) {
             $ordersJson = json_encode($orders);
-            $updateStmt = $db->prepare('UPDATE clients SET orders = :orders WHERE id = :id');
+            $updateStmt = $pdo->prepare('UPDATE clients SET orders = :orders WHERE id = :id');
             $updateStmt->execute([':orders' => $ordersJson, ':id' => $client['id']]);
             break;
         }

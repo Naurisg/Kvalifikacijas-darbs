@@ -23,12 +23,12 @@ if (!$user_id || !$order_id) {
 }
 
 try {
-    $reviewsDb = new PDO('sqlite:../Datubazes/reviews.db');
-    $reviewsDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    // Iekļauj datubāzes savienojumu no db_connect.php
+    require_once '../db_connect.php';
 
     // Iegūst attēlu JSON datus, kas saistīti ar dzēšamo atsauksmi
     // un dzēš tos no servera
-    $selectStmt = $reviewsDb->prepare('SELECT images FROM reviews WHERE user_id = :user_id AND order_id = :order_id');
+    $selectStmt = $pdo->prepare('SELECT images FROM reviews WHERE user_id = :user_id AND order_id = :order_id');
     $selectStmt->execute([':user_id' => $user_id, ':order_id' => $order_id]);
     $row = $selectStmt->fetch(PDO::FETCH_ASSOC);
 
@@ -44,7 +44,7 @@ try {
         }
     }
 
-    $stmt = $reviewsDb->prepare('DELETE FROM reviews WHERE user_id = :user_id AND order_id = :order_id');
+    $stmt = $pdo->prepare('DELETE FROM reviews WHERE user_id = :user_id AND order_id = :order_id');
     $stmt->execute([':user_id' => $user_id, ':order_id' => $order_id]);
 
     if ($stmt->rowCount() > 0) {

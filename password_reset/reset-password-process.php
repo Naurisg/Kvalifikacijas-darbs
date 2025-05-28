@@ -5,6 +5,7 @@ Apstrādā lietotāja paroles atiestatīšanas saiti, pārbauda tokenu, ļauj ie
 */
 
 session_start();
+require_once '../db_connect.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $token = $_GET['token'] ?? '';
@@ -14,10 +15,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
 
     try {
-        $db = new SQLite3('../Datubazes/client_signup.db');
-        $stmt = $db->prepare('SELECT email, expires_at FROM password_resets WHERE token = :token');
-        $stmt->bindValue(':token', $token, SQLITE3_TEXT);
-        $result = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
+        $stmt = $pdo->prepare('SELECT email, expires_at FROM password_resets WHERE token = :token');
+        $stmt->execute([':token' => $token]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$result) {
             echo "Nederīgs vai beidzies derīguma termiņš tokenam.";
@@ -199,13 +199,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $token = $_SESSION['reset_token'];
 
     try {
-        $db = new SQLite3('../Datubazes/client_signup.db');
-
-        // Pārbauda, vai tokens joprojām ir derīgs un iegūst pašreizējās paroles hešu
-        $stmt = $db->prepare('SELECT expires_at, password FROM password_resets INNER JOIN clients ON password_resets.email = clients.email WHERE password_resets.token = :token AND password_resets.email = :email');
-        $stmt->bindValue(':token', $token, SQLITE3_TEXT);
-        $stmt->bindValue(':email', $email, SQLITE3_TEXT);
-        $result = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
+        $stmt = $pdo->prepare('SELECT expires_at, password FROM password_resets INNER JOIN clients ON password_resets.email = clients.email WHERE password_resets.token = :token AND password_resets.email = :email');
+        $stmt->execute([':token' => $token, ':email' => $email]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$result) {
             echo "Nederīgs vai beidzies derīguma termiņš tokenam.";
@@ -220,7 +216,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             exit;
         }
 
-        // Pārbauda, vai jaunā parole nav tāda pati kā pašreizējā parole
         if (password_verify($new_password, $result['password'])) {
             $error_message = "Jaunā parole nevar būt tāda pati kā pašreizējā parole.";
             ?>
@@ -297,20 +292,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             <?php
             exit;
         }
-        
-        // Atjaunina paroli clients tabulā
+
         $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
-        $update = $db->prepare('UPDATE clients SET password = :password WHERE email = :email');
-        $update->bindValue(':password', $hashed_password, SQLITE3_TEXT);
-        $update->bindValue(':email', $email, SQLITE3_TEXT);
-        $update->execute();
+        $update = $pdo->prepare('UPDATE clients SET password = :password WHERE email = :email');
+        $update->execute([':password' => $hashed_password, ':email' => $email]);
 
-        // Dzēš tokenu no password_resets tabulas
-        $delete = $db->prepare('DELETE FROM password_resets WHERE token = :token');
-        $delete->bindValue(':token', $token, SQLITE3_TEXT);
-        $delete->execute();
+        $delete = $pdo->prepare('DELETE FROM password_resets WHERE token = :token');
+        $delete->execute([':token' => $token]);
 
-        // Notīra sesijas mainīgos un iznīcina sesiju, lai izrakstītu lietotāju no visām cilnēm
         unset($_SESSION['reset_email'], $_SESSION['reset_token']);
         session_destroy();
 

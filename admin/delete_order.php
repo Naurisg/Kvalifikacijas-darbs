@@ -14,10 +14,10 @@ if (!$orderId) {
 }
 
 try {
-    $db = new PDO('sqlite:../Datubazes/client_signup.db');
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    // Iekļauj datubāzes savienojumu no db_connect.php
+    require_once '../db_connect.php';
 
-    $stmt = $db->query('SELECT id, orders FROM clients WHERE orders IS NOT NULL');
+    $stmt = $pdo->query('SELECT id, orders FROM clients WHERE orders IS NOT NULL');
     $clientFound = false;
 
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -39,7 +39,7 @@ try {
             array_splice($orders, $orderIndex, 1);
 
             // Atjaunina clienta pasūtijuma JSON
-            $updateStmt = $db->prepare('UPDATE clients SET orders = :orders WHERE id = :id');
+            $updateStmt = $pdo->prepare('UPDATE clients SET orders = :orders WHERE id = :id');
             $updateStmt->execute([
                 ':orders' => json_encode($orders),
                 ':id' => $row['id']

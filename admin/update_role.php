@@ -7,10 +7,9 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-try {
-    $db = new PDO('sqlite:../Datubazes/admin_signup.db');
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+require_once '../db_connect.php';
 
+try {
     $data = json_decode(file_get_contents('php://input'), true);
     $id = $data['id'] ?? null;
     $role = $data['role'] ?? null;
@@ -19,7 +18,7 @@ try {
         throw new Exception("Invalid data provided");
     }
 
-    $stmt = $db->prepare("UPDATE admin_signup SET role = :role WHERE id = :id");
+    $stmt = $pdo->prepare("UPDATE admin_signup SET role = :role WHERE id = :id");
     $stmt->execute([':id' => $id, ':role' => $role]);
 
     echo json_encode(["success" => true, "message" => "Role updated successfully"]);

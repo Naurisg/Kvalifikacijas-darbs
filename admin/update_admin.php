@@ -7,10 +7,9 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+require_once '../db_connect.php';
+
 try {
-    $db = new PDO('sqlite:../Datubazes/admin_signup.db');
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
     $id = $_POST['id'];
     $email = $_POST['email'];
     $name = $_POST['name'];
@@ -18,7 +17,7 @@ try {
     $newPassword = $_POST['newPassword'];
 
     if (!empty($newPassword)) {
-        $stmt = $db->prepare('SELECT password FROM admin_signup WHERE id = :id');
+        $stmt = $pdo->prepare('SELECT password FROM admin_signup WHERE id = :id');
         $stmt->execute(['id' => $id]);
         $admin = $stmt->fetch(PDO::FETCH_ASSOC);
         
@@ -30,7 +29,7 @@ try {
 
     if (!empty($newPassword)) {
         $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-        $stmt = $db->prepare('UPDATE admin_signup SET email = :email, name = :name, password = :password WHERE id = :id');
+        $stmt = $pdo->prepare('UPDATE admin_signup SET email = :email, name = :name, password = :password WHERE id = :id');
         $stmt->execute([
             'email' => $email,
             'name' => $name,
@@ -38,7 +37,7 @@ try {
             'id' => $id
         ]);
     } else {
-        $stmt = $db->prepare('UPDATE admin_signup SET email = :email, name = :name WHERE id = :id');
+        $stmt = $pdo->prepare('UPDATE admin_signup SET email = :email, name = :name WHERE id = :id');
         $stmt->execute([
             'email' => $email,
             'name' => $name,

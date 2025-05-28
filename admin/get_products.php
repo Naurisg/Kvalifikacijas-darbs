@@ -2,17 +2,16 @@
 header('Content-Type: application/json');
 session_start();
 
-try {
-    $db = new PDO('sqlite:../Datubazes/products.db');
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+require_once '../db_connect.php';
 
+try {
     $category = $_GET['category'] ?? null;
 
     if ($category) {
-        $stmt = $db->prepare("SELECT * FROM products WHERE kategorija = :category");
+        $stmt = $pdo->prepare("SELECT * FROM products WHERE kategorija = :category");
         $stmt->execute(['category' => $category]);
     } else {
-        $stmt = $db->query("SELECT * FROM products");
+        $stmt = $pdo->query("SELECT * FROM products");
     }
 
     $products = $stmt->fetchAll(PDO::FETCH_ASSOC);

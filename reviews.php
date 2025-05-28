@@ -1,23 +1,21 @@
 <?php
 session_start();
 
-try {
-    $reviewsDb = new PDO('sqlite:Datubazes/reviews.db');
-    $reviewsDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+require_once 'db_connect.php';
 
-    $clientDb = new PDO('sqlite:Datubazes/client_signup.db');
-    $clientDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+try {
+    global $pdo;
 
     $reviewsPerPage = 20;
     $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 1;
     if ($page < 1) $page = 1;
     $offset = ($page - 1) * $reviewsPerPage;
 
-    $countStmt = $reviewsDb->query('SELECT COUNT(*) FROM reviews');
+    $countStmt = $pdo->query('SELECT COUNT(*) FROM reviews');
     $totalReviews = (int)$countStmt->fetchColumn();
     $totalPages = ceil($totalReviews / $reviewsPerPage);
 
-    $stmt = $reviewsDb->prepare('SELECT user_id, order_id, review_text, images, rating FROM reviews LIMIT :limit OFFSET :offset');
+    $stmt = $pdo->prepare('SELECT user_id, order_id, review_text, images, rating FROM reviews LIMIT :limit OFFSET :offset');
     $stmt->bindValue(':limit', $reviewsPerPage, PDO::PARAM_INT);
     $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
     $stmt->execute();
@@ -26,7 +24,7 @@ try {
     $reviews = [];
 
     foreach ($reviewsData as $review) {
-        $userStmt = $clientDb->prepare('SELECT name, email FROM clients WHERE id = :user_id');
+        $userStmt = $pdo->prepare('SELECT name, email FROM clients WHERE id = :user_id');
         $userStmt->execute([':user_id' => $review['user_id']]);
         $user = $userStmt->fetch(PDO::FETCH_ASSOC);
 

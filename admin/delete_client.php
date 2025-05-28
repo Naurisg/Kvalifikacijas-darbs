@@ -15,12 +15,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
-    try {
-        $db = new PDO('sqlite:../Datubazes/client_signup.db');
-        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+require_once '../db_connect.php';
 
+    try {
         // Delete the client from database
-        $stmt = $db->prepare("DELETE FROM clients WHERE id = :id");
+        $stmt = $pdo->prepare("DELETE FROM clients WHERE id = :id");
         $stmt->execute([':id' => $clientId]);
 
         echo json_encode(["success" => true, "message" => "Klients veiksmīgi dzēsts"]);

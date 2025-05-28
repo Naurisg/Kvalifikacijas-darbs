@@ -4,10 +4,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($contactId) {
         try {
-            $pdo = new PDO('sqlite:../Datubazes/kontakti.db');
-            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            // Iekļauj datubāzes savienojumu no db_connect.php
+            require_once '../db_connect.php';
+
             $stmt = $pdo->prepare('DELETE FROM contacts WHERE id = :id');
-            $stmt->execute(['id' => $contactId]);
+            $stmt->execute([':id' => $contactId]);
 
             echo json_encode(['success' => true, 'message' => 'Kontakts veiksmīgi dzēsts']);
         } catch (PDOException $e) {
@@ -19,3 +20,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 } else {
     echo json_encode(['success' => false, 'message' => 'Nederīgs pieprasījums']);
 }
+?>

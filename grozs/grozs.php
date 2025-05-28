@@ -1,6 +1,7 @@
 <?php
 session_start();
-include '../header.php'; 
+include '../header.php';
+require_once '../db_connect.php';
 
 if (!isset($_SESSION['user_id'])) {
     echo '<p>Lūdzu, piesakieties, lai apskatītu savu grozu.</p>';
@@ -8,27 +9,37 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 try {
-    $clientDb = new PDO('sqlite:../Datubazes/client_signup.db'); 
-    $clientDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
+    // Use $pdo from db_connect.php instead of creating a new PDO instance
     // Always fetch the cart from the database
-    $stmt = $clientDb->prepare('SELECT cart FROM clients WHERE id = :user_id');
+    $stmt = $pdo->prepare('SELECT cart FROM clients WHERE id = :user_id');
     $stmt->execute([':user_id' => $_SESSION['user_id']]);
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
     $cart = $result['cart'] ? json_decode($result['cart'], true) : [];
+
+    // Enrich cart items with product details from MySQL products table
+    $enrichedCart = [];
+    $totalPrice = 0;
+
+    foreach ($cart as $item) {
+        $stmtProd = $pdo->prepare('SELECT nosaukums, cena, bilde, sizes FROM products WHERE id = :id');
+        $stmtProd->execute([':id' => $item['id']]);
+        $productDetails = $stmtProd->fetch(PDO::FETCH_ASSOC);
+
+        if ($productDetails) {
+            $mergedItem = array_merge($item, $productDetails);
+            $enrichedCart[] = $mergedItem;
+            $totalPrice += $productDetails['cena'] * ($item['quantity'] ?? 1);
+        }
+    }
+    $cart = $enrichedCart;
     $_SESSION['cart'] = $cart; // Update session cart to match the database
 } catch (PDOException $e) {
     echo '<p>Kļūda ielādējot grozu: ' . htmlspecialchars($e->getMessage()) . '</p>';
     exit();
 }
 
-$totalPrice = 0;
 $totalItems = count($cart);
-
-foreach ($cart as $product) {
-    $totalPrice += $product['cena'] * ($product['quantity'] ?? 1);
-}
 ?>
 <!DOCTYPE html>
 <html lang="lv">

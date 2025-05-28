@@ -1,13 +1,10 @@
 <?php
 header('Content-Type: application/json'); 
 
-// Savienojums ar SQLite Datubāzi
-try {
-    $db = new PDO('sqlite:../Datubazes/client_signup.db');
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
+require_once '../db_connect.php';
 
-    $result = $db->query('SELECT id, email, name, accept_privacy_policy, created_at FROM clients');
+try {
+    $result = $pdo->query('SELECT id, email, name, accept_privacy_policy, created_at FROM clients');
     $clients = [];
 
     while ($row = $result->fetch(PDO::FETCH_ASSOC)) {

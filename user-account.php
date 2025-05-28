@@ -7,70 +7,79 @@ header("Pragma: no-cache");
 include 'session_helper.php';
 validate_session_user();
 
-include 'header.php'; // Pievieno header.php failu
+include 'header.php'; // Pievieno header
 
 $user_id = $_SESSION['user_id'];
-$db = new SQLite3('Datubazes/client_signup.db');
 
-$query = $db->prepare('SELECT email, name, phone, password FROM clients WHERE id = :id');
-$query->bindValue(':id', $user_id, SQLITE3_INTEGER);
-$result = $query->execute()->fetchArray(SQLITE3_ASSOC);
+require_once 'db_connect.php'; // savienojums ar datubāzi
 
-$email = $result['email'];
-$name = $result['name'];
-$phone = $result['phone'] ?? '';
-$hashed_password = $result['password'];
-
-$popup_message = null; 
-$popup_type = null; 
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $new_name = $_POST['name'];
-    $new_phone = $_POST['phone'];
-    $old_password = $_POST['old_password'];
-    $new_password = $_POST['new_password'];
-
-    if (!empty($new_password)) {
-        if (strlen($new_password) < 8) {
-            $popup_message = "Jaunā parole nevar būt īsāka par 8 burtiem vai cipariem!";
-            $popup_type = "error";
-        } elseif (password_verify($old_password, $hashed_password)) {
-            if (password_verify($new_password, $hashed_password)) {
-                $popup_message = "Jaunā parole nevar būt tāda pati kā vecā parole!";
-                $popup_type = "error";
-            } else {
-                $update_query = $db->prepare('UPDATE clients SET name = :name, phone = :phone, password = :password WHERE id = :id');
-                $update_query->bindValue(':name', $new_name, SQLITE3_TEXT);
-                $update_query->bindValue(':phone', $new_phone, SQLITE3_TEXT);
-                $update_query->bindValue(':password', password_hash($new_password, PASSWORD_DEFAULT), SQLITE3_TEXT);
-                $update_query->bindValue(':id', $user_id, SQLITE3_INTEGER);
-                $update_query->execute();
-                $popup_message = "Jūsu parole, vārds un telefona numurs ir veiksmīgi atjaunināti.";
-                $popup_type = "success";
-            }
-        } else {
-            $popup_message = "Vecā parole ir nepareiza!";
-            $popup_type = "error";
-        }
-    } else {
-        $update_query = $db->prepare('UPDATE clients SET name = :name, phone = :phone WHERE id = :id');
-        $update_query->bindValue(':name', $new_name, SQLITE3_TEXT);
-        $update_query->bindValue(':phone', $new_phone, SQLITE3_TEXT);
-        $update_query->bindValue(':id', $user_id, SQLITE3_INTEGER);
-        $update_query->execute();
-        $popup_message = "Jūsu vārds un telefona numurs ir veiksmīgi atjaunināti.";
-        $popup_type = "success";
-    }
-
-    // Atjauno jauna lietotāja datus
-    $query = $db->prepare('SELECT email, name, phone, password FROM clients WHERE id = :id');
-    $query->bindValue(':id', $user_id, SQLITE3_INTEGER);
-    $result = $query->execute()->fetchArray(SQLITE3_ASSOC);
+try {
+    // Use $pdo instead of creating a new PDO connection
+    $stmt = $pdo->prepare('SELECT email, name, phone, password FROM clients WHERE id = :id');
+    $stmt->execute([':id' => $user_id]);
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
     $email = $result['email'];
     $name = $result['name'];
     $phone = $result['phone'] ?? '';
     $hashed_password = $result['password'];
+
+    $popup_message = null; 
+    $popup_type = null; 
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $new_name = $_POST['name'];
+        $new_phone = $_POST['phone'];
+        $old_password = $_POST['old_password'];
+        $new_password = $_POST['new_password'];
+
+        if (!empty($new_password)) {
+            if (strlen($new_password) < 8) {
+                $popup_message = "Jaunā parole nevar būt īsāka par 8 burtiem vai cipariem!";
+                $popup_type = "error";
+            } elseif (password_verify($old_password, $hashed_password)) {
+                if (password_verify($new_password, $hashed_password)) {
+                    $popup_message = "Jaunā parole nevar būt tāda pati kā vecā parole!";
+                    $popup_type = "error";
+                } else {
+                    $update_query = $pdo->prepare('UPDATE clients SET name = :name, phone = :phone, password = :password WHERE id = :id');
+                    $update_query->execute([
+                        ':name' => $new_name,
+                        ':phone' => $new_phone,
+                        ':password' => password_hash($new_password, PASSWORD_DEFAULT),
+                        ':id' => $user_id
+                    ]);
+                    $popup_message = "Jūsu parole, vārds un telefona numurs ir veiksmīgi atjaunināti.";
+                    $popup_type = "success";
+                }
+            } else {
+                $popup_message = "Vecā parole ir nepareiza!";
+                $popup_type = "error";
+            }
+        } else {
+            $update_query = $pdo->prepare('UPDATE clients SET name = :name, phone = :phone WHERE id = :id');
+            $update_query->execute([
+                ':name' => $new_name,
+                ':phone' => $new_phone,
+                ':id' => $user_id
+            ]);
+            $popup_message = "Jūsu vārds un telefona numurs ir veiksmīgi atjaunināti.";
+            $popup_type = "success";
+        }
+
+        // Atjauno jauna lietotāja datus
+        $stmt = $pdo->prepare('SELECT email, name, phone, password FROM clients WHERE id = :id');
+        $stmt->execute([':id' => $user_id]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $email = $result['email'];
+        $name = $result['name'];
+        $phone = $result['phone'] ?? '';
+        $hashed_password = $result['password'];
+    }
+} catch (PDOException $e) {
+    $popup_message = "Datubāzes kļūda: " . $e->getMessage();
+    $popup_type = "error";
 }
 ?>
 <body>

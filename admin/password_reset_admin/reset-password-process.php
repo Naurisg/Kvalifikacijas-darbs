@@ -5,6 +5,7 @@ Apstrādā administratora paroles atiestatīšanas saiti, pārbauda tokenu, ļau
 */
 
 session_start();
+require_once '../../db_connect.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $token = $_GET['token'] ?? '';
@@ -14,10 +15,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
 
     try {
-        $db = new SQLite3('../../Datubazes/admin_signup.db');
-        $stmt = $db->prepare('SELECT email, expires_at FROM password_resets_admin WHERE token = :token');
-        $stmt->bindValue(':token', $token, SQLITE3_TEXT);
-        $result = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
+        $stmt = $pdo->prepare('SELECT email, expires_at FROM password_resets_admin WHERE token = :token');
+        $stmt->execute([':token' => $token]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$result) {
             echo "Nederīgs vai beidzies derīguma termiņš tokenam.";
@@ -199,13 +199,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $token = $_SESSION['reset_token'];
 
     try {
-        $db = new SQLite3('../../Datubazes/admin_signup.db');
-
-        // Pārbauda, vai tokens joprojām ir derīgs
-        $stmt = $db->prepare('SELECT expires_at, password FROM password_resets_admin INNER JOIN admin_signup ON password_resets_admin.email = admin_signup.email WHERE password_resets_admin.token = :token AND password_resets_admin.email = :email');
-        $stmt->bindValue(':token', $token, SQLITE3_TEXT);
-        $stmt->bindValue(':email', $email, SQLITE3_TEXT);
-        $result = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
+        // Pārbauda, vai tokens joprojām ir derīgs un iegūst pašreizējo paroli
+        $stmt = $pdo->prepare('SELECT pra.expires_at, a.password FROM password_resets_admin pra INNER JOIN admin_signup a ON pra.email = a.email WHERE pra.token = :token AND pra.email = :email');
+        $stmt->execute([':token' => $token, ':email' => $email]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$result) {
             echo "Nederīgs vai beidzies derīguma termiņš tokenam.";
@@ -300,15 +297,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         
         // Atjaunina paroli admin_signup tabulā
         $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
-        $update = $db->prepare('UPDATE admin_signup SET password = :password WHERE email = :email');
-        $update->bindValue(':password', $hashed_password, SQLITE3_TEXT);
-        $update->bindValue(':email', $email, SQLITE3_TEXT);
-        $update->execute();
+        $update = $pdo->prepare('UPDATE admin_signup SET password = :password WHERE email = :email');
+        $update->execute([':password' => $hashed_password, ':email' => $email]);
 
         // Dzēš tokenu no password_resets_admin tabulas
-        $delete = $db->prepare('DELETE FROM password_resets_admin WHERE token = :token');
-        $delete->bindValue(':token', $token, SQLITE3_TEXT);
-        $delete->execute();
+        $delete = $pdo->prepare('DELETE FROM password_resets_admin WHERE token = :token');
+        $delete->execute([':token' => $token]);
 
         // Notīra sesijas mainīgos
         unset($_SESSION['reset_email'], $_SESSION['reset_token']);

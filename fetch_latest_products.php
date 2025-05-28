@@ -1,9 +1,8 @@
 <?php
+require_once 'db_connect.php';
+
 try {
-    $db = new PDO('sqlite:Datubazes/products.db');
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
-    $stmt = $db->query("SELECT * FROM products ORDER BY created_at DESC LIMIT 4");
+    $stmt = $pdo->query("SELECT * FROM products ORDER BY created_at DESC LIMIT 4");
     $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     echo json_encode(['success' => true, 'products' => $products]);

@@ -4,13 +4,7 @@ header('Content-Type: application/json');
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-try {
-    $db = new PDO('sqlite:../Datubazes/client_signup.db'); 
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    echo json_encode(["success" => false, "message" => "Connection failed: " . $e->getMessage()]);
-    exit();
-}
+require_once '../db_connect.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
@@ -37,7 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (!empty($newPassword)) {
         // Verify old password
-        $stmt = $db->prepare('SELECT password FROM clients WHERE id = :id');
+        $stmt = $pdo->prepare('SELECT password FROM clients WHERE id = :id');
         $stmt->execute([':id' => $clientId]);
         $client = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -52,7 +46,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     $sql .= " WHERE id = :id";
-    $stmt = $db->prepare($sql);
+    $stmt = $pdo->prepare($sql);
 
     if ($stmt->execute($params)) {
         echo json_encode(["success" => true, "message" => "Informācija atjaunota veiksmīgi."]);

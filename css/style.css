@@ -4781,3 +4781,38 @@ a.nav-link.dark-mode {
   background-color: #2196F3;
   color: white;
 }
+
+/* --- Responsivitāte footer priekš telefoniem --- */
+@media screen and (max-width: 600px) {
+  .footer-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 24px !important;
+  }
+
+  .footer-links-container {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .footerlogobloks {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Maksājuma iconas grid in footer */
+  .footer-links-container > div[style*="grid-template-columns"] {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 12px !important;
+    margin-top: 10px !important;
+  }
+
+  .footer-links-container > div[style*="grid-template-columns"] img {
+    margin: 0 6px 6px 0 !important;
+    max-width: 60px !important;
+    height: 28px !important;
+    flex: 0 0 auto !important;
+  }
+}

@@ -2,10 +2,10 @@
 header('Content-Type: application/json');
 
 try {
-    $db = new PDO('sqlite:../Datubazes/client_signup.db');
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    // Iekļauj datubāzes savienojumu no db_connect.php
+    require_once '../db_connect.php';
 
-    $stmt = $db->query('SELECT id, name AS client_name, orders FROM clients WHERE orders IS NOT NULL');
+    $stmt = $pdo->query('SELECT id, name AS client_name, orders FROM clients WHERE orders IS NOT NULL');
     $orders = [];
 
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {

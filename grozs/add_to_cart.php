@@ -2,6 +2,8 @@
 session_start();
 header('Content-Type: application/json');
 
+require_once '../db_connect.php';
+
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(['success' => false, 'message' => 'Lūdzu, piesakieties, lai pievienotu produktus grozam.']);
     exit();
@@ -18,36 +20,28 @@ if (!$productId) {
 }
 
 try {
-    $db = new PDO('sqlite:../Datubazes/products.db');
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    // Use $pdo from db_connect.php instead of creating a new PDO instance
 
-    $stmt = $db->prepare('SELECT id, nosaukums, cena, bilde FROM products WHERE id = :id');
-    $stmt->execute([':id' => $productId]);
-    $product = $stmt->fetch(PDO::FETCH_ASSOC);
+    $product = [
+        'id' => $productId,
+        'size' => $size,
+        'quantity' => $quantity
+    ];
 
-    if ($product) {
-        $product['size'] = $size;
-        $product['quantity'] = $quantity;
-
-        if (!isset($_SESSION['cart'])) {
-            $_SESSION['cart'] = [];
-        }
-        $_SESSION['cart'][] = $product;
-
-        $clientDb = new PDO('sqlite:../Datubazes/client_signup.db'); 
-        $clientDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-        $cartJson = json_encode($_SESSION['cart']);
-        $updateStmt = $clientDb->prepare('UPDATE clients SET cart = :cart WHERE id = :user_id');
-        $updateStmt->execute([
-            ':cart' => $cartJson,
-            ':user_id' => $_SESSION['user_id']
-        ]);
-
-        echo json_encode(['success' => true, 'message' => 'Produkts pievienots grozam.']);
-    } else {
-        echo json_encode(['success' => false, 'message' => 'Produkts nav atrasts.']);
+    if (!isset($_SESSION['cart'])) {
+        $_SESSION['cart'] = [];
     }
+    $_SESSION['cart'][] = $product;
+
+    // Remove the inner try/catch and use $pdo for the update
+    $cartJson = json_encode($_SESSION['cart']);
+    $updateStmt = $pdo->prepare('UPDATE clients SET cart = :cart WHERE id = :user_id');
+    $updateStmt->execute([
+        ':cart' => $cartJson,
+        ':user_id' => $_SESSION['user_id']
+    ]);
+
+    echo json_encode(['success' => true, 'message' => 'Produkts pievienots grozam.']);
 } catch (PDOException $e) {
     echo json_encode(['success' => false, 'message' => 'Kļūda: ' . $e->getMessage()]);
 }

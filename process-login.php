@@ -2,6 +2,8 @@
 session_start();
 header('Content-Type: application/json');
 
+require_once 'db_connect.php';
+
 // verificē, vai reCAPTCHA ir aizpildīta
 if (!isset($_POST['g-recaptcha-response'])) {
     echo json_encode(['success' => false, 'message' => 'Lūdzu, apstipriniet, ka neesat robots.']);
@@ -36,13 +38,10 @@ if (!$responseData->success) {
 }
 
 try {
-    $db = new PDO('sqlite:Datubazes/client_signup.db');
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
     $email = $_POST['Email'];
     $password = $_POST['Password'];
 
-    $stmt = $db->prepare('SELECT * FROM clients WHERE email = :email');
+    $stmt = $pdo->prepare('SELECT * FROM clients WHERE email = :email');
     $stmt->execute(['email' => $email]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 

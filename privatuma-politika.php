@@ -120,7 +120,7 @@
     </ul>
 
     <h2>6. Sīkdatnes (Cookies)</h2>
-    <p>Mūsu vietne izmanto sīkdatnes, lai uzlabotu lietošanas pieredzi, analizētu trafiku un saglabātu sesiju informāciju.</p>
+    <p>Mūsu mājaslapa neizmanto sīkdatnes, un netiek ievākta pārlūkprogrammas informācija, izņemot nepieciešamo sesijas informāciju tīmekļa vietnes darbībai.</p>
 
     <h2>7. Datu glabāšanas periods</h2>
     <p>Personas dati tiek glabāti tikai tik ilgi, cik nepieciešams iepriekš minētajiem nolūkiem vai saskaņā ar tiesību aktiem.</p>

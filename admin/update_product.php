@@ -11,9 +11,8 @@ if (!isset($_SESSION['user_id'])) {
 // Apstrādā POST pieprasījumu
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     try {
-        // Izveido savienojumu ar datubāzi
-        $db = new PDO('sqlite:../Datubazes/products.db');
-        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        // Iekļauj datubāzes savienojumu no db_connect.php
+        require_once '../db_connect.php';
 
         // Pārbauda obligātos laukus
         $requiredFields = ['id', 'nosaukums', 'apraksts', 'kategorija', 'cena', 'quantity'];
@@ -34,7 +33,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $removedImages = isset($_POST['removedImages']) ? json_decode($_POST['removedImages'], true) : [];
 
         // Iegūst pašreizējās bildes no datubāzes
-        $stmt = $db->prepare("SELECT bilde FROM products WHERE id = :id");
+        $stmt = $pdo->prepare("SELECT bilde FROM products WHERE id = :id");
         $stmt->execute([':id' => $productId]);
         $product = $stmt->fetch(PDO::FETCH_ASSOC);
         
@@ -108,7 +107,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 bilde = :bilde 
                 WHERE id = :id";
         
-        $stmt = $db->prepare($sql);
+        $stmt = $pdo->prepare($sql);
         $stmt->execute([
             ':nosaukums' => $nosaukums,
             ':apraksts' => $apraksts,

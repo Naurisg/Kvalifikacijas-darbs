@@ -64,7 +64,7 @@ include 'header.php';
           
         <div id="w-node-a3991ecf-fa86-490d-a772-6ad5f67469c0-1c953ec7" class="w-layout-cell">
             <a href="precu-lapas/jakas.php" class="image-link">
-                <img src="images/fleecejakas.kategorias.png" loading="lazy" sizes="(max-width: 479px) 100vw, 350px" srcset="images/fleecejakas.kategorias-p-500.png 500w, images/fleecejakas.kategorijas-p-800.png 800w, images/fleecejakas.kategorijas-p-1080.png 1080w, images/fleecejakas.kategorijas-p-1600.png 1600w, images/fleecejakas.kategorijas.png 1856w" alt="" class="image-46">
+        <img src="images/fleecejakas.kategorias.png" loading="lazy" sizes="(max-width: 479px) 100vw, 350px" srcset="images/fleecejakas.kategorias-p-500.png 500w, images/fleecejakas.kategorias-p-800.png 800w, images/fleecejakas.kategorias-p-1080.png 1080w, images/fleecejakas.kategorias-p-1600.png 1600w, images/fleecejakas.kategorias.png 1856w" alt="" class="image-46">
                 <span class="hover-text">Jakas</span>
               </a>
         </div>

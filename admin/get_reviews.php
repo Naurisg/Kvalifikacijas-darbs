@@ -8,20 +8,17 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 try {
-    $reviewsDb = new PDO('sqlite:../Datubazes/reviews.db');
-    $reviewsDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    // Iekļauj datubāzes savienojumu no db_connect.php
+    require_once '../db_connect.php';
 
-    $clientDb = new PDO('sqlite:../Datubazes/client_signup.db');
-    $clientDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    $stmt = $reviewsDb->prepare('SELECT user_id, order_id, review_text, images, rating FROM reviews');
+    $stmt = $pdo->prepare('SELECT user_id, order_id, review_text, images, rating FROM reviews');
     $stmt->execute();
     $reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     $result = [];
 
     foreach ($reviews as $review) {
-        $userStmt = $clientDb->prepare('SELECT name, email FROM clients WHERE id = :user_id');
+        $userStmt = $pdo->prepare('SELECT name, email FROM clients WHERE id = :user_id');
         $userStmt->execute([':user_id' => $review['user_id']]);
         $user = $userStmt->fetch(PDO::FETCH_ASSOC);
 

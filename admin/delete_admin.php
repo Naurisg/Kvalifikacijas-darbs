@@ -1,17 +1,16 @@
 <?php
 header('Content-Type: application/json');
 
+require_once '../db_connect.php';
+
 try {
-    $db = new PDO('sqlite:../Datubazes/admin_signup.db');
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
     $id = $_POST['id'] ?? null;
     
     if (!$id) {
         throw new Exception('ID nav norādīts');
     }
     
-    $stmt = $db->prepare('DELETE FROM admin_signup WHERE id = :id');
+    $stmt = $pdo->prepare('DELETE FROM admin_signup WHERE id = :id');
     $stmt->execute(['id' => $id]);
     
     if ($stmt->rowCount() > 0) {

@@ -3,6 +3,7 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 require '../../vendor/autoload.php';
+require_once '../../db_connect.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -17,20 +18,18 @@ if (!$email) {
 }
 
 try {
-    $db = new SQLite3('../../Datubazes/admin_signup.db');
-
-    $stmt = $db->prepare('SELECT id FROM admin_signup WHERE email = :email');
-    $stmt->bindValue(':email', $email, SQLITE3_TEXT);
-    $result = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
+    $stmt = $pdo->prepare('SELECT id FROM admin_signup WHERE email = :email');
+    $stmt->execute([':email' => $email]);
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$result) {
         echo json_encode(['message' => 'Ja atradām kontu, kas saistīts ar šo e-pasta adresi, mēs nosūtījām saiti paroles atiestatīšanai.']);
         exit;
     }
 
-    $checkRecentToken = $db->prepare('SELECT expires_at FROM password_resets_admin WHERE email = :email ORDER BY expires_at DESC LIMIT 1');
-    $checkRecentToken->bindValue(':email', $email, SQLITE3_TEXT);
-    $recentTokenResult = $checkRecentToken->execute()->fetchArray(SQLITE3_ASSOC);
+    $checkRecentToken = $pdo->prepare('SELECT expires_at FROM password_resets_admin WHERE email = :email ORDER BY expires_at DESC LIMIT 1');
+    $checkRecentToken->execute([':email' => $email]);
+    $recentTokenResult = $checkRecentToken->fetch(PDO::FETCH_ASSOC);
 
     if ($recentTokenResult) {
         $expiresAt = new DateTime($recentTokenResult['expires_at']);
@@ -51,16 +50,16 @@ try {
     $expires_at = (new DateTime('+1 hour'))->format('Y-m-d H:i:s');
 
     // Dzēš visus esošos tokenus šim e-pastam, lai atspējotu vecās paroles atiestatīšanas saites
-    $deleteOldTokens = $db->prepare('DELETE FROM password_resets_admin WHERE email = :email');
-    $deleteOldTokens->bindValue(':email', $email, SQLITE3_TEXT);
-    $deleteOldTokens->execute();
+    $deleteOldTokens = $pdo->prepare('DELETE FROM password_resets_admin WHERE email = :email');
+    $deleteOldTokens->execute([':email' => $email]);
 
     // Ievieto jaunu tokenu paroles atiestatīšanai
-    $insert = $db->prepare('INSERT INTO password_resets_admin (email, token, expires_at) VALUES (:email, :token, :expires_at)');
-    $insert->bindValue(':email', $email, SQLITE3_TEXT);
-    $insert->bindValue(':token', $token, SQLITE3_TEXT);
-    $insert->bindValue(':expires_at', $expires_at, SQLITE3_TEXT);
-    $insert->execute();
+    $insert = $pdo->prepare('INSERT INTO password_resets_admin (email, token, expires_at) VALUES (:email, :token, :expires_at)');
+    $insert->execute([
+        ':email' => $email,
+        ':token' => $token,
+        ':expires_at' => $expires_at
+    ]);
 
     $reset_link = sprintf(
         '%s/vissdarbam/admin/password_reset_admin/reset-password-process.php?token=%s',

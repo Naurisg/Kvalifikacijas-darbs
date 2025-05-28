@@ -1,12 +1,11 @@
 <?php
 header('Content-Type: application/json');
 
+require_once '../db_connect.php';
+
 try {
-    $db = new PDO('sqlite:../Datubazes/products.db');
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
     $category = $_GET['category'] ?? '';
-    $stmt = $db->prepare('SELECT * FROM products WHERE kategorija = :category ORDER BY created_at DESC');
+    $stmt = $pdo->prepare('SELECT * FROM products WHERE kategorija = :category ORDER BY created_at DESC');
     $stmt->execute(['category' => $category]);
     
     $products = $stmt->fetchAll(PDO::FETCH_ASSOC);

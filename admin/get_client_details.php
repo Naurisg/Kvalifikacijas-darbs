@@ -7,11 +7,10 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+require_once '../db_connect.php';
+
 try {
-    $db = new PDO('sqlite:../Datubazes/client_signup.db');
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
-    $stmt = $db->prepare('SELECT id, email, name FROM clients WHERE id = :id');
+    $stmt = $pdo->prepare('SELECT id, email, name FROM clients WHERE id = :id');
     $stmt->execute(['id' => $_GET['id']]);
     $client = $stmt->fetch(PDO::FETCH_ASSOC);
     

@@ -16,23 +16,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     try {
-        $db = new PDO('sqlite:../Datubazes/products.db');
-        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        // Iekļauj datubāzes savienojumu no db_connect.php
+        require_once '../db_connect.php';
 
         // Get the image filename before deleting the product
-        $stmt = $db->prepare("SELECT bilde FROM products WHERE id = :id");
+        $stmt = $pdo->prepare("SELECT bilde FROM products WHERE id = :id");
         $stmt->execute([':id' => $productId]);
         $product = $stmt->fetch(PDO::FETCH_ASSOC);
 
         // Delete the product from database
-        $stmt = $db->prepare("DELETE FROM products WHERE id = :id");
+        $stmt = $pdo->prepare("DELETE FROM products WHERE id = :id");
         $stmt->execute([':id' => $productId]);
 
-        // Delete the associated image file if it exists
+        // Delete the associated image files if they exist
         if ($product && $product['bilde']) {
-            $imagePath = "../uploads/" . $product['bilde'];
-            if (file_exists($imagePath)) {
-                unlink($imagePath);
+            $images = explode(',', $product['bilde']);
+            foreach ($images as $image) {
+                $imagePath = '../' . $image;
+                if (file_exists($imagePath)) {
+                    unlink($imagePath);
+                }
             }
         }
 
