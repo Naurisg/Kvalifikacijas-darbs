@@ -47,6 +47,21 @@ try {
 
     $orders = $user['orders'] ? json_decode($user['orders'], true) : [];
 
+    // Pievieno groza vienumiem informāciju no produktu tabulas
+    $enrichedCart = [];
+    foreach ($cart as $item) {
+        $stmtProd = $pdo->prepare('SELECT nosaukums, cena, bilde FROM products WHERE id = :id');
+        $stmtProd->execute([':id' => $item['id']]);
+        $productDetails = $stmtProd->fetch(PDO::FETCH_ASSOC);
+
+        if ($productDetails) {
+            $enrichedCart[] = array_merge($item, $productDetails);
+        } else {
+            $enrichedCart[] = $item; // Noklusējuma gadījums, kuram nevajadzētu rasties
+        }
+    }
+    $cart = $enrichedCart;
+
     // Iegūst adreses datus no sesijas metadatiem
     $address = [
         'name' => $session->metadata->name,
@@ -75,7 +90,7 @@ try {
     $orderId = uniqid('order_');
 
     // Atjaunina produktu daudzumu datubāzē pēc veiksmīga maksājuma
-    // Use $pdo for product updates as well
+    // Izmanto PDO, lai droši atjauninātu datubāzi
     foreach ($cart as $product) {
         $productId = isset($product['id']) ? $product['id'] : null;
         $quantityBought = isset($product['quantity']) ? intval($product['quantity']) : 0;

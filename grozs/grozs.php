@@ -9,31 +9,57 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 try {
-    // Use $pdo from db_connect.php instead of creating a new PDO instance
-    // Always fetch the cart from the database
+    // Izmanto PDO, lai izveidotu savienojumu ar datubāzi
+    // Vienmēr izmanto drošu savienojumu ar datubāzi
     $stmt = $pdo->prepare('SELECT cart FROM clients WHERE id = :user_id');
     $stmt->execute([':user_id' => $_SESSION['user_id']]);
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
     $cart = $result['cart'] ? json_decode($result['cart'], true) : [];
 
-    // Enrich cart items with product details from MySQL products table
+    // Pievieno groza vienumiem informāciju no MySQL produktu tabulas
     $enrichedCart = [];
     $totalPrice = 0;
 
+    $soldOutExists = false; // Pārbaude, vai kāds produkts ir izpārdots
+
+    // Izrēķina katra produkta kopējo daudzumu grozā
+    $productTotals = [];
     foreach ($cart as $item) {
-        $stmtProd = $pdo->prepare('SELECT nosaukums, cena, bilde, sizes FROM products WHERE id = :id');
+        $productTotals[$item['id']] = ($productTotals[$item['id']] ?? 0) + ($item['quantity'] ?? 1);
+    }
+
+    $enrichedCart = [];
+    foreach ($cart as $index => $item) {
+        $stmtProd = $pdo->prepare('SELECT nosaukums, cena, bilde, sizes, quantity AS stock_quantity FROM products WHERE id = :id');
         $stmtProd->execute([':id' => $item['id']]);
         $productDetails = $stmtProd->fetch(PDO::FETCH_ASSOC);
 
         if ($productDetails) {
+            $quantityInCart = $item['quantity'] ?? 1;
+            $totalForThisProduct = $productTotals[$item['id']];
+            $availableStock = $productDetails['stock_quantity'];
+
+            // Izrēķina maksimālo daudzumu šai rindai, ņemot vērā pieejamo krājumu
+            $otherLines = $totalForThisProduct - $quantityInCart;
+            $maxForThisLine = max(1, $availableStock - $otherLines);
+
+            // Izpārdots, ja pieejamais krājums ir mazāks vai vienāds ar 0, vai arī kopējais daudzums šim produktam pārsniedz pieejamo krājumu
+            $isSoldOut = ($availableStock <= 0) || ($totalForThisProduct > $availableStock);
+
+            if ($isSoldOut) {
+                $soldOutExists = true;
+            }
+
             $mergedItem = array_merge($item, $productDetails);
+            $mergedItem['sold_out'] = $isSoldOut;
+            $mergedItem['max_for_this_line'] = $maxForThisLine;
             $enrichedCart[] = $mergedItem;
-            $totalPrice += $productDetails['cena'] * ($item['quantity'] ?? 1);
+            $totalPrice += $productDetails['cena'] * $quantityInCart;
         }
     }
     $cart = $enrichedCart;
-    $_SESSION['cart'] = $cart; // Update session cart to match the database
+    $_SESSION['cart'] = $cart; // Atjaunina grozu sesijā
 } catch (PDOException $e) {
     echo '<p>Kļūda ielādējot grozu: ' . htmlspecialchars($e->getMessage()) . '</p>';
     exit();
@@ -223,18 +249,31 @@ $totalItems = count($cart);
         <?php foreach ($cart as $index => $product): ?>
           <?php 
             $images = isset($product['bilde']) ? explode(',', $product['bilde']) : []; 
-            $firstImage = !empty($images) ? trim($images[0]) : 'images/placeholder.png'; // Fallback to placeholder if no image
+            $firstImage = !empty($images) ? trim($images[0]) : 'images/placeholder.png';
           ?>
           <li class="cart-item">
             <img src="../<?php echo htmlspecialchars($firstImage); ?>" alt="<?php echo htmlspecialchars($product['nosaukums']); ?>" width="100">
             <div class="cart-item-details">
               <h3><?php echo htmlspecialchars($product['nosaukums']); ?></h3>
+              <?php if (!empty($product['sold_out']) && $product['sold_out']): ?>
+                <p style="color: red; font-weight: bold;">Izpārdots</p>
+              <?php endif; ?>
               <p>Cena: €<?php echo htmlspecialchars($product['cena']); ?></p>
               <p class="size">Izmērs: <?php echo htmlspecialchars($product['size'] ?? 'Nav norādīts'); ?></p>
               <p class="quantity">
                 Daudzums:
                 <div class="quantity-container">
-                  <input type="number" value="<?php echo htmlspecialchars($product['quantity'] ?? 1); ?>" min="1" onchange="updateQuantity(<?php echo $index; ?>, this.value)">
+                  <input type="number"
+                         value="<?php echo htmlspecialchars($product['quantity'] ?? 1); ?>"
+                         min="1"
+                         max="<?php echo htmlspecialchars($product['max_for_this_line']); ?>"
+                         onchange="updateQuantity(<?php echo $index; ?>, this.value)"
+                         <?php echo (!empty($product['sold_out']) && $product['sold_out']) ? 'disabled' : ''; ?>
+                         <?php if (($product['quantity'] ?? 1) >= $product['max_for_this_line']) echo 'style=\"border:2px solid red;\"'; ?>
+                  >
+                  <?php if (($product['quantity'] ?? 1) >= $product['max_for_this_line']): ?>
+                    <span style="color:red;font-size:12px;">Maksimālais daudzums sasniegts</span>
+                  <?php endif; ?>
                 </div>
               </p>
             </div>
@@ -261,8 +300,11 @@ $totalItems = count($cart);
         </div>
         <div class="cart-total" style="margin-top:10px;">
           <strong>Kopējā cena: €<?php echo number_format($finalTotal, 2); ?></strong>
+          <?php if ($soldOutExists): ?>
+            <p style="color: red; font-weight: bold; margin-top: 10px;">Kāds no produktiem kas atrodas grozā ir izpārdots izņemiet to lai turpinātu maksājumu</p>
+          <?php endif; ?>
         </div>
-        <button class="checkout-button" onclick="window.location.href='adress.php'">Noformēt sūtījumu</button>
+        <button class="checkout-button" id="checkoutButton" <?php echo $soldOutExists ? 'disabled style="background-color: grey; cursor: not-allowed;"' : ''; ?> onclick="window.location.href='adress.php'">Noformēt sūtījumu</button>
       </div>
     <?php else: ?>
       <p class="cart-empty">Grozs ir tukšs.</p>
@@ -331,6 +373,25 @@ $totalItems = count($cart);
         alert('Kļūda noņemot produktu no groza.');
       });
     }
+
+    // Pievieno notikumu, lai pārbaudītu daudzuma ievadi
+    document.addEventListener('DOMContentLoaded', function() {
+      const quantityInputs = document.querySelectorAll('.quantity-container input[type="number"]');
+      quantityInputs.forEach(input => {
+        input.addEventListener('input', function() {
+          const max = parseInt(this.getAttribute('max'), 10);
+          let value = parseInt(this.value, 10);
+          if (isNaN(value) || value < 1) {
+            value = 1;
+          }
+          if (value > max) {
+            value = max;
+            alert('Daudzums nevar pārsniegt pieejamo krājumu: ' + max);
+          }
+          this.value = value;
+        });
+      });
+    });
 
     function proceedToCheckout() {
       alert('Noformēt sūtījumu funkcionalitāte vēl nav ieviesta.');

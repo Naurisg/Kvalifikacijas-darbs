@@ -19,6 +19,27 @@ if (empty($cart)) {
 
 // Lietotāja dati no sesijas vai pēc vajadzības no datubāzes
 require '../db_connect.php';
+
+// Pievieno katram groza produktam informāciju no produktu tabulas
+$enrichedCart = [];
+$totalPrice = 0;
+foreach ($cart as $item) {
+    // Iegūst produkta detaļas no datubāzes
+    $stmtProd = $pdo->prepare('SELECT nosaukums, cena, bilde FROM products WHERE id = :id');
+    $stmtProd->execute([':id' => $item['id']]);
+    $productDetails = $stmtProd->fetch(PDO::FETCH_ASSOC);
+
+    if ($productDetails) {
+        $mergedItem = array_merge($item, $productDetails);
+        $enrichedCart[] = $mergedItem;
+        $quantity = isset($mergedItem['quantity']) ? (int)$mergedItem['quantity'] : 1;
+        $price = isset($mergedItem['cena']) ? (float)$mergedItem['cena'] : 0;
+        $totalPrice += $price * $quantity;
+    }
+}
+$cart = $enrichedCart;
+
+// Pievieno lietotāja datus no datubāzes
 try {
     $stmt = $pdo->prepare('SELECT name, email, phone FROM clients WHERE id = :user_id');
     $stmt->execute([':user_id' => $_SESSION['user_id']]);
@@ -31,14 +52,6 @@ try {
     ];
 } catch (Exception $e) {
     $userData = ['name' => '', 'email' => '', 'phone' => ''];
-}
-
-// Aprēķina kopējo cenu
-$totalPrice = 0;
-foreach ($cart as $product) {
-    $quantity = isset($product['quantity']) ? (int)$product['quantity'] : 1;
-    $price = isset($product['cena']) ? (float)$product['cena'] : 0;
-    $totalPrice += $price * $quantity;
 }
 ?>
 

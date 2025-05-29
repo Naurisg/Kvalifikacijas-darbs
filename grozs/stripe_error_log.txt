@@ -1,0 +1,10 @@
+Could not connect to Stripe (https://api.stripe.com/v1/checkout/sessions).  Please check your internet connection and try again.  If this problem persists, you should check Stripe's service status at https://twitter.com/stripestatus, or let us know at support@stripe.com.
+
+(Network error [errno 6]: Could not resolve host: api.stripe.com)
+Could not connect to Stripe (https://api.stripe.com/v1/checkout/sessions).  Please check your internet connection and try again.  If this problem persists, you should check Stripe's service status at https://twitter.com/stripestatus, or let us know at support@stripe.com.
+
+(Network error [errno 6]: Could not resolve host: api.stripe.com)
+Nepietiekams daudzums noliktavā priekš produkta ID 58. Pieejams: 0
+Nepietiekams daudzums noliktavā priekš produkta ID 58. Pieejams: 0
+Nederīga cena vai daudzums priekš: Nezināms produkts
+Nederīga cena vai daudzums priekš: Nezināms produkts

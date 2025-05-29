@@ -446,6 +446,7 @@ function showProductModal(product) {
     currentProduct = product;
 
     const images = product.bilde.split(',');
+    const isOutOfStock = parseInt(product.quantity) === 0;
 
     modalBody.innerHTML = `
         <div class="modal-product-details">
@@ -463,21 +464,22 @@ function showProductModal(product) {
                 <p class="modal-description">${product.apraksts}</p>
                 <p class="modal-price">€${product.cena}</p>
                 <p><strong>Pieejamie izmēri:</strong> ${product.sizes ? product.sizes.split(',').map(size => size.trim()).join(', ') : 'Nav pieejami'}</p>
+                ${isOutOfStock ? `<p style="color: red; font-weight: bold;">Izpārdots</p>` : ''}
                 <div>
                     <label for="size-select">Izvēlieties izmēru:</label>
-                    <select id="size-select">
+                    <select id="size-select" ${isOutOfStock ? 'disabled' : ''}>
                         ${product.sizes ? product.sizes.split(',').map(size => `<option value="${size.trim()}">${size.trim()}</option>`).join('') : '<option disabled>Nav pieejami</option>'}
                     </select>
                 </div>
                 <div>
                     <label for="quantity-input">Daudzums:</label>
-                    <input type="number" id="quantity-input" min="1" max="${product.quantity}" value="1">
+                    <input type="number" id="quantity-input" min="1" max="${product.quantity}" value="1" ${isOutOfStock ? 'disabled' : ''}>
                 </div>
                 <div class="modal-buttons">
-                    <button class="add-to-cart" onclick="addToCart()">
+                    <button class="add-to-cart" onclick="addToCart()" ${isOutOfStock ? 'disabled' : ''}>
                         <i class="fas fa-shopping-cart"></i>
                     </button>
-                    <button class="buy-now" onclick="buyNow()">
+                    <button class="buy-now" onclick="buyNow()" ${isOutOfStock ? 'disabled' : ''}>
                         Pirkt tagad
                     </button>
                 </div>
@@ -514,9 +516,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 const container = document.getElementById('latest-products-container');
                 container.innerHTML = ''; // Clear container before adding products
                 data.products.forEach(product => {
-                    const images = product.bilde ? product.bilde.split(',') : []; // Handle multiple images or empty field
-                    const firstImage = images.length > 0 ? images[0].trim() : 'images/placeholder.png'; // Fallback to placeholder if no image
-
+                    const images = product.bilde ? product.bilde.split(',') : [];
+                    const firstImage = images.length > 0 ? images[0].trim() : 'images/placeholder.png';
+                    const isOutOfStock = parseInt(product.quantity) === 0;
                     container.innerHTML += `
                         <div class="product-card" onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">
                             <img src="${firstImage}" loading="lazy" alt="${product.nosaukums}">
@@ -524,11 +526,12 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <h3>${product.nosaukums}</h3>
                                 <p>${product.apraksts}</p>
                                 <p class="price">€${product.cena}</p>
+                                ${isOutOfStock ? `<p style="color: red; font-weight: bold;">Izpārdots</p>` : ''}
                                 <div class="product-buttons">
-                                    <button class="add-to-cart" onclick="event.stopPropagation(); showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">
+                                    <button class="add-to-cart" onclick="event.stopPropagation(); showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})" ${isOutOfStock ? 'disabled' : ''}>
                                         <i class="fas fa-shopping-cart"></i>
                                     </button>
-                                    <button class="buy-now" onclick="event.stopPropagation(); showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')}, true)">
+                                    <button class="buy-now" onclick="event.stopPropagation(); showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')}, true)" ${isOutOfStock ? 'disabled' : ''}>
                                         Pirkt tagad
                                     </button>
                                 </div>
@@ -547,6 +550,19 @@ document.addEventListener('DOMContentLoaded', function() {
         if (event.target.classList.contains('close-modal') || event.target === modal) {
             modal.style.display = 'none';
         }
+    });
+
+    // Atpakaļ uz augšu poga 
+    const backToTopBtn = document.getElementById('backToTop');
+    window.addEventListener('scroll', function() {
+        if (window.scrollY > 200) {
+            backToTopBtn.style.display = 'block';
+        } else {
+            backToTopBtn.style.display = 'none';
+        }
+    });
+    backToTopBtn.addEventListener('click', function() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 });
 

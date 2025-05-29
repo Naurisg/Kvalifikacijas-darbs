@@ -20,7 +20,37 @@ if (!$productId) {
 }
 
 try {
-    // Use $pdo from db_connect.php instead of creating a new PDO instance
+    // Pārbauda, vai produkts pastāv un iegūst tā pieejamo daudzumu
+    $stmt = $pdo->prepare('SELECT quantity FROM products WHERE id = :id');
+    $stmt->execute([':id' => $productId]);
+    $productRow = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$productRow) {
+        echo json_encode(['success' => false, 'message' => 'Produkts nav atrasts.']);
+        exit();
+    }
+
+    $availableStock = (int)$productRow['quantity'];
+
+    // Saskaita, cik daudz šis produkts jau ir grozā
+    $alreadyInCart = 0;
+    if (!isset($_SESSION['cart'])) {
+        $_SESSION['cart'] = [];
+    }
+    foreach ($_SESSION['cart'] as $cartItem) {
+        if ($cartItem['id'] == $productId) {
+            $alreadyInCart += (int)($cartItem['quantity'] ?? 1);
+        }
+    }
+
+    // Pārbauda, vai pieprasītais daudzums nepārsniedz pieejamo daudzumu
+    if ($alreadyInCart + $quantity > $availableStock) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Nav pietiekami daudz preču noliktavā. Maksimālais pieejamais daudzums: ' . max(0, $availableStock - $alreadyInCart)
+        ]);
+        exit();
+    }
 
     $product = [
         'id' => $productId,
@@ -28,12 +58,8 @@ try {
         'quantity' => $quantity
     ];
 
-    if (!isset($_SESSION['cart'])) {
-        $_SESSION['cart'] = [];
-    }
     $_SESSION['cart'][] = $product;
 
-    // Remove the inner try/catch and use $pdo for the update
     $cartJson = json_encode($_SESSION['cart']);
     $updateStmt = $pdo->prepare('UPDATE clients SET cart = :cart WHERE id = :user_id');
     $updateStmt->execute([
