@@ -10,7 +10,6 @@
   <link href="images/favicon.png" rel="shortcut icon" type="image/x-icon">
   <link href="images/webclip.png" rel="apple-touch-icon">
   <style>
-    /* Style for the notification */
     #notification {
       display: none; 
       position: fixed; 
@@ -24,6 +23,8 @@
       z-index: 1000; 
     }
   </style>
+  <!-- Google reCAPTCHA scripts -->
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
   <div id="notification"></div>
@@ -46,6 +47,8 @@
           <input class="w-checkbox-input check-box" name="Checkbox" type="checkbox" id="wf-sign-up-accept-privacy" required="">
           <span class="checkbox-label w-form-label" for="Checkbox">Piekrītu lietošanas noteikumiem!</span>
         </label>
+        <!-- Google reCAPTCHA -->
+        <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI" style="margin: 15px 0;"></div>
         <input data-wait="Mazliet uzgaidiet.." type="submit" class="w-users-userformbutton button w-button" value="Reģistrēties">
         <div class="w-users-userformfooter form-card-footer">
           <span>Vai jums jau ir konts?</span>
@@ -65,10 +68,18 @@
 
       const passwordField = document.getElementById('wf-sign-up-password');
       if (passwordField.value.length < 8) {
-        notification.style.backgroundColor = '#f44336'; // Error color
+        notification.style.backgroundColor = '#f44336'; // Error krāsa
         notification.textContent = 'Parolei jābūt vismaz 8 cipariem vai burtiem garai!';
         notification.style.display = 'block';
-        return; // Stop form submission
+        return; // Apstādina formu, ja parole ir pārāk īsa
+      }
+
+      // Pārbauda, vai reCAPTCHA ir apstiprināta
+      if (grecaptcha.getResponse() === "") {
+        notification.style.backgroundColor = '#f44336'; // Error krāsa
+        notification.textContent = 'Lūdzu, apstipriniet, ka neesat robots!';
+        notification.style.display = 'block';
+        return; // Apstādina formu, ja reCAPTCHA nav apstiprināta
       }
 
       const formData = new FormData(form);
@@ -80,8 +91,8 @@
       .then(response => response.json())
       .then(data => {
         if (data.success) {
-          let countdown = 3; // Start countdown from 3
-          notification.style.backgroundColor = '#4CAF50'; // Success color
+          let countdown = 3; // Sāk skaitīt no 3
+          notification.style.backgroundColor = '#4CAF50';
           notification.textContent = `Reģistrācija veiksmīga! Jūs tiksiet pārvirzīts pēc ${countdown} sekundēm.`;
           notification.style.display = 'block';
 
@@ -91,32 +102,32 @@
               notification.textContent = `Reģistrācija veiksmīga! Jūs tiksiet pārvirzīts pēc ${countdown} sekundēm.`;
             } else {
               clearInterval(interval);
-              window.location.href = 'log-in.php'; // Redirect after countdown
+              window.location.href = 'log-in.php'; 
             }
-          }, 1000); // Update every second
+          }, 1000); 
         } else {
-          notification.style.backgroundColor = '#f44336'; // Error color
+          notification.style.backgroundColor = '#f44336'; 
           notification.textContent = data.message;
           notification.style.display = 'block';
         }
       })
       .catch(error => {
-        notification.style.backgroundColor = '#f44336'; // Error color
+        notification.style.backgroundColor = '#f44336'; 
         notification.textContent = 'Lietotājs ar šādu e-pastu jau eksistē!';
         notification.style.display = 'block';
       });
     });
 
-    // Add "show password" toggle functionality
+    // Parāda vai paslēpj paroli, kad lietotājs noklikšķina uz acs ikonas
     document.getElementById('toggle-password').addEventListener('click', function() {
       const passwordField = document.getElementById('wf-sign-up-password');
       const eyeIcon = document.getElementById('eye-icon');
       if (passwordField.type === 'password') {
         passwordField.type = 'text';
-        eyeIcon.src = 'images/eye-close.png'; // Change to "eye-slash" icon
+        eyeIcon.src = 'images/eye-close.png'; // Nomaina uz "aizvērtā acs" ikonu
       } else {
         passwordField.type = 'password';
-        eyeIcon.src = 'images/eye-icon.png'; // Change back to "eye" icon
+        eyeIcon.src = 'images/eye-icon.png'; // Nomaina uz "atvērtā acs" ikonu
       }
     });
   </script>

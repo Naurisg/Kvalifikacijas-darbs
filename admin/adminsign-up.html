@@ -17,9 +17,8 @@
   <style>
     .notification {
       display: none;
-      position: fixed;
-      top: 20px;
-      right: 20px;
+      position: relative;
+      margin: 0 auto 10px auto;
       background-color: #4CAF50;
       color: white;
       padding: 15px;
@@ -27,6 +26,8 @@
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
       z-index: 1000;
       transition: opacity 0.5s ease-in-out;
+      max-width: 400px;
+      text-align: center;
     }
 
     .notification.show {
@@ -37,12 +38,23 @@
     .notification.hide {
       opacity: 0;
     }
+
+    .notification.success {
+      background-color: #4CAF50;
+    }
+
+    .notification.error {
+      background-color: #f44336;
+    }
   </style>
+  <!-- Google reCAPTCHA scripts -->
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
   <div class="w-users-userformpagewrap full-page-wrapper">
     <div class="w-users-usersignupformwrapper admin-form-card">
       <form id="signupForm" method="post">
+        <div id="signupNotification" class="notification"></div>
         <div class="w-users-userformheader form-card-header">
             <h2 class="heading h3">Admin Reģistrācija</h2>
         </div>
@@ -56,9 +68,15 @@
         </div>
         <label class="w-checkbox checkbox-field">
             <input class="w-checkbox-input check-box" name="Checkbox" type="checkbox" id="wf-sign-up-accept-privacy" required="">
-            <span class="checkbox-label w-form-label" for="Checkbox">Piekrītu kad mani dati ir pareizi.</span>
+            <span class="checkbox-label w-form-label" for="Checkbox">Piekrītu lietošanas noteikumiem!</span>
         </label>
+        <!-- Google reCAPTCHA -->
+        <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI" style="margin: 15px 0;"></div>
         <input data-wait="Mazliet uzgaidiet.." type="submit" class="w-users-userformbutton button w-button" value="Reģistrēties">
+      <div class="w-users-userformfooter form-card-footer">
+      <span>Vai jums jau ir konts?</span>
+      <a href="adminlogin.html">Autorizēties</a>
+    </div>
       </form>
 
       <div id="signupNotification" class="notification"></div>
@@ -71,6 +89,17 @@
     document.getElementById("signupForm").addEventListener("submit", function(event) {
       event.preventDefault(); 
 
+      // Pārbaudīt, vai reCAPTCHA ir apstiprināta
+      if (grecaptcha.getResponse() === "") {
+        const notification = document.getElementById("signupNotification");
+        notification.textContent = "Lūdzu, apstipriniet, ka neesat robots!";
+        notification.classList.add("show");
+        setTimeout(() => {
+          notification.classList.remove("show");
+        }, 5000);
+        return; // Apstādināt formu, ja reCAPTCHA nav apstiprināta
+      }
+
       const formData = new FormData(this);
 
       fetch('signup.php', {
@@ -82,15 +111,20 @@
         const notification = document.getElementById("signupNotification");
         if (data.success) {
           notification.textContent = data.message;
-          notification.classList.add("show");
+          notification.className = "notification success show";
           setTimeout(() => {
             notification.classList.remove("show");
-          }, 5000); 
-    
+            window.location.href = "adminlogin.html";
+          }, 2000); 
           this.reset();
         } else {
           notification.textContent = data.message;
-          notification.classList.add("show");
+          // Ja ziņa satur "jau eksistē", piešķir error klasi
+          if (data.message && data.message.toLowerCase().includes("jau eksistē")) {
+            notification.className = "notification error show";
+          } else {
+            notification.className = "notification show";
+          }
           setTimeout(() => {
             notification.classList.remove("show");
           }, 5000); 

@@ -304,7 +304,7 @@ $totalItems = count($cart);
             <p style="color: red; font-weight: bold; margin-top: 10px;">Kāds no produktiem kas atrodas grozā ir izpārdots izņemiet to lai turpinātu maksājumu</p>
           <?php endif; ?>
         </div>
-        <button class="checkout-button" id="checkoutButton" <?php echo $soldOutExists ? 'disabled style="background-color: grey; cursor: not-allowed;"' : ''; ?> onclick="window.location.href='adress.php'">Noformēt sūtījumu</button>
+        <button class="checkout-button" id="checkoutButton" <?php echo $soldOutExists ? 'disabled style="background-color: grey; cursor: not-allowed;"' : ''; ?> onclick="window.location.href='adress'">Noformēt sūtījumu</button>
       </div>
     <?php else: ?>
       <p class="cart-empty">Grozs ir tukšs.</p>

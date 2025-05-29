@@ -256,7 +256,7 @@
             <h1 class="heading h1">VissDarbam</h1>
             <p class="text large"><strong class="bold-text-5">Jūsu aizsardzība- mūsu rūpes</strong></p>
             <div class="spacer _16"></div>
-            <a href="precu-katalogs.php" class="button w-button">Preču Katalogs</a>
+            <a href="precu-katalogs" class="button w-button">Preču Katalogs</a>
           </div>
         </div>
       </div>
@@ -267,25 +267,25 @@
         <h1 class="heading-8"><strong class="bold-text-10">Top kategorijas:</strong></h1>
         <div class="w-layout-grid grid-6">
             <div class="topprecesdiv">
-                <a href="precu-lapas/cimdi.php" class="image-container">
+                <a href="precu-lapas/cimdi" class="image-container">
                     <img src="images/cimdi2.png" loading="lazy" alt="" class="image-73">
                     <span class="overlay-text">Cimdi</span>
                 </a>
             </div>
             <div class="topprecesdiv">
-                <a href="precu-lapas/apavi.php" class="image-container">
+                <a href="precu-lapas/apavi" class="image-container">
                     <img src="images/apavi.webp" loading="lazy" alt="" class="image-74">
                     <span class="overlay-text">Apavi</span>
                 </a>
             </div>
             <div class="topprecesdiv">
-                <a href="precu-lapas/apgerbi.php" class="image-container">
+                <a href="precu-lapas/apgerbi" class="image-container">
                     <img src="images/artwork.png" loading="lazy" alt="" class="image-75">
                     <span class="overlay-text">Apģērbi</span>
                 </a>
             </div>
             <div class="topprecesdiv">
-                <a href="precu-lapas/jakas.php" class="image-container">
+                <a href="precu-lapas/jakas" class="image-container">
                     <img src="images/fleecejakas.kategorias.png" loading="lazy" alt="" class="image-76">
                     <span class="overlay-text">Jakas</span>
                 </a>
@@ -299,7 +299,7 @@
       <div class="container2">
           <div class="section-top">
               <h2 class="heading h3"><strong>Preču Jaunumi:</strong></h2>
-              <a href="precu-katalogs.php" class="button light mobile-hidden w-button">Apskatīt visus</a>
+              <a href="precu-katalogs" class="button light mobile-hidden w-button">Apskatīt visus</a>
           </div>
           <div class="w-layout-grid grid" id="latest-products-container">
               <!-- Produkti tiks ielādēti šeit dynamically -->
@@ -307,7 +307,7 @@
       </div>
   </div>
 
-  <!-- Modal for product details -->
+  <!-- Modal logs produktiem -->
   <div id="product-modal" class="modal" style="display: none;">
     <div class="modal-content">
       <span class="close-modal">&times;</span>
@@ -514,7 +514,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             if (data.success) {
                 const container = document.getElementById('latest-products-container');
-                container.innerHTML = ''; // Clear container before adding products
+                container.innerHTML = ''; 
                 data.products.forEach(product => {
                     const images = product.bilde ? product.bilde.split(',') : [];
                     const firstImage = images.length > 0 ? images[0].trim() : 'images/placeholder.png';
@@ -606,7 +606,7 @@ function buyNow() {
     const quantityInput = document.getElementById('quantity-input');
     const quantity = quantityInput ? parseInt(quantityInput.value, 10) || 1 : 1;
 
-    fetch('/Vissdarbam/grozs/add_to_cart.php', { 
+    fetch('/Vissdarbam/grozs/add_to_cart', { 
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -620,7 +620,7 @@ function buyNow() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            window.location.href = '/Vissdarbam/grozs/adress.php';
+            window.location.href = '/Vissdarbam/grozs/adress';
         } else {
             alert(data.message || 'Kļūda pievienojot produktu grozam.');
         }

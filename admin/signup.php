@@ -4,7 +4,7 @@ header('Content-Type: application/json');
 require_once '../db_connect.php';
 
 try {
-    // Check if default admin exists
+    // Pābauda vai default admins jau eksistē
     $defaultAdminEmail = "admin@admin.com";
     $checkAdmin = $pdo->prepare("SELECT COUNT(*) FROM admin_signup WHERE email = :email");
     $checkAdmin->execute(['email' => $defaultAdminEmail]);
@@ -36,6 +36,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         exit();
     }
 
+    // Pārbauda vai e-pasts jau eksistē
+    $checkStmt = $pdo->prepare("SELECT COUNT(*) FROM admin_signup WHERE email = :email");
+    $checkStmt->execute(['email' => $email]);
+    if ($checkStmt->fetchColumn() > 0) {
+        echo json_encode(["success" => false, "message" => "Šāds e-pasts jau eksistē!"]);
+        exit();
+    }
+
     $hashed_password = password_hash($password, PASSWORD_BCRYPT);
 
     $sql = "INSERT INTO admin_signup (email, name, password, role, approved) 
@@ -47,7 +55,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->bindParam(':password', $hashed_password);
 
     if ($stmt->execute()) {
-        echo json_encode(["success" => true, "message" => "Reģistrācija ir veiksmīga, gaida apstiprinājumu!"]);
+        echo json_encode(["success" => true, "message" => "Reģistrācija ir veiksmīga, gaidiet apstiprinājumu!"]);
     } else {
         echo json_encode(["success" => false, "message" => "Reģistrācijas laikā radās kļūda."]);
     }

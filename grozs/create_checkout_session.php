@@ -15,6 +15,11 @@ if (!isset($_SESSION['user_id'])) {
 \Stripe\Stripe::setApiKey('sk_test_51QP0wYHs6AycTP1yyPSwfq6pYdkUGT9w6yLf2gsZdEsgfIxnsTqkwRJnqZZoF1H4f42axHvNyqHIj7enkqtMEp1100Zzk0WPsE');
 
 try {
+    // Dynamically build base URL for redirects
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $baseUrl = $scheme . '://' . $host . '/Vissdarbam';
+
     // Groza dati no sesijas
     $cart = $_SESSION['cart'] ?? [];
 
@@ -89,8 +94,8 @@ try {
         'payment_method_types' => ['card'],
         'line_items' => $lineItems,
         'mode' => 'payment',
-        'success_url' => 'http://localhost/Vissdarbam/grozs/success.php?session_id={CHECKOUT_SESSION_ID}',
-        'cancel_url' => 'http://localhost/Vissdarbam/grozs/adress.php',
+        'success_url' => $baseUrl . '/grozs/success.php?session_id={CHECKOUT_SESSION_ID}',
+        'cancel_url' => $baseUrl . '/grozs/adress.php',
         'metadata' => [
             'name' => $addressData['name'] ?? '',
             'email' => $addressData['email'] ?? '',

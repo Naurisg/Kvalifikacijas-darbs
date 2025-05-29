@@ -65,7 +65,7 @@ try {
     ]);
 
     $reset_link = sprintf(
-        '%s/vissdarbam/password_reset/reset-password-process.php?token=%s',
+        '%s/Vissdarbam/password_reset/reset-password-process.php?token=%s',
         (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'],
         $token
     );

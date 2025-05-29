@@ -18,6 +18,7 @@
 <body>
   <div class="w-users-userformpagewrap full-page-wrapper">
     <div class="w-users-userloginformwrapper admin-form-card">
+      <div id="notification" class="notification" style="display: none; color: red; margin-bottom: 10px;"></div>
       <form id="loginForm" method="post">
         <div class="w-users-userformheader form-card-header">
           <h2 class="heading h3">Autorizēties</h2>
@@ -29,35 +30,48 @@
             <img src="images/eye-icon.png" alt="Show Password" id="eye-icon" style="width: 20px; height: 20px;">
           </span>
         </div>
-        <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"></div>
+        <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI" style="display:none"></div>
         <input type="submit" data-wait="Please wait..." class="w-users-userformbutton button w-button" value="Ienākt">
         <div class="w-users-userformfooter form-card-footer"><span>Nav izveidots konts?</span>
-          <a href="sign-up.php">Reģistrēties</a>
+          <a href="sign-up">Reģistrēties</a>
         </div>
       </form>
-      <div style="display:none" data-wf-user-form-error="true" class="w-users-userformerrorstate form-error w-form-fail">
-        <div class="user-form-error-msg" wf-login-form-general-error-error="We&#x27;re having trouble logging you in. Please try again, or contact us if you continue to have problems." wf-login-form-invalid-email_or_password-error="Invalid email or password. Please try again.">We&#x27;re having trouble logging you in. Please try again, or contact us if you continue to have problems.</div>
-      </div>
     </div>
     <a href="password_reset/reset-password.html" class="below-card-link">Aizmirsi paroli?</a>
   </div>
+  <style>
+    .notification {
+      background-color: #f8d7da;
+      border: 1px solid #f5c6cb;
+      padding: 10px;
+      text-align: center;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      color: #721c24;
+    }
+  </style>
   <script src="https://d3e54v103j8qbb.cloudfront.net/js/jquery-3.5.1.min.dc5e7f18c8.js?site=66f12005df0203b01c953e53" type="text/javascript" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
   <script src="js/script.js" type="text/javascript"></script>
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
   <script>
+    let failedAttempts = 0;
     document.getElementById('loginForm').addEventListener('submit', function(event) {
-      event.preventDefault(); //  Novērš formu no noklusējuma iesniegšanas
+      event.preventDefault();
+      const formData = new FormData(this);
+      const recaptchaDiv = document.querySelector('.g-recaptcha');
+      let recaptchaResponse = '';
+      const notificationDiv = document.getElementById('notification');
+      notificationDiv.style.display = 'none';
 
-      const formData = new FormData(this); // Iegūst form datus
-
-      // Iegūt reCAPTCHA atbildes tokenu
-      const recaptchaResponse = grecaptcha.getResponse();
-      if (!recaptchaResponse) {
-        alert('Lūdzu, apstipriniet, ka neesat robots.');
-        return;
+      if (recaptchaDiv.style.display !== 'none') {
+        recaptchaResponse = grecaptcha.getResponse();
+        if (!recaptchaResponse) {
+          notificationDiv.textContent = 'Lūdzu, apstipriniet, ka neesat robots.';
+          notificationDiv.style.display = 'block';
+          return;
+        }
+        formData.append('g-recaptcha-response', recaptchaResponse);
       }
-      formData.append('g-recaptcha-response', recaptchaResponse);
-
       fetch('process-login.php', {
         method: 'POST',
         body: formData
@@ -65,16 +79,20 @@
       .then(response => response.json())
       .then(data => {
         if (data.success) {
-          window.location.href = 'index.php'; // Pārved atpakaļ uz index.php pec veiksmigas ielogošanas
+          window.location.href = 'index';
         } else {
-          const errorDiv = document.querySelector('.w-users-userformerrorstate');
-          const errorMsg = document.querySelector('.user-form-error-msg');
-          errorMsg.textContent = data.message;
-          errorDiv.style.display = 'block';
+          failedAttempts++;
+          if (failedAttempts >= 2) {
+            recaptchaDiv.style.display = 'block';
+          }
+          notificationDiv.textContent = data.message;
+          notificationDiv.style.display = 'block';
         }
       })
       .catch(error => {
         console.error('Error:', error);
+        notificationDiv.textContent = 'Neplānota kļūda. Mēģiniet vēlreiz vēlāk.';
+        notificationDiv.style.display = 'block';
       });
     });
 

@@ -28,18 +28,20 @@
         <input maxlength="256" placeholder="Jūsu e-pasts" name="Email" id="wf-log-in-email" class="text-field w-input" type="email" autocomplete="username" required="" data-wf-user-form-input-type="email">
         
         <div style="position: relative;">
-          <input maxlength="256" placeholder="Jūsu parole" name="Password" id="wf-log-in-password" class="text-field w-input" type="password" required="" data-wf-user-form-input-type="password">
-          <span id="toggle-password" style="cursor: pointer; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);">
-            <img src="../images/eye-icon.png" alt="Show Password" id="eye-icon" style="width: 20px; height: 20px;">
-          </span>
-        </div>
-        
-        <input type="submit" data-wait="Please wait..." class="w-users-userformbutton button w-button" value="Autorizēties">
-        <div class="w-users-userformfooter form-card-footer">
-          <span>Nav admin konts?</span>
-          <a href="adminsign-up.html">Reģistrēties</a>
-        </div>
-      </form>
+      <input maxlength="256" placeholder="Jūsu parole" name="Password" id="wf-log-in-password" class="text-field w-input" type="password" required="" data-wf-user-form-input-type="password">
+      <span id="toggle-password" style="cursor: pointer; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);">
+        <img src="../images/eye-icon.png" alt="Show Password" id="eye-icon" style="width: 20px; height: 20px;">
+      </span>
+    </div>
+    
+    <!-- Google reCAPTCHA  -->
+    <div class="g-recaptcha" id="recaptcha-container" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI" style="margin: 15px 0; display: none;"></div>
+    <input type="submit" data-wait="Please wait..." class="w-users-userformbutton button w-button" value="Autorizēties">
+    <div class="w-users-userformfooter form-card-footer">
+      <span>Nav admin konts?</span>
+      <a href="adminsign-up.html">Reģistrēties</a>
+    </div>
+  </form>
       <div style="display:none" data-wf-user-form-error="true" class="w-users-userformerrorstate form-error w-form-fail">
         <div class="user-form-error-msg" wf-login-form-general-error="We&#x27;re having trouble logging you in. Please try again, or contact us if you continue to have problems." wf-login-form-invalid-email_or_password-error="Invalid email or password. Please try again.">We&#x27;re having trouble logging you in. Please try again, or contact us if you continue to have problems.</div>
       </div>
@@ -58,7 +60,9 @@
     margin-bottom: 10px;
     color: #721c24; 
 }
-</style>
+  </style>
+  <!-- Google reCAPTCHA scripts -->
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
   <script>
     // JavaScript lai redzētu paroli
     document.getElementById('toggle-password').addEventListener('click', function() {
@@ -76,6 +80,15 @@
     document.getElementById("loginForm").addEventListener("submit", function(event) {
         event.preventDefault(); 
 
+        // Pārbauda, vai reCAPTCHA ir nepieciešama
+        const recaptchaContainer = document.getElementById('recaptcha-container');
+        if (recaptchaContainer.style.display !== 'none' && grecaptcha.getResponse() === "") {
+          const notificationDiv = document.getElementById('notification');
+          notificationDiv.innerHTML = "Lūdzu, apstipriniet, ka neesat robots!";
+          notificationDiv.style.display = 'block';
+          return; // Apstājas, ja reCAPTCHA nav apstiprināta
+        }
+
         const formData = new FormData(this);
         const notificationDiv = document.getElementById('notification');
 
@@ -87,9 +100,20 @@
         .then(data => {
             if (data.success) {
                 // novirza ja login ir pareizs
+                // Atjaunina failed login attempts skaitu
+                localStorage.setItem('failedLoginAttempts', '0');
                 window.location.href = data.redirect;
             } else {
-              
+                // Palielina neveiksmīgo mēģinājumu skaitu
+                let failedAttempts = parseInt(localStorage.getItem('failedLoginAttempts') || '0');
+                failedAttempts++;
+                localStorage.setItem('failedLoginAttempts', failedAttempts.toString());
+
+                // Parāda reCAPTCHA, ja ir 2 vai vairāk neveiksmīgi mēģinājumi
+                if (failedAttempts >= 2) {
+                  recaptchaContainer.style.display = 'block';
+                }
+
                 notificationDiv.innerHTML = data.message;
                 notificationDiv.style.display = 'block'; // parāda error paziņojumu
             }

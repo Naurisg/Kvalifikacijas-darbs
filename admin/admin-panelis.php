@@ -1258,7 +1258,8 @@ fetch('get_clients.php')
 .then(response => response.json())
 .then(data => {
     if (data.success) {
-        const clients = data.clients;
+        // kārto client tabulu jaunākie augšā
+        const clients = data.clients.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         const tbody = document.querySelector("#client-table tbody");
         clients.forEach(client => {
             const row = document.createElement("tr");
