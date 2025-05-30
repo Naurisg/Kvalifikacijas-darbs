@@ -1,4 +1,20 @@
 <!-- footer.php -->
+<style>
+.payment-methods-grid {
+  display: grid;
+  grid-template-columns: repeat(4, max-content);
+  gap: 12px;
+  align-items: center;
+  margin-top: 10px;
+  justify-content: start;
+}
+
+.payment-method-img {
+  height: 32px;
+  max-width: 70px;
+  justify-self: center;
+}
+</style>
 <div class="footer">
     <div class="footer-container w-container">
       <div class="w-layout-grid footer-grid">
@@ -40,11 +56,11 @@
         </div>
         <div class="footer-links-container">
           <h5 class="footer-header">Apmaksas veidi</h5>
-          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; align-items: center; margin-top: 10px;">
-            <img src="/Vissdarbam/images/mastercard.png" alt="Mastercard" style="height:32px;max-width:70px;justify-self:center;">
-            <img src="/Vissdarbam/images/visa.jpg" alt="Visa" style="height:32px;max-width:70px;justify-self:center;">
-            <img src="/Vissdarbam/images/americanexpress.png" alt="American Express" style="height:32px;max-width:70px;justify-self:center;">
-            <img src="/Vissdarbam/images/googlepay.png" alt="Google Pay" style="height:32px;max-width:70px;justify-self:center;">
+          <div class="payment-methods-grid">
+            <img src="/Vissdarbam/images/mastercard.png" alt="Mastercard" class="payment-method-img">
+            <img src="/Vissdarbam/images/visa.jpg" alt="Visa" class="payment-method-img">
+            <img src="/Vissdarbam/images/americanexpress.png" alt="American Express" class="payment-method-img">
+            <img src="/Vissdarbam/images/googlepay.png" alt="Google Pay" class="payment-method-img">
           </div>
         </div>
       </div>

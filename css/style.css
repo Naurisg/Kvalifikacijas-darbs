@@ -4085,6 +4085,37 @@ figcaption {
     font-size: 14px;
   }
 
+  
+  /* Payment methods grid responsiveness */
+  .footer-links-container div[style*="grid-template-columns"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+    justify-items: center !important;
+  }
+
+  .footer-links-container div[style*="grid-template-columns"] img {
+    height: 28px !important;
+    max-width: 60px !important;
+  }
+
+  /* Fix text centering on par-mums.php for phone */
+  .text-box.centered {
+    text-align: center !important;
+    left: 0 !important;
+    padding-left: 0 !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  .text-box {
+    left: 0 !important;
+    padding-left: 0 !important;
+  }
+
+  .rich-text {
+    text-align: center !important;
+  }
+
   h1 {
     font-size: 32px;
   }
@@ -4575,6 +4606,22 @@ figcaption {
   }
 }
 
+
+
+@media screen and (max-width: 768px) {
+  /* footer responsivitāte */
+  .footer-grid {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .footer-links-container {
+    width: 100% !important;
+    margin-bottom: 20px !important;
+  }
+
+}
+
 .topprecesdiv {
   position: relative; /* Positioning for overlay text */
   overflow: hidden; /* Ensure the image doesn't overflow its container */
@@ -4596,16 +4643,16 @@ figcaption {
 .overlay-text {
   position: absolute; /* Position the text over the image */
   top: 50%; /* Center vertically */
-  left: 50%; /* Center horizontally */
-  transform: translate(-50%, -50%); /* Adjust for centering */
-  background-color: rgba(0, 0, 0, 0.7); /* Background with transparency */
-  color: #fff; /* White text */
-  padding: 10px; /* Padding around text */
-  border-radius: 5px; /* Rounded corners */
-  font-size: 16px; /* Font size */
-  font-weight: bold; /* Make text bold */
-  transition: opacity 0.3s; /* Fade effect */
-  opacity: 0; /* Initially hidden */
+  left: 50%;
+  transform: translate(-50%, -50%); 
+  background-color: rgba(0, 0, 0, 0.7); 
+  color: #fff; 
+  padding: 10px;
+  border-radius: 5px; 
+  font-size: 16px; 
+  font-weight: bold; 
+  transition: opacity 0.3s; 
+  opacity: 0; 
 }
 
 
@@ -4615,8 +4662,8 @@ figcaption {
 }
 
 .heading-8 {
-  text-align: center; /* Center the heading */
-  margin-bottom: 20px; /* Add some space below the heading */
+  text-align: center;
+  margin-bottom: 20px; 
 }
 
 /* Preču-kategorijas animācijas****************************************** */
@@ -4668,32 +4715,6 @@ figcaption {
   100% {
       transform: scale(1);
   }
-}
-
-/* Dark Mods */
-body.dark-mode {
-    background-color: #121212; 
-    color: #e0e0e0; 
-}
-
-.nav-bar.dark-mode {
-    background-color: #1f1f1f; 
-}
-
-a.nav-link.dark-mode {
-    color: #e0e0e0; 
-}
-
-.button.light {
-    background-color: #424242; 
-    color: #ffffff; 
-}
-
-.text.large.dark-mode,
-.heading.h1.dark-mode,
-.heading.h3.dark-mode,
-.paragraph-15.dark-mode {
-    color: #e0e0e0; 
 }
 
 
@@ -4782,37 +4803,42 @@ a.nav-link.dark-mode {
   color: white;
 }
 
-/* --- Responsivitāte footer priekš telefoniem --- */
-@media screen and (max-width: 600px) {
-  .footer-grid {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 24px !important;
+/* Responsive fixes for Top kategorijas section */
+@media screen and (max-width: 991px) {
+  .grid-6 {
+    grid-template-columns: repeat(2, 1fr) !important;
   }
-
-  .footer-links-container {
-    width: 100% !important;
-    max-width: 100% !important;
+  .toppreces {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
   }
-
-  .footerlogobloks {
-    width: 100% !important;
-    max-width: 100% !important;
+  .topprecesdiv {
+    height: 160px !important;
   }
+}
 
-  /* Maksājuma iconas grid in footer */
-  .footer-links-container > div[style*="grid-template-columns"] {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    justify-content: center !important;
-    gap: 12px !important;
-    margin-top: 10px !important;
+@media screen and (max-width: 767px) {
+  .grid-6 {
+    grid-template-columns: 1fr !important;
   }
+  .toppreces {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+  .topprecesdiv {
+    height: 140px !important;
+  }
+}
 
-  .footer-links-container > div[style*="grid-template-columns"] img {
-    margin: 0 6px 6px 0 !important;
-    max-width: 60px !important;
-    height: 28px !important;
-    flex: 0 0 auto !important;
+@media screen and (max-width: 479px) {
+  .grid-6 {
+    grid-template-columns: 1fr !important;
+  }
+  .toppreces {
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+  }
+  .topprecesdiv {
+    height: 120px !important;
   }
 }

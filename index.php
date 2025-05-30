@@ -366,7 +366,7 @@
           </div>
           <div id="w-node-_073258ef-8810-ad26-defd-c0ca1d94d223-1c953eb0" class="w-layout-cell cell-11">
             <div class="partneridiv">
-              <a href="https://www.brabantia.com/int_en/" target="_blank" class="w-inline-block"><img src="images/sadarbibaspartneris1.png" loading="lazy" sizes="(max-width: 767px) 160px, (max-width: 991px) 22vw, (max-width: 1279px) 220px, 260px" srcset="images/sadarbibaspartneris1-p-500.png 500w, images/sadarbibaspartneris1.png 590w" alt="" class="image-64"></a>
+              <a href="https://www.brabantia.com/int_en/" target="_blank" class="w-inline-block"><img src="images/sadarbibaspartneris1.png" loading="lazy" sizes="(max-width: 767px) 160px, (max-width: 991px) 22vw, (max-width: 1279px) 220px, 260px" srcset="images/sadarbibaspartneris1.png 500w, images/sadarbibaspartneris1.png 590w" alt="" class="image-64"></a>
             </div>
           </div>
         </div>
@@ -655,6 +655,20 @@ function buyNow() {
       transform: scale(1.1);
       opacity: 0.8;
     }
+      /* Responsivitate iegūstiet jaunumus epasta */
+@media screen and (max-width: 479px) {
+  .text-box {
+    left: 0 !important;
+    padding-left: 0 !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  .email-form.center-align input.button {
+    display: block !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
   </style>
 </body>
 </html>

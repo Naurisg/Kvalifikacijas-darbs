@@ -389,6 +389,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
         padding: 30px 20px;
         transform: translateY(20px);
         transition: transform 0.3s ease;
+        /* Ierobežo augstumu un padara ritināmu */
+        max-height: 75vh;
+        overflow-y: auto;
       }
       
       .mobile-menu.active .mobile-menu-content {
