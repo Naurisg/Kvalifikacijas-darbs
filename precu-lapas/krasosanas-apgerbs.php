@@ -46,6 +46,7 @@
 <body>
     <div class="shop-container">
         <aside class="filters-sidebar">
+                        <button id="filter-close-btn" aria-label="Close Filters" style="display:none;">Aizvērt</button>
             <div class="filter-section">
                 <h3>Cenas filtrs</h3>
                 <input type="range" class="price-range" min="0" max="100" step="5">
@@ -64,26 +65,13 @@
                 <label><input type="checkbox" class="size-filter" value="XXL"> XXL</label>
             </div>
 
-            <div class="filter-section">
-                <h3>Tips</h3>
-                <label><input type="checkbox" class="type-filter" value="Kombinezoni"> Kombinezoni</label><br>
-                <label><input type="checkbox" class="type-filter" value="Halāti"> Halāti</label><br>
-                <label><input type="checkbox" class="type-filter" value="Priekšauti"> Priekšauti</label><br>
-                <label><input type="checkbox" class="type-filter" value="Cepures"> Cepures</label>
-            </div>
 
-            <div class="filter-section">
-                <h3>Materiāls</h3>
-                <label><input type="checkbox" class="material-filter" value="Vienreizējie"> Vienreizējās lietošanas</label><br>
-                <label><input type="checkbox" class="material-filter" value="Polipropilēns"> Polipropilēns</label><br>
-                <label><input type="checkbox" class="material-filter" value="Kokvilna"> Kokvilna</label><br>
-                <label><input type="checkbox" class="material-filter" value="Poliesters"> Poliesters</label>
-            </div>
         </aside>
 
         <main class="products-section">
             <div class="search-container">
                 <input type="text" class="search-bar" placeholder="Meklēt krāsošanas apģērbu...">
+                <button id="filter-toggle-btn" aria-label="Toggle Filters" style="display:none;">Filtri</button>
             </div>
             <div id="products-container" class="products-grid">
             </div>
@@ -95,7 +83,6 @@
         let allProducts = [];
         let currentProduct = null;
 
-        // Fetch products for the "Krāsošanas apģērbs" category
         fetch('../admin/get_products.php?category=KrasosanasApgerbs')
             .then(response => response.json())
             .then(data => {
@@ -199,13 +186,13 @@
         modalBody.innerHTML = `
             <div class="modal-product-details">
                 <div class="modal-carousel">
-                    ${images.length > 1 ? `<button class="carousel-btn prev-btn" onclick="showPrevModalImage()">&#9664;</button>` : ''}
+                    ${images.length > 1 ? `<button class="carousel-btn prev-btn" onclick="showPrevModalImage()" aria-label="Iepriekšējais attēls"></button>` : ''}
                     <div class="carousel-images">
                         ${images.map((image, index) => `
                             <img src="../${image.trim()}" class="carousel-image" style="display: ${index === 0 ? 'block' : 'none'}">
                         `).join('')}
                     </div>
-                    ${images.length > 1 ? `<button class="carousel-btn next-btn" onclick="showNextModalImage()">&#9654;</button>` : ''}
+                    ${images.length > 1 ? `<button class="carousel-btn next-btn" onclick="showNextModalImage()" aria-label="Nākamais attēls"></button>` : ''}
                 </div>
                 <div class="modal-product-info">
                     <h2>${product.nosaukums}</h2>
@@ -345,6 +332,57 @@
             alert('Kļūda pievienojot produktu grozam.');
         });
     }
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterToggleBtn = document.getElementById('filter-toggle-btn');
+        const filtersSidebar = document.querySelector('.filters-sidebar');
+
+        function updateFilterButtonVisibility() {
+            if (window.innerWidth <= 600) {
+                filterToggleBtn.style.display = 'inline-block';
+             
+                if (filtersSidebar.style.display !== 'block') {
+                    filtersSidebar.style.display = 'none';
+                }
+            } else {
+                filterToggleBtn.style.display = 'none';
+                filtersSidebar.style.display = 'block';
+            }
+        }
+
+        filterToggleBtn.addEventListener('click', () => {
+            if (filtersSidebar.style.display === 'none') {
+                filtersSidebar.style.display = 'block';
+            } else {
+                filtersSidebar.style.display = 'none';
+            }
+        });
+
+        window.addEventListener('resize', updateFilterButtonVisibility);
+        updateFilterButtonVisibility();
+    });
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterCloseBtn = document.getElementById('filter-close-btn');
+        const filtersSidebar = document.querySelector('.filters-sidebar');
+
+        filterCloseBtn.addEventListener('click', () => {
+            filtersSidebar.style.display = 'none';
+        });
+
+        function updateCloseButtonVisibility() {
+            if (window.innerWidth <= 600) {
+                filterCloseBtn.style.display = 'inline-block';
+            } else {
+                filterCloseBtn.style.display = 'none';
+            }
+        }
+
+        window.addEventListener('resize', updateCloseButtonVisibility);
+        updateCloseButtonVisibility();
+    });
     </script>
 </body>
 </html>

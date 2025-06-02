@@ -42,6 +42,7 @@
 <body>
     <div class="shop-container">
         <aside class="filters-sidebar">
+                         <button id="filter-close-btn" aria-label="Close Filters" style="display:none;">Aizvērt</button>
             <div class="filter-section">
                 <h3>Cenas filtrs</h3>
                 <input type="range" class="price-range" min="0" max="100" step="5">
@@ -54,6 +55,7 @@
         <main class="products-section">
             <div class="search-container">
                 <input type="text" class="search-bar" placeholder="Meklēt darba aksesuārus...">
+                  <button id="filter-toggle-btn" aria-label="Toggle Filters" style="display:none;">Filtri</button>
             </div>
             <div id="products-container" class="products-grid">
             </div>
@@ -150,13 +152,13 @@
         modalBody.innerHTML = `
             <div class="modal-product-details">
                 <div class="modal-carousel">
-                    ${images.length > 1 ? `<button class="carousel-btn prev-btn" onclick="showPrevModalImage()">&#9664;</button>` : ''}
+                    ${images.length > 1 ? `<button class="carousel-btn prev-btn" onclick="showPrevModalImage()" aria-label="Iepriekšējais attēls"></button>` : ''}
                     <div class="carousel-images">
                         ${images.map((image, index) => `
                             <img src="../${image.trim()}" class="carousel-image" style="display: ${index === 0 ? 'block' : 'none'}; width: 300px; height: 300px; object-fit: contain; border-radius: 8px;">
                         `).join('')}
                     </div>
-                    ${images.length > 1 ? `<button class="carousel-btn next-btn" onclick="showNextModalImage()">&#9654;</button>` : ''}
+                    ${images.length > 1 ? `<button class="carousel-btn next-btn" onclick="showNextModalImage()" aria-label="Nākamais attēls"></button>` : ''}
                 </div>
                 <div class="modal-product-info">
                     <h2>${product.nosaukums}</h2>
@@ -261,7 +263,6 @@
             return;
         }
 
-        // First add to cart, then redirect to checkout
         fetch('/Vissdarbam/grozs/add_to_cart.php', { 
             method: 'POST',
             headers: {
@@ -286,6 +287,56 @@
             alert('Kļūda pievienojot produktu grozam.');
         });
     }
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterToggleBtn = document.getElementById('filter-toggle-btn');
+        const filtersSidebar = document.querySelector('.filters-sidebar');
+
+        function updateFilterButtonVisibility() {
+            if (window.innerWidth <= 600) {
+                filterToggleBtn.style.display = 'inline-block';
+                
+                if (filtersSidebar.style.display !== 'block') {
+                    filtersSidebar.style.display = 'none';
+                }
+            } else {
+                filterToggleBtn.style.display = 'none';
+                filtersSidebar.style.display = 'block';
+            }
+        }
+
+        filterToggleBtn.addEventListener('click', () => {
+            if (filtersSidebar.style.display === 'none') {
+                filtersSidebar.style.display = 'block';
+            } else {
+                filtersSidebar.style.display = 'none';
+            }
+        });
+
+        window.addEventListener('resize', updateFilterButtonVisibility);
+        updateFilterButtonVisibility();
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterCloseBtn = document.getElementById('filter-close-btn');
+        const filtersSidebar = document.querySelector('.filters-sidebar');
+
+        filterCloseBtn.addEventListener('click', () => {
+            filtersSidebar.style.display = 'none';
+        });
+
+        function updateCloseButtonVisibility() {
+            if (window.innerWidth <= 600) {
+                filterCloseBtn.style.display = 'inline-block';
+            } else {
+                filterCloseBtn.style.display = 'none';
+            }
+        }
+
+        window.addEventListener('resize', updateCloseButtonVisibility);
+        updateCloseButtonVisibility();
+    });
     </script>
 </body>
 </html>

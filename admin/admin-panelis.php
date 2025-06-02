@@ -89,11 +89,11 @@ try {
         }
 
         .logout-button {
-            background-color: #dc3545; /* red */
+            background-color: #dc3545; 
         }
 
         .logout-button:hover {
-            background-color: #c82333; /* darker red */
+            background-color: #c82333; 
             transform: scale(1.05);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
@@ -163,6 +163,26 @@ try {
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
+        .soldout-button {
+            padding: 12px 24px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+        }
+
+        .soldout-button:hover,
+        .soldout-button.active {
+            background-color: #c82333;
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
         .role-select {
             padding: 6px 10px;
             border: 1px solid #ddd;
@@ -203,7 +223,6 @@ try {
             position: relative;
         }
 
-        /* Order Modal Styles */
         #orderModal {
             display: none;
             position: fixed;
@@ -321,34 +340,326 @@ try {
             }
         }
 
-        /* stils izpardošanas pogai */
-        .soldout-button {
-            padding: 12px 24px;
-            background-color: #dc3545;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 13px;
-            transition: all 0.3s ease;
-            margin-left: 10px;
+        /* ---Responsivitāte --- */
+        @media (max-width: 1200px) {
+            section {
+                margin: 10px;
+                padding: 10px;
+                border-radius: 6px;
+            }
+            .header-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .header-container h2 {
+                text-align: center;
+                width: 100%;
+            }
+            .logout-button {
+                text-align: center;
+            }
+            .logo {
+                width: 80px;
+                margin-bottom: 10px;
+            }
+            h2 {
+                font-size: 1.2rem;
+                margin-bottom: 12px;
+            }
+            .search-container {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+                width: 100%;
+                padding: 0 0 6px 0;
+                box-sizing: border-box;
+            }
+            .search-input, #categoryFilter {
+                width: 98vw !important;
+                max-width: 100%;
+                min-width: 0;
+                font-size: 15px;
+                padding: 10px 12px;
+                margin: 0 auto;
+                box-sizing: border-box;
+                display: block;
+            }
+            #categoryFilter {
+                display: block;
+                margin: 12px auto 12px auto !important;
+                text-align: center;
+            }
+            .add-button, .soldout-button, .logout-button, .toggle-button {
+                width: 100%;
+                margin: 6px 0;
+                font-size: 15px;
+                padding: 12px 0;
+            }
+            table, thead, tbody, th, td, tr {
+                display: block;
+                width: 100%;
+            }
+            thead {
+                display: none;
+            }
+            tr {
+                margin-bottom: 18px;
+                border-bottom: 2px solid #eee;
+                background: #fff;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+                padding: 10px 0;
+            }
+            td {
+                padding: 10px 12px;
+                text-align: left;
+                border: none;
+                position: relative;
+                font-size: 15px;
+            }
+            td:before {
+                content: attr(data-label);
+                font-weight: bold;
+                display: block;
+                margin-bottom: 2px;
+                color: #2c3e50;
+                font-size: 13px;
+            }
+            .edit-button, .delete-btn, .approval-button {
+                width: 100%;
+                margin: 4px 0 0 0;
+                font-size: 14px;
+                padding: 10px 0;
+                box-sizing: border-box;
+                display: block;
+                text-align: center;
+            }
+            #admin-table td .edit-button,
+            #admin-table td .approval-button,
+            #admin-table td .delete-btn {
+                width: 100%;
+                margin: 4px 0 0 0;
+                font-size: 14px;
+                padding: 10px 0;
+                box-sizing: border-box;
+                display: block;
+            }
+            #admin-table td .edit-button:first-child,
+            #admin-table td .approval-button:first-child,
+            #admin-table td .delete-btn:first-child {
+                margin-top: 0;
+            }
+            .size-badge {
+                font-size: 12px;
+                padding: 3px 7px;
+            }
+            .order-details-table, .order-details-table thead, .order-details-table tbody, .order-details-table tr, .order-details-table td, .order-details-table th {
+                display: block;
+                width: 100%;
+            }
+            .order-details-table tr {
+                margin-bottom: 12px;
+                border-bottom: 1px solid #eee;
+            }
+            .order-details-table td, .order-details-table th {
+                padding: 8px 10px;
+                font-size: 14px;
+            }
+            .order-details-table td:before {
+                content: attr(data-label);
+                font-weight: bold;
+                display: block;
+                margin-bottom: 2px;
+                color: #2c3e50;
+                font-size: 12px;
+            }
+            .order-details-table img {
+                max-width: 45px;
+                max-height: 45px;
+            }
+            .modal-content {
+                width: 99%;
+                min-width: unset;
+                padding: 8px;
+            }
+            .modal-summary, .modal-address {
+                flex-direction: column;
+                align-items: flex-start;
+                font-size: 14px;
+            }
         }
-        .soldout-button.active, .soldout-button:active {
-            background-color: #a71d2a;
-        }
-        .soldout-button:hover {
-            background-color: #c82333;
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        @media (max-width: 600px) {
+            section {
+                margin: 5px;
+                padding: 5px;
+                border-radius: 0;
+            }
+            .header-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .header-container h2 {
+                text-align: center;
+                width: 100%;
+            }
+            .logout-button {
+                text-align: center;
+            }
+            .logo {
+                width: 70px;
+                margin-bottom: 10px;
+            }
+            h2 {
+                font-size: 1.1rem;
+                margin-bottom: 10px;
+            }
+            .search-container {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+                width: 100%;
+                padding: 0 0 4px 0;
+                box-sizing: border-box;
+            }
+            .search-input, #categoryFilter {
+                width: 96vw !important;
+                max-width: 100%;
+                min-width: 0;
+                font-size: 14px;
+                padding: 8px 10px;
+                margin: 0 auto;
+                box-sizing: border-box;
+                display: block;
+            }
+            #categoryFilter {
+                display: block;
+                margin: 10px auto 10px auto !important;
+                text-align: center;
+            }
+            .add-button, .soldout-button, .logout-button, .toggle-button {
+                width: 100%;
+                margin: 5px 0;
+                font-size: 14px;
+                padding: 10px 0;
+            }
+            table, thead, tbody, th, td, tr {
+                display: block;
+                width: 100%;
+            }
+            thead {
+                display: none;
+            }
+            tr {
+                margin-bottom: 15px;
+                border-bottom: 2px solid #eee;
+                background: #fff;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+                padding: 8px 0;
+            }
+            td {
+                padding: 8px 10px;
+                text-align: left;
+                border: none;
+                position: relative;
+                font-size: 14px;
+            }
+            td:before {
+                content: attr(data-label);
+                font-weight: bold;
+                display: block;
+                margin-bottom: 2px;
+                color: #2c3e50;
+                font-size: 12px;
+            }
+            .edit-button, .delete-btn, .approval-button {
+                width: 100%;
+                margin: 3px 0 0 0;
+                font-size: 13px;
+                padding: 8px 0;
+                box-sizing: border-box;
+                display: block;
+                text-align: center;
+            }
+            #admin-table td .edit-button,
+            #admin-table td .approval-button,
+            #admin-table td .delete-btn {
+                width: 100%;
+                margin: 3px 0 0 0;
+                font-size: 13px;
+                padding: 8px 0;
+                box-sizing: border-box;
+                display: block;
+            }
+            #admin-table td .edit-button:first-child,
+            #admin-table td .approval-button:first-child,
+            #admin-table td .delete-btn:first-child {
+                margin-top: 0;
+            }
+            .size-badge {
+                font-size: 11px;
+                padding: 2px 6px;
+            }
+            .order-details-table, .order-details-table thead, .order-details-table tbody, .order-details-table tr, .order-details-table td, .order-details-table th {
+                display: block;
+                width: 100%;
+            }
+            .order-details-table tr {
+                margin-bottom: 10px;
+                border-bottom: 1px solid #eee;
+            }
+            .order-details-table td, .order-details-table th {
+                padding: 6px 8px;
+                font-size: 13px;
+            }
+            .order-details-table td:before {
+                content: attr(data-label);
+                font-weight: bold;
+                display: block;
+                margin-bottom: 2px;
+                color: #2c3e50;
+                font-size: 11px;
+            }
+            .order-details-table img {
+                max-width: 40px;
+                max-height: 40px;
+            }
+            .modal-content {
+                width: 99%;
+                min-width: unset;
+                padding: 5px;
+            }
+            .modal-summary, .modal-address {
+                flex-direction: column;
+                align-items: flex-start;
+                font-size: 13px;
+            }
         }
     </style>
 </head>
 <body>
 <section>
-    <div class="header-container">
+    <div class="header-container" style="position: relative;">
         <img src="../images/Logo.png" alt="Logo" class="logo">
         <h2>Sveiki, <?php echo htmlspecialchars($admin_name); ?>!</h2>
+        <button id="burger-button" aria-label="Menu" aria-expanded="false" aria-controls="burger-menu" onclick="toggleBurgerMenu()" style="display:none; position: absolute; top: 10px; right: 10px; background: none; border: none; cursor: pointer; z-index: 1001;">
+            <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect y="5" width="30" height="3" fill="#333"/>
+                <rect y="13.5" width="30" height="3" fill="#333"/>
+                <rect y="22" width="30" height="3" fill="#333"/>
+            </svg>
+        </button>
+        <div id="burger-menu" style="display:none; position: absolute; top: 45px; right: 10px; background: white; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); z-index: 1000; min-width: 150px;">
+            <?php if ($user_role !== 'Moderators'): ?>
+            <button class="burger-menu-item" onclick="showTable('admin'); toggleBurgerMenu();">Admini</button>
+            <?php endif; ?>
+            <button class="burger-menu-item" onclick="showTable('client'); toggleBurgerMenu();">Klienti</button>
+            <button class="burger-menu-item" onclick="showTable('product'); toggleBurgerMenu();">Produkti</button>
+            <button class="burger-menu-item" onclick="showTable('subscriber'); toggleBurgerMenu();">Abonenti</button>
+            <button class="burger-menu-item" onclick="showTable('contact'); toggleBurgerMenu();">Kontakti</button>
+            <button class="burger-menu-item" onclick="showTable('orders'); toggleBurgerMenu();">Pasūtījumi</button>
+            <button class="burger-menu-item" onclick="showTable('reviews'); toggleBurgerMenu();">Atsauksmes</button>
+        </div>
     </div>
     <?php if ($user_role !== 'Moderators'): ?>
     <button class="toggle-button" onclick="showTable('admin')">Admini</button>
@@ -382,7 +693,6 @@ try {
         </thead>
 <tbody>
         </tbody>
-</table>
 
 <style>
 .size-badge {
@@ -409,7 +719,7 @@ fetch('get_products.php')
         if (data.success) {
             const products = data.products.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); // Sort by newest
             const tbody = document.querySelector("#product-table tbody");
-            tbody.innerHTML = ''; // Clear existing rows
+            tbody.innerHTML = ''; 
             products.forEach(product => {
                 const sizes = product.sizes || '';
                 const sizeArray = sizes.split(/[, ]+/).filter(s => s.trim() !== '');
@@ -1293,7 +1603,7 @@ fetch('get_products.php')
         if (data.success) {
             const products = data.products.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); // Sort by newest
             const tbody = document.querySelector("#product-table tbody");
-            tbody.innerHTML = ''; // Clear existing rows
+            tbody.innerHTML = ''; 
             products.forEach(product => {
                 const row = document.createElement("tr");
                 row.innerHTML = `

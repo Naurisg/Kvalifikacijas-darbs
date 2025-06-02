@@ -296,6 +296,103 @@ try {
     .button-group {
       margin-top: 30px;
     }
+
+    /* Responsivitāte */
+    @media (max-width: 600px) {
+      .checkout-container {
+        margin: 0;
+        padding: 5px;
+        border-radius: 0;
+        max-width: 100vw;
+        min-width: 0;
+        box-shadow: none;
+      }
+
+      .checkout-header {
+        margin-bottom: 10px;
+        padding: 0 5px;
+      }
+
+      .checkout-header h2 {
+        font-size: 18px;
+        margin: 0;
+        padding: 0;
+      }
+
+      .checkout-steps {
+        flex-direction: row;
+        gap: 0;
+        margin-bottom: 15px;
+        align-items: flex-start;
+        overflow-x: auto;
+        padding-bottom: 8px;
+        scrollbar-width: thin;
+      }
+
+      .checkout-steps::-webkit-scrollbar {
+        height: 4px;
+      }
+
+      .step {
+        min-width: 90px;
+        flex: 0 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        padding: 0 6px;
+      }
+
+      .step-number {
+        width: 22px;
+        height: 22px;
+        font-size: 13px;
+        margin-bottom: 2px;
+      }
+
+      .step-title {
+        font-size: 12px;
+        text-align: center;
+        line-height: 1.1;
+      }
+
+      .checkout-content {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .address-form, .order-summary {
+        flex: none;
+        width: 100%;
+        padding: 0;
+      }
+
+      .address-form {
+        display: flex;
+        flex-direction: column;
+      }
+      .order-summary {
+        order: 2;
+        margin-bottom: 10px;
+      }
+      .button-group {
+        order: 3;
+        margin-top: 0;
+      }
+
+      @media (max-width: 600px) {
+        .checkout-content {
+          display: block;
+        }
+        .address-form {
+          display: block;
+        }
+        .order-summary {
+          margin-top: 0;
+          margin-bottom: 10px;
+        }
+      }
+    }
   </style>
 </head>
 <body>
@@ -364,20 +461,60 @@ try {
             <label for="notes">Piezīmes pie pasūtījuma (nav obligāts)</label>
             <textarea id="notes" name="notes" rows="3"></textarea>
           </div>
+
+          <div class="order-summary order-summary-mobile">
+
+            <h3>Jūsu pasūtījums</h3>
+            <ul>
+              <?php foreach ($cart as $product): ?>
+                <?php 
+                  $images = isset($product['bilde']) ? explode(',', $product['bilde']) : []; 
+                  $firstImage = !empty($images) ? trim($images[0]) : 'images/placeholder.png';
+                ?>
+                <li class="cart-item">
+                  <img src="../<?php echo htmlspecialchars($firstImage); ?>" alt="<?php echo htmlspecialchars($product['nosaukums']); ?>">
+                  <div class="cart-item-details">
+                    <h3><?php echo htmlspecialchars($product['nosaukums']); ?></h3>
+                    <p>Cena: €<?php echo htmlspecialchars($product['cena']); ?></p>
+                    <p>Izmērs: <?php echo htmlspecialchars($product['size'] ?? 'Nav norādīts'); ?></p>
+                    <p>Daudzums: <?php echo htmlspecialchars($product['quantity'] ?? 1); ?></p>
+                  </div>
+                </li>
+              <?php endforeach; ?>
+            </ul>
+            <?php
+              $pvn = $totalPrice * 0.21;
+              $delivery = ($totalPrice >= 100) ? 0 : 10;
+              $finalTotal = $totalPrice + $pvn + $delivery;
+            ?>
+            <div class="order-total">Preču summa: €<?php echo number_format($totalPrice, 2); ?></div>
+            <div class="order-total">PVN (21%): €<?php echo number_format($pvn, 2); ?></div>
+            <div class="order-total">
+              Piegādes cena: 
+              <?php if ($delivery == 0): ?>
+                <span style="color:green;font-weight:bold;">Bezmaksas</span>
+              <?php else: ?>
+                €<?php echo number_format($delivery, 2); ?>
+              <?php endif; ?>
+            </div>
+            <div class="order-total" style="margin-top:10px;">
+              <strong>Kopējā cena: €<?php echo number_format($finalTotal, 2); ?></strong>
+            </div>
+          </div>
           <div class="button-group">
             <button type="button" class="back-button" onclick="window.location.href='grozs.php'">Atpakaļ uz grozu</button>
             <button type="submit" class="checkout-button">Turpināt uz maksājumu</button>
           </div>
         </form>
       </div>
-      
-      <div class="order-summary">
+      <div class="order-summary order-summary-desktop">
+
         <h3>Jūsu pasūtījums</h3>
         <ul>
           <?php foreach ($cart as $product): ?>
             <?php 
               $images = isset($product['bilde']) ? explode(',', $product['bilde']) : []; 
-              $firstImage = !empty($images) ? trim($images[0]) : 'images/placeholder.png'; // Fallback to placeholder if no image
+              $firstImage = !empty($images) ? trim($images[0]) : 'images/placeholder.png';
             ?>
             <li class="cart-item">
               <img src="../<?php echo htmlspecialchars($firstImage); ?>" alt="<?php echo htmlspecialchars($product['nosaukums']); ?>">
@@ -391,7 +528,6 @@ try {
           <?php endforeach; ?>
         </ul>
         <?php
-          // PVN (VAT) 21% no Preču summas
           $pvn = $totalPrice * 0.21;
           $delivery = ($totalPrice >= 100) ? 0 : 10;
           $finalTotal = $totalPrice + $pvn + $delivery;
@@ -510,5 +646,14 @@ try {
         });
     });
   </script>
+  <style>
+    /* Paslēpj arī mobilo izvēlni */
+    .order-summary-mobile { display: none; }
+    .order-summary-desktop { display: block; }
+    @media (max-width: 600px) {
+      .order-summary-mobile { display: block; }
+      .order-summary-desktop { display: none; }
+    }
+  </style>
 </body>
 </html>

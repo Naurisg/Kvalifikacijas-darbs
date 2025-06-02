@@ -138,13 +138,74 @@ try {
     // Notīra sesijas grozu
     unset($_SESSION['cart']);
 
-    echo '<div style="display:flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; text-align: center;">';
-    echo '<h1>Maksājums veiksmīgs!</h1>';
-    echo '<p>Paldies par pirkumu. Jūsu pasūtījums tiks apstrādāts.</p>';
-    echo '<p>Jūs tiksiet novirzīts pēc <span id="countdown">3</span> sekundēm.</p>';
-    echo '<p><strong>Lūdzu neaizveriet šo lapu</strong></p>';
-    echo '</div>';
-    echo '<script>
+    echo '<!DOCTYPE html>
+    <html lang="lv">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Maksājums veiksmīgs</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background: #f8f8f8;
+        font-family: Inter, Arial, sans-serif;
+      }
+      .success-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        text-align: center;
+        background: #f8f8f8;
+      }
+      .success-box {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+        padding: 40px 50px;
+        max-width: 400px;
+        width: 90vw;
+        margin: 20px;
+      }
+      .success-box h1 {
+        color: #4CAF50;
+        font-size: 2.2em;
+        margin-bottom: 10px;
+      }
+      .success-box p {
+        color: #333;
+        font-size: 1.1em;
+        margin: 10px 0;
+      }
+      .success-box strong {
+        color: #222;
+      }
+      @media (max-width: 600px) {
+        .success-box {
+          padding: 20px 10px;
+          font-size: 1em;
+        }
+        .success-box h1 {
+          font-size: 1.4em;
+        }
+        .success-box p {
+          font-size: 1em;
+        }
+      }
+    </style>
+    </head>
+    <body>
+      <div class="success-container">
+        <div class="success-box">
+          <h1>Maksājums veiksmīgs!</h1>
+          <p>Paldies par pirkumu. Jūsu pasūtījums tiks apstrādāts.</p>
+          <p>Jūs tiksiet novirzīts pēc <span id="countdown">3</span> sekundēm.</p>
+          <p><strong>Lūdzu neaizveriet šo lapu</strong></p>
+        </div>
+      </div>
+      <script>
         var countdownElement = document.getElementById("countdown");
         var countdown = 3;
         var interval = setInterval(function() {
@@ -156,11 +217,73 @@ try {
                 countdownElement.textContent = countdown;
             }
         }, 1000);
-    </script>';
+      </script>
+    </body>
+    </html>';
 } catch (Exception $e) {
-    echo '<div style="display:flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; text-align: center;">';
-    echo '<h1>Kļūda</h1>';
-    echo '<p>' . htmlspecialchars($e->getMessage()) . '</p>';
-    echo '</div>';
+    echo '<!DOCTYPE html>
+    <html lang="lv">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kļūda</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background: #f8f8f8;
+        font-family: Inter, Arial, sans-serif;
+      }
+      .success-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        text-align: center;
+        background: #f8f8f8;
+      }
+      .success-box {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+        padding: 40px 50px;
+        max-width: 400px;
+        width: 90vw;
+        margin: 20px;
+      }
+      .success-box h1 {
+        color: #d32f2f;
+        font-size: 2.2em;
+        margin-bottom: 10px;
+      }
+      .success-box p {
+        color: #333;
+        font-size: 1.1em;
+        margin: 10px 0;
+      }
+      @media (max-width: 600px) {
+        .success-box {
+          padding: 20px 10px;
+          font-size: 1em;
+        }
+        .success-box h1 {
+          font-size: 1.4em;
+        }
+        .success-box p {
+          font-size: 1em;
+        }
+      }
+    </style>
+    </head>
+    <body>
+      <div class="success-container">
+        <div class="success-box">
+          <h1>Kļūda</h1>
+          <p>' . htmlspecialchars($e->getMessage()) . '</p>
+        </div>
+      </div>
+    </body>
+    </html>';
 }
 ?>

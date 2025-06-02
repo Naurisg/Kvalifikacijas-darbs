@@ -9,6 +9,7 @@
   <link href="css/normalize.css" rel="stylesheet" type="text/css">
   <link href="css/main.css" rel="stylesheet" type="text/css">
   <link href="css/style.css" rel="stylesheet" type="text/css">
+  <link href="css/modal-responsive.css" rel="stylesheet" type="text/css">
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin="anonymous">
   <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js" type="text/javascript"></script>
@@ -242,6 +243,26 @@
     .carousel-btn:hover {
         background-color: #555;
     }
+
+    .carousel-btn.prev-btn::before {
+      content: '';
+      display: inline-block;
+      border: solid black;
+      border-width: 0 4px 4px 0;
+      padding: 6px;
+      transform: rotate(135deg);
+      -webkit-transform: rotate(135deg);
+    }
+
+    .carousel-btn.next-btn::before {
+      content: '';
+      display: inline-block;
+      border: solid black;
+      border-width: 0 4px 4px 0;
+      padding: 6px;
+      transform: rotate(-45deg);
+      -webkit-transform: rotate(-45deg);
+    }
   </style>
 </head>
 <body>
@@ -451,13 +472,13 @@ function showProductModal(product) {
     modalBody.innerHTML = `
         <div class="modal-product-details">
             <div class="modal-carousel">
-                ${images.length > 1 ? `<button class="carousel-btn prev-btn" onclick="showPrevModalImage()">&#9664;</button>` : ''}
+                ${images.length > 1 ? `<button class="carousel-btn prev-btn" onclick="showPrevModalImage()" aria-label="Iepriekšējais attēls"></button>` : ''}
                 <div class="carousel-images">
                     ${images.map((image, index) => `
                         <img src="${image}" class="carousel-image" style="display: ${index === 0 ? 'block' : 'none'}; width: 300px; height: 300px; object-fit: contain; border-radius: 8px;">
                     `).join('')}
                 </div>
-                ${images.length > 1 ? `<button class="carousel-btn next-btn" onclick="showNextModalImage()">&#9654;</button>` : ''}
+                ${images.length > 1 ? `<button class="carousel-btn next-btn" onclick="showNextModalImage()" aria-label="Nākamais attēls"></button>` : ''}
             </div>
             <div class="modal-product-info">
                 <h2>${product.nosaukums}</h2>

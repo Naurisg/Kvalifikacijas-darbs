@@ -185,6 +185,7 @@ unset($order);
             display: flex;
             justify-content: flex-end;
             margin-bottom: 20px;
+            gap: 10px;
         }
 
         .search-input {
@@ -318,8 +319,8 @@ unset($order);
         }
 
         .modal-body {
-            max-height: 60vh;
-            overflow-y: auto;
+            max-height: none;
+            overflow-y: visible;
         }
 
         .modal-summary {
@@ -330,6 +331,7 @@ unset($order);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .modal-total {
@@ -355,18 +357,195 @@ unset($order);
             object-fit: contain;
         }
 
-        @media (max-width: 768px) {
-            .modal-content {
-                width: 95%;
-                margin: 2% auto;
-                padding: 15px;
+        /* --- RESPONSIVE STYLES --- */
+        @media (max-width: 1000px) {
+            .container {
+                padding: 10px;
             }
-            
+            .modal-content {
+                width: 98%;
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 5px;
+            }
+            .modal-content {
+                width: 99%;
+                margin: 2% auto;
+                padding: 8px;
+            }
             .modal-body {
                 max-height: 70vh;
             }
+            .modal-summary {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .modal-total {
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                max-width: 100vw;
+                padding: 2vw 2vw 10vw 2vw;
+                border-radius: 0;
+                box-shadow: none;
+            }
+            h1 {
+                font-size: 1.2em;
+                margin-bottom: 12px;
+            }
+            .search-container {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+                margin-bottom: 10px;
+            }
+            .search-input {
+                width: 100%;
+                font-size: 15px;
+                padding: 8px;
+            }
+            table, thead, tbody, th, td, tr {
+                display: block;
+                width: 100%;
+            }
+            thead {
+                display: none;
+            }
+            #orderTable tr {
+                margin-bottom: 18px;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+                background: #fff;
+                border: 1px solid #eee;
+                padding: 10px 0;
+            }
+            #orderTable td {
+                border: none;
+                padding: 6px 10px;
+                font-size: 15px;
+                position: relative;
+            }
+            #orderTable td:before {
+                content: attr(data-label);
+                font-weight: bold;
+                color: #555;
+                display: block;
+                margin-bottom: 2px;
+                font-size: 13px;
+            }
+            #orderTable td:last-child {
+                margin-bottom: 0;
+            }
+            .no-orders {
+                font-size: 15px;
+                margin: 10px 0;
+            }
+            .modal-content {
+                width: 99vw;
+                max-width: 99vw;
+                min-width: 0;
+                padding: 4vw 2vw;
+            }
+            .modal-header h2 {
+                font-size: 1.1em;
+            }
+            .modal-summary {
+                font-size: 14px;
+                padding: 8px;
+            }
+            .modal-total {
+                font-size: 15px;
+            }
+            /* Modal order details table as cards for mobile */
+            .order-details-table {
+                display: block;
+                width: 100%;
+            }
+            .order-details-table thead {
+                display: none;
+            }
+            .order-details-table tbody {
+                display: block;
+                width: 100%;
+            }
+            .order-details-table tr {
+                display: flex;
+                flex-direction: column;
+                background: #fafafa;
+                border-radius: 8px;
+                box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+                margin-bottom: 12px;
+                border: 1px solid #eee;
+                padding: 8px 0;
+            }
+            .order-details-table td {
+                display: flex;
+                align-items: center;
+                padding: 6px 10px;
+                font-size: 14px;
+                border: none;
+                width: 100%;
+                position: relative;
+                background: none;
+            }
+            .order-details-table td[data-label="Attēls"] {
+                justify-content: center;
+                padding-top: 0;
+                padding-bottom: 0;
+            }
+            .order-details-table td[data-label="Attēls"] img {
+                margin: 0 auto;
+                display: block;
+                max-width: 48px;
+                max-height: 48px;
+            }
+            .order-details-table td:before {
+                content: attr(data-label) ": ";
+                font-weight: bold;
+                color: #555;
+                min-width: 90px;
+                display: inline-block;
+                margin-right: 8px;
+                font-size: 13px;
+            }
+            .order-details-table td[data-label="Attēls"]:before {
+                content: "";
+                display: none;
+            }
         }
     </style>
+    <script>
+        // Add data-labels for mobile table
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.innerWidth <= 600) {
+                const labels = ["Pasūtījuma ID", "Datums", "Produkti", "Kopējā Cena", "Statuss", "Atsauksme"];
+                document.querySelectorAll("#orderTable tbody tr").forEach(function(row) {
+                    row.querySelectorAll("td").forEach(function(td, i) {
+                        td.setAttribute("data-label", labels[i]);
+                    });
+                });
+            }
+        });
+        // Add data-labels for modal order-details-table for mobile
+        function addModalDataLabels() {
+            if (window.innerWidth <= 600) {
+                const modalLabels = ["Attēls", "Nosaukums", "Daudzums", "Izmērs", "Cena", "Summa"];
+                document.querySelectorAll(".order-details-table tbody tr").forEach(function(row) {
+                    row.querySelectorAll("td").forEach(function(td, i) {
+                        td.setAttribute("data-label", modalLabels[i]);
+                    });
+                });
+            }
+        }
+    </script>
 </head>
 <body>
     <div class="container">
@@ -400,9 +579,9 @@ unset($order);
                         <td><span class="status-<?= htmlspecialchars(str_replace(' ', '-', $order['status'])) ?>"><?= htmlspecialchars($order['status']) ?></span></td>
                         <td>
                         <?php if (!empty($order['has_review'])): ?>
-                            <button onclick="openViewReviewModal('<?= htmlspecialchars($order['order_id']) ?>')" style="cursor: pointer;">Skatīt atsauksmi</button>
+                            <button onclick="openViewReviewModal('<?= htmlspecialchars($order['order_id']) ?>')" style="padding: 4px 10px; font-size: 14px; cursor: pointer; border: 1px solid #333; background-color: #333; color: white; border-radius: 4px; transition: background-color 0.3s;">Skatīt atsauksmi</button>
                         <?php elseif ($order['status'] === 'Piegādāts'): ?>
-                            <button onclick="openReviewModal('<?= htmlspecialchars($order['order_id']) ?>')" style="cursor: pointer;">Atstāt atsauksmi</button>
+                            <button onclick="openReviewModal('<?= htmlspecialchars($order['order_id']) ?>')" style="padding: 4px 10px; font-size: 14px; cursor: pointer; border: 1px solid #333; background-color: #333; color: white; border-radius: 4px; transition: background-color 0.3s;">Atstāt atsauksmi</button>
                         <?php else: ?>
                             <span style="color: #777; font-size: 0.8em; white-space: nowrap;">Atsauksmi būs iespējams atstāt, kad sūtījums būs piegādāts</span>
                         <?php endif; ?>
@@ -492,8 +671,8 @@ unset($order);
                     </div>
                 </div>
                 <div style="margin-top: 15px; text-align: right;">
-                    <button type="submit" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">Iesniegt</button>
-                    <button type="button" style="padding: 10px 20px; font-size: 16px; cursor: pointer; margin-left: 10px;" onclick="closeReviewModal()">Atcelt</button>
+                    <button type="submit" style="padding: 10px 20px; font-size: 16px; cursor: pointer; border: 1px solid #333; background-color: #333; color: white; border-radius: 4px; transition: background-color 0.3s;">Iesniegt</button>
+                    <button type="button" style="padding: 10px 20px; font-size: 16px; cursor: pointer; margin-left: 10px; border: 1px solid #333; background-color: #fff; color: #333; border-radius: 4px; transition: background-color 0.3s;">Atcelt</button>
                 </div>
             </form>
             <script>
@@ -581,7 +760,10 @@ unset($order);
                     e.preventDefault();
                     const formData = new FormData(reviewForm);
                     formData.delete('review_images[]');
-                    selectedFiles.forEach(file => {
+
+                    // --- Vienmēr izmantot failus no ievades, ja selectedFiles ir tukšs. ---
+                    let filesToUpload = selectedFiles.length > 0 ? selectedFiles : Array.from(reviewImagesInput.files);
+                    filesToUpload.forEach(file => {
                         formData.append('review_images[]', file);
                     });
 
@@ -732,7 +914,7 @@ unset($order);
             document.getElementById('modalOrderDate').textContent = order.created_at;
             document.getElementById('modalOrderStatus').textContent = order.status;
 
-            // Display address information
+            // Parādīt pasūtījuma adresi
             const addressInfo = order.address || {};
             document.getElementById('modalAddress').innerHTML = `
                 <strong>Vārds:</strong> ${addressInfo.name || 'Nav norādīts'}<br>
@@ -772,7 +954,7 @@ unset($order);
                     orderDetailsTable.appendChild(row);
                 });
 
-                // Calculate VAT and shipping based on itemsPrice
+                // Aprēķināt PVN un piegādes maksu
                 const vatAmount = itemsPrice * 0.21;
                 let shippingPrice = 10;
                 let shippingDisplay = "10.00 EUR";
@@ -780,13 +962,12 @@ unset($order);
                     shippingPrice = 0;
                     shippingDisplay = "Bezmaksas";
                 }
-                // Use saved total_amount for modal total price if available
+                // Izmanto saglabāto kopējo summu, ja tā ir pieejama
                 let modalTotalPrice = itemsPrice + vatAmount + shippingPrice;
                 if (order.total_amount) {
                     modalTotalPrice = parseFloat(order.total_amount);
                 }
 
-                // Set modal fields
                 document.getElementById('modalItemsPrice').textContent = itemsPrice.toFixed(2);
                 document.getElementById('modalVatAmount').textContent = vatAmount.toFixed(2);
                 document.getElementById('modalShippingPrice').textContent = shippingDisplay;
@@ -794,6 +975,7 @@ unset($order);
 
                 document.getElementById('orderModal').style.display = 'block';
                 document.body.style.overflow = 'hidden'; 
+                addModalDataLabels();
             } catch (error) {
                 console.error('Error parsing order items:', error);
                 alert('Kļūda ielādējot pasūtījuma detaļas.');

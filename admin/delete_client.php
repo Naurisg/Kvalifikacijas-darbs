@@ -22,7 +22,6 @@ require_once '../db_connect.php';
         $stmt = $pdo->prepare("DELETE FROM clients WHERE id = :id");
         $stmt->execute([':id' => $clientId]);
 
-        echo json_encode(["success" => true, "message" => "Klients veiksmīgi dzēsts"]);
         header("Location: admin-panelis.php");
         exit();
     } catch (PDOException $e) {

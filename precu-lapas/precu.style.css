@@ -303,3 +303,231 @@
 .modal-buttons .add-to-cart:hover {
     color: gray;
 }
+
+.carousel-btn {
+    background: none !important;
+    color: inherit !important;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 12px;
+    box-shadow: none !important;
+    outline: none;
+}
+
+.carousel-btn:active,
+.carousel-btn:focus {
+    background: none !important;
+    box-shadow: none !important;
+    outline: none;
+}
+
+.carousel-btn:hover {
+    background: none !important;
+    color: inherit !important;
+    box-shadow: none !important;
+}
+
+.carousel-btn.prev-btn::before {
+    content: '';
+    display: inline-block;
+    border: solid black;
+    border-width: 0 4px 4px 0;
+    padding: 6px;
+    transform: rotate(135deg);
+    -webkit-transform: rotate(135deg);
+    margin-right: 2px;
+}
+
+.carousel-btn.next-btn::before {
+    content: '';
+    display: inline-block;
+    border: solid black;
+    border-width: 0 4px 4px 0;
+    padding: 6px;
+    transform: rotate(-45deg);
+    -webkit-transform: rotate(-45deg);
+    margin-left: 2px;
+}
+
+/* Responsive styles for phones */
+@media (max-width: 600px) {
+    .shop-container {
+        flex-direction: column;
+        padding: 10px;
+    }
+
+    .filters-sidebar {
+        width: 100%;
+        padding: 15px;
+        margin-bottom: 20px;
+        box-shadow: none;
+        border-radius: 0;
+        display: none; 
+        position: absolute;
+        background: white;
+        z-index: 1001;
+        top: 60px; 
+        left: 0;
+        right: 0;
+        max-height: calc(100vh - 60px);
+        overflow-y: auto;
+        border: 1px solid #ddd;
+    }
+
+    .filters-sidebar.active {
+        display: block;
+    }
+
+    .products-section {
+        padding: 0;
+    }
+
+    .search-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    #filter-toggle-btn {
+        display: inline-block;
+        padding: 8px 12px;
+        font-size: 14px;
+        cursor: pointer;
+        background-color: black;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        transition: background-color 0.3s ease;
+    }
+
+    #filter-toggle-btn:hover {
+        background-color: #333;
+    }
+
+    #filter-close-btn {
+        display: inline-block;
+        padding: 8px 12px;
+        font-size: 14px;
+        cursor: pointer;
+        background-color: black;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        margin-bottom: 15px;
+        transition: background-color 0.3s ease;
+    }
+
+    #filter-close-btn:hover {
+        background-color: #333;
+    }
+
+    .products-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .product-card {
+        height: auto;
+    }
+
+    .product-card img {
+        height: 200px;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .product-info h3 {
+        font-size: 18px;
+        height: auto;
+        -webkit-line-clamp: 3;
+    }
+
+    .product-info p {
+        font-size: 15px;
+        -webkit-line-clamp: 3;
+    }
+
+    .product-info .price {
+        font-size: 20px;
+    }
+
+    .product-buttons {
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+.product-buttons button {
+    font-size: 14px;
+    padding: 10px;
+}
+
+@media (max-width: 600px) {
+    .product-buttons .add-to-cart {
+        background-color: #f8f5f5; 
+        border: 2px;
+        color: black;
+        font-size: 16px;
+        cursor: pointer;
+        padding: 5px;
+        transition: color 0.3s ease, background-color 0.3s ease;
+    }
+
+    .product-buttons .add-to-cart:hover {
+        color: gray;
+        background-color: #c0c0c0; 
+    }
+}
+
+    .modal-content {
+        max-width: 95%;
+        max-height: 85vh;
+        padding: 15px;
+    }
+
+    .modal-product-details {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .modal-product-details img {
+        width: 100%;
+        max-width: 200px;
+        height: auto;
+        margin-bottom: 15px;
+    }
+
+    .modal-product-info h2 {
+        font-size: 22px;
+        text-align: center;
+    }
+
+    .modal-product-info p,
+    .modal-product-info .modal-price {
+        font-size: 16px;
+        text-align: center;
+    }
+
+    .modal-buttons {
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .modal-buttons button {
+        width: 100%;
+        font-size: 16px;
+        padding: 12px;
+    }
+
+    .carousel-btn {
+        padding: 10px 18px;
+        font-size: 0px;
+    }
+    .carousel-btn.prev-btn::before,
+    .carousel-btn.next-btn::before {
+        padding: 10px;
+        border-width: 0 6px 6px 0;
+    }
+}
