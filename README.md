@@ -47,7 +47,7 @@ TO DO:
 - [x] pievienotas preces grozam nepazud pēc page reload
 - [x] Pievienot opciju nopirkt preci mājas lapā
 - [ ] Iespejams pievienot opciju kad nopērkot klients preci tam atnāk pavadzīme epastā vai kads paziņojums par pirkumu
-- [ ] Tests payment metodei
-- [ ] Test host
+- [x] Tests payment metodei
+- [x] Test host
 - [ ] FUll WEB TEST
-- [ ] Pievienot hostingam
+- [x] Pievienot hostingam
