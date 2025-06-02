@@ -26,7 +26,7 @@ TO DO:
 - [x] Izveidot user profile kur lietotājam iespējams rediģēt savu informāciju
 - [x] Main page zem slideshow/bildes pievienot preču jaunumus un top kategorijas
 - [x] Izveidot jaunas bildes ar AI kuras tiks izmantotas majas lapa
-- [ ] salikt produktu bildes mape
+- [x] salikt produktu bildes mape
 - [x] Izdomāt design krāsas mājas lapai
 - [x] Izveidot admin login
 - [x] Pievienot iespēju atstāt atsauksmi par katru produktu
