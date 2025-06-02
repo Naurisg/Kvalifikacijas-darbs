@@ -37,8 +37,8 @@ TO DO:
 - [x] Izveidot kad Adminam iespeja pievienot moderatorus caur majas lapu vai datubāzi
 - [x] Izveidot kad admins vai mods var rediģēt/dzēst produktus
 - [x] Izveidot kad admins vai moderators var pievienot jaunus produktus
-- [ ] pievienot visus produktu aprakstus
-- [ ] Salikt produktus
+- [x] pievienot visus produktu aprakstus
+- [x] Salikt produktus
 - [x] Vairāku attēlu pievienošana veidojot produktu
 - [x] Pievienot klienta login
 - [x] Pielikt opciju pievienot grozam
