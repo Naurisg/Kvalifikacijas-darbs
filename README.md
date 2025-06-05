@@ -26,7 +26,7 @@ TO DO:
 - [x] Izveidot user profile kur lietotājam iespējams rediģēt savu informāciju
 - [x] Main page zem slideshow/bildes pievienot preču jaunumus un top kategorijas
 - [x] Izveidot jaunas bildes ar AI kuras tiks izmantotas majas lapa
-- [ ] salikt produktu bildes mape
+- [x] salikt produktu bildes mape
 - [x] Izdomāt design krāsas mājas lapai
 - [x] Izveidot admin login
 - [x] Pievienot iespēju atstāt atsauksmi par katru produktu
@@ -37,8 +37,8 @@ TO DO:
 - [x] Izveidot kad Adminam iespeja pievienot moderatorus caur majas lapu vai datubāzi
 - [x] Izveidot kad admins vai mods var rediģēt/dzēst produktus
 - [x] Izveidot kad admins vai moderators var pievienot jaunus produktus
-- [ ] pievienot visus produktu aprakstus
-- [ ] Salikt produktus
+- [x] pievienot visus produktu aprakstus
+- [x] Salikt produktus
 - [x] Vairāku attēlu pievienošana veidojot produktu
 - [x] Pievienot klienta login
 - [x] Pielikt opciju pievienot grozam
@@ -47,7 +47,7 @@ TO DO:
 - [x] pievienotas preces grozam nepazud pēc page reload
 - [x] Pievienot opciju nopirkt preci mājas lapā
 - [ ] Iespejams pievienot opciju kad nopērkot klients preci tam atnāk pavadzīme epastā vai kads paziņojums par pirkumu
-- [ ] Tests payment metodei
-- [ ] Test host
+- [x] Tests payment metodei
+- [x] Test host
 - [ ] FUll WEB TEST
-- [ ] Pievienot hostingam
+- [x] Pievienot hostingam
