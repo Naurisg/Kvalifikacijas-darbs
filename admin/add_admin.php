@@ -4,12 +4,20 @@ require_once 'auth_check.php';
 require_once '../db_connect.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        try {
-            $name = $_POST['name'];
-            $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-            $email = $_POST['email'];
-            $role = $_POST['role'];
+    try {
+        $name = $_POST['name'];
+        $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+        $email = $_POST['email'];
+        $role = $_POST['role'];
 
+        // Pārbauda, vai e-pasts jau ir reģistrēts
+        $checkStmt = $pdo->prepare("SELECT COUNT(*) FROM admin_signup WHERE email = :email");
+        $checkStmt->execute(['email' => $email]);
+        $emailExists = $checkStmt->fetchColumn();
+
+        if ($emailExists) {
+            $error_message = "Šis e-pasts jau ir reģistrēts.";
+        } else {
             $stmt = $pdo->prepare("INSERT INTO admin_signup (name, password, email, role) VALUES (:name, :password, :email, :role)");
             $stmt->execute([
                 'name' => $name,
@@ -17,11 +25,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'email' => $email,
                 'role' => $role
             ]);
-
-            $success_message = "Administrators veiksmīgi pievienots!";
-        } catch(PDOException $e) {
-            $error_message = "Kļūda: " . $e->getMessage();
+            // Pārvirza uz administrācijas paneli
+            header("Location: admin-panelis.php?success=1");
+            exit;
         }
+    } catch(PDOException $e) {
+        $error_message = "Kļūda: " . $e->getMessage();
+    }
 }
 ?>
 
@@ -29,6 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="lv">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pievienot jaunu administratoru</title>
     <style>
         body {
@@ -167,8 +178,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="form-group">
                 <label for="role">Loma:</label>
                 <select id="role" name="role" required>
-                    <option value="admin">Administrators</option>
-                    <option value="moderator">Moderators</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Mod">Mod</option>
                 </select>
             </div>
             
