@@ -36,6 +36,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         exit();
     }
 
+    // Paroles minimālais garums 8 simboli
+    if (strlen($password) < 8) {
+        echo json_encode(["success" => false, "message" => "Parolei jābūt vismaz 8 simbolus garai."]);
+        exit();
+    }
+
     // Pārbauda vai e-pasts jau eksistē
     $checkStmt = $pdo->prepare("SELECT COUNT(*) FROM admin_signup WHERE email = :email");
     $checkStmt->execute(['email' => $email]);

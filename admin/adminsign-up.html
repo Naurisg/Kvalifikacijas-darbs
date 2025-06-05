@@ -118,9 +118,17 @@
           }, 2000); 
           this.reset();
         } else {
-          notification.textContent = data.message;
-          // Ja ziņa satur "jau eksistē", piešķir error klasi
-          if (data.message && data.message.toLowerCase().includes("jau eksistē")) {
+          //Ja ziņojums satur kādu no šiem tekstiem: “e-pasts jau eksistē”, “parolei jābūt 8 simbolus garai” vai “visi lauki ir obligāti”, tad rāda kļūdas paziņojumu.
+          notification.innerHTML = data.message;
+          // Ja ziņojums satur "jau eksistē" vai "parolei jābūt" vai "visi lauki ir obligāti", rādīt kā kļūdu.
+          if (
+            data.message &&
+            (
+              data.message.toLowerCase().includes("jau eksistē") ||
+              data.message.toLowerCase().includes("parolei jābūt") ||
+              data.message.toLowerCase().includes("visi lauki ir obligāti")
+            )
+          ) {
             notification.className = "notification error show";
           } else {
             notification.className = "notification show";

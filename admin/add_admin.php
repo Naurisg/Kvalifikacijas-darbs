@@ -6,28 +6,35 @@ require_once '../db_connect.php';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $name = $_POST['name'];
-        $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+        $password = $_POST['password'];
         $email = $_POST['email'];
         $role = $_POST['role'];
 
-        // Pārbauda, vai e-pasts jau ir reģistrēts
-        $checkStmt = $pdo->prepare("SELECT COUNT(*) FROM admin_signup WHERE email = :email");
-        $checkStmt->execute(['email' => $email]);
-        $emailExists = $checkStmt->fetchColumn();
-
-        if ($emailExists) {
-            $error_message = "Šis e-pasts jau ir reģistrēts.";
+        // Paroles validācija: vismaz 8 simboli (burti vai cipari, nav svarīgi)
+        if (strlen($password) < 8) {
+            $error_message = "Parolei jābūt vismaz 8 simbolus garai.";
         } else {
-            $stmt = $pdo->prepare("INSERT INTO admin_signup (name, password, email, role) VALUES (:name, :password, :email, :role)");
-            $stmt->execute([
-                'name' => $name,
-                'password' => $password,
-                'email' => $email,
-                'role' => $role
-            ]);
-            // Pārvirza uz administrācijas paneli
-            header("Location: admin-panelis.php?success=1");
-            exit;
+            $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+
+            // Pārbauda, vai e-pasts jau ir reģistrēts
+            $checkStmt = $pdo->prepare("SELECT COUNT(*) FROM admin_signup WHERE email = :email");
+            $checkStmt->execute(['email' => $email]);
+            $emailExists = $checkStmt->fetchColumn();
+
+            if ($emailExists) {
+                $error_message = "Šis e-pasts jau ir reģistrēts.";
+            } else {
+                $stmt = $pdo->prepare("INSERT INTO admin_signup (name, password, email, role) VALUES (:name, :password, :email, :role)");
+                $stmt->execute([
+                    'name' => $name,
+                    'password' => $passwordHash,
+                    'email' => $email,
+                    'role' => $role
+                ]);
+                // Pārvirza uz administrācijas paneli
+                header("Location: admin-panelis.php?success=1");
+                exit;
+            }
         }
     } catch(PDOException $e) {
         $error_message = "Kļūda: " . $e->getMessage();

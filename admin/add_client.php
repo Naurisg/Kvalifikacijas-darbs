@@ -7,18 +7,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $email = $_POST['email'];
         $name = $_POST['name'];
-        $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-        $accept_privacy_policy = $_POST['accept_privacy_policy'];
+        $password = $_POST['password'];
+        $accept_privacy_policy = isset($_POST['accept_privacy_policy']) && $_POST['accept_privacy_policy'] === '1' ? 1 : 0;
 
-        $stmt = $pdo->prepare("INSERT INTO clients (email, name, password, accept_privacy_policy) VALUES (:email, :name, :password, :accept_privacy_policy)");
-        $stmt->execute([
-            'email' => $email,
-            'name' => $name,
-            'password' => $password,
-            'accept_privacy_policy' => $accept_privacy_policy
-        ]);
-
-        $success_message = "Klients veiksmīgi pievienots!";
+        //Pārbauda vai visi lauki ir aizpildīti
+        $checkStmt = $pdo->prepare("SELECT COUNT(*) FROM clients WHERE email = :email");
+        $checkStmt->execute(['email' => $email]);
+        if ($checkStmt->fetchColumn() > 0) {
+            $error_message = "Šis e-pasts jau ir reģistrēts!";
+        } elseif (strlen($password) < 8) {
+            $error_message = "Parolei jābūt vismaz 8 simbolus garai.";
+        } elseif (!$accept_privacy_policy) {
+            $error_message = "Lai pievienotu klientu, jāpiekrīt privātuma politikai.";
+        } else {
+            $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+            $stmt = $pdo->prepare("INSERT INTO clients (email, name, password, accept_privacy_policy) VALUES (:email, :name, :password, :accept_privacy_policy)");
+            $stmt->execute([
+                'email' => $email,
+                'name' => $name,
+                'password' => $passwordHash,
+                'accept_privacy_policy' => $accept_privacy_policy
+            ]);
+            // Pārvirza uz administrācijas paneli
+            header("Location: admin-panelis.php?success=1");
+            exit;
+        }
     } catch(PDOException $e) {
         $error_message = "Kļūda: " . $e->getMessage();
     }
@@ -66,6 +79,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin-bottom: 8px;
             color: #444;
             font-weight: 600;
+        }
+
+        /*Checkbox stils */
+        .checkbox-label {
+            display: inline;
+            font-weight: 400;
+            margin-left: 6px;
+        }
+
+        input[type="checkbox"] {
+            width: auto;
+            margin-right: 6px;
+            accent-color: #333;
+            vertical-align: middle;
         }
 
         input, select {
@@ -166,11 +193,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             
             <div class="form-group">
-                <label for="accept_privacy_policy">Piekrītu privātuma politikai:</label>
-                <select id="accept_privacy_policy" name="accept_privacy_policy" required>
-                    <option value="1">Jā</option>
-                    <option value="0">Nē</option>
-                </select>
+                <input type="checkbox" id="accept_privacy_policy" name="accept_privacy_policy" value="1" required>
+                <label for="accept_privacy_policy" class="checkbox-label">Piekrītu privātuma politikai</label>
             </div>
             
             <div class="button-group">
