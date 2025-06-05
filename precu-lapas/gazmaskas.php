@@ -62,6 +62,13 @@
                 <label><input type="checkbox" class="type-filter" value="Filtri"> Filtri</label><br>
                 <label><input type="checkbox" class="type-filter" value="Piederumi"> Piederumi</label><br>
             </div>
+            <div class="filter-section">
+                <h3>Izmērs</h3>
+                <label><input type="checkbox" class="size-filter" value="S"> S</label><br>
+                <label><input type="checkbox" class="size-filter" value="M"> M</label><br>
+                <label><input type="checkbox" class="size-filter" value="L"> L</label><br>
+                <label><input type="checkbox" class="size-filter" value="XL"> XL</label><br>
+            </div>
         </aside>
 
         <main class="products-section">
@@ -100,10 +107,16 @@
             checkbox.addEventListener('change', () => filterProducts());
         });
 
+        // Pievieno notikumu klausītājus izmēra filtriem
+        document.querySelectorAll('.size-filter').forEach(checkbox => {
+            checkbox.addEventListener('change', () => filterProducts());
+        });
+
         function filterProducts() {
             const searchTerm = document.querySelector('.search-bar').value.toLowerCase();
             const maxPrice = parseFloat(document.querySelector('.price-range').value);
             const selectedTypes = Array.from(document.querySelectorAll('.type-filter:checked')).map(cb => cb.value);
+            const selectedSizes = Array.from(document.querySelectorAll('.size-filter:checked')).map(cb => cb.value);
 
             const filteredProducts = allProducts.filter(product => {
                 const matchesSearch = product.nosaukums.toLowerCase().includes(searchTerm) ||
@@ -111,7 +124,11 @@
                 const matchesPrice = parseFloat(product.cena) <= maxPrice;
                 const matchesType = selectedTypes.length === 0 || 
                                     selectedTypes.some(type => product.type && product.type.includes(type));
-                return matchesSearch && matchesPrice && matchesType;
+                const matchesSize = selectedSizes.length === 0 ||
+                    (product.sizes && selectedSizes.some(size =>
+                        product.sizes.split(',').map(s => s.trim()).includes(size)
+                    ));
+                return matchesSearch && matchesPrice && matchesType && matchesSize;
             });
 
             displayProducts(filteredProducts);

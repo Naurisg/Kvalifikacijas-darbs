@@ -47,7 +47,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $hashed_password = password_hash($password, PASSWORD_BCRYPT);
 
     $sql = "INSERT INTO admin_signup (email, name, password, role, approved) 
-            VALUES (:email, :name, :password, 'Moderators', 0)";
+            VALUES (:email, :name, :password, 'Mod', 0)";
     $stmt = $pdo->prepare($sql);
 
     $stmt->bindParam(':email', $email);

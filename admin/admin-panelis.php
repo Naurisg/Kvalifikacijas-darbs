@@ -114,6 +114,7 @@ try {
             background-color: #2c3e50;
             color: white;
             transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+            text-decoration: none; 
         }
 
         .edit-button:hover, .approval-button:hover {
@@ -650,9 +651,9 @@ try {
             </svg>
         </button>
         <div id="burger-menu" style="display:none; position: absolute; top: 45px; right: 10px; background: white; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); z-index: 1000; min-width: 150px;">
-            <?php if ($user_role !== 'Moderators'): ?>
-            <button class="burger-menu-item" onclick="showTable('admin'); toggleBurgerMenu();">Admini</button>
-            <?php endif; ?>
+        <?php if ($user_role !== 'Mod'): ?>
+        <button class="burger-menu-item" onclick="showTable('admin'); toggleBurgerMenu();">Admini</button>
+        <?php endif; ?>
             <button class="burger-menu-item" onclick="showTable('client'); toggleBurgerMenu();">Klienti</button>
             <button class="burger-menu-item" onclick="showTable('product'); toggleBurgerMenu();">Produkti</button>
             <button class="burger-menu-item" onclick="showTable('subscriber'); toggleBurgerMenu();">Abonenti</button>
@@ -661,9 +662,17 @@ try {
             <button class="burger-menu-item" onclick="showTable('reviews'); toggleBurgerMenu();">Atsauksmes</button>
         </div>
     </div>
-    <?php if ($user_role !== 'Moderators'): ?>
-    <button class="toggle-button" onclick="showTable('admin')">Admini</button>
-    <?php endif; ?>
+        <?php if ($user_role !== 'Mod'): ?>
+        <button class="toggle-button" onclick="showTable('admin')">Admini</button>
+        <?php endif; ?>
+
+        <?php if ($user_role === 'Mod'): ?>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                showTable('client');
+            });
+        </script>
+        <?php endif; ?>
     <button class="toggle-button" onclick="showTable('client')">Klienti</button>
     <button class="toggle-button" onclick="showTable('product')">Produkti</button>
     <button class="toggle-button" onclick="showTable('subscriber')">Abonenti</button>
@@ -673,26 +682,26 @@ try {
     
     <a href="logout.php" class="logout-button">Iziet</a>
 
-    <?php if ($user_role !== 'Moderators'): ?>
-    <h2 id="admin-header" style="display: none;">Admini</h2>
-    <div class="search-container" id="admin-actions" style="display: none;">
-        <input type="text" id="adminSearchInput" class="search-input" placeholder="Meklēt pēc Epasta, Vārda vai Lomas...">
-        <button class="add-button" onclick="addNewAdmin()">+Pievienot adminu</button>
-    </div>
-    <table id="admin-table">
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Epasts</th>
-            <th>Vārds</th>
-            <th>Pakāpe</th>
-            <th>Apstiprināts</th>
-            <th>Izveidots</th>
-            <th>Darbības</th>
-        </tr>
-        </thead>
+        <?php if ($user_role !== 'Moderators'): ?>
+        <h2 id="admin-header" style="display: none;">Admini</h2>
+        <div class="search-container" id="admin-actions" style="display: none;">
+            <input type="text" id="adminSearchInput" class="search-input" placeholder="Meklēt pēc Epasta, Vārda vai Lomas...">
+            <button class="add-button" onclick="addNewAdmin()">+Pievienot adminu</button>
+        </div>
+        <table id="admin-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Epasts</th>
+                <th>Vārds</th>
+                <th>Pakāpe</th>
+                <th>Apstiprināts</th>
+                <th>Izveidots</th>
+                <th>Darbības</th>
+            </tr>
+            </thead>
 <tbody>
-        </tbody>
+            </tbody>
 
 <style>
 .size-badge {
@@ -989,7 +998,7 @@ function showTable(table) {
     ordersActions.style.display = 'none';
     reviewsActions.style.display = 'none';
 
-    if (table === 'admin' && '<?php echo $user_role; ?>' !== 'Moderators') {
+    if (table === 'admin' && '<?php echo $user_role; ?>' !== 'Mod') {
         adminTable.style.display = 'table';
         adminHeader.style.display = 'block';
         adminActions.style.display = 'flex';
@@ -1049,7 +1058,18 @@ function deleteProduct(id) {
         .then(data => {
             if (data.success) {
                 alert('Produkts veiksmīgi dzēsts');
-                location.reload();
+                //Noņemam rindu no tabulas bez lapas pārlādēšanas
+                const table = document.getElementById('product-table');
+                const rows = table.getElementsByTagName('tr');
+                for (let i = 1; i < rows.length; i++) {
+                    const row = rows[i];
+                    // Assume first cell is product ID
+                    if (row.cells[0] && row.cells[0].textContent == id) {
+                        row.remove();
+                        break;
+                    }
+                }
+                // Nav jāatsvaidzināt lapa, jo rinda ir noņemta
             } else {
                 alert('Kļūda dzēšot produktu: ' + data.message);
             }
@@ -1469,10 +1489,10 @@ fetch('get_admins.php')
 <td>${admin.email}</td>
 <td>${admin.name}</td>
 <td>
-    <select class="role-select" onchange="updateRole(${admin.id}, this.value)">
-        <option value="admin" ${admin.role === 'admin' ? 'selected' : ''}>Admins</option>
-        <option value="moderator" ${admin.role === 'moderator' ? 'selected' : ''}>Moderātors</option>
-    </select>
+            <select class="role-select" onchange="updateRole(${admin.id}, this.value)">
+                <option value="Admin" ${admin.role === 'Admin' ? 'selected' : ''}>Admin</option>
+                <option value="Mod" ${admin.role === 'Mod' ? 'selected' : ''}>Mod</option>
+            </select>
 </td>
 <td>${admin.approved ? 'Jā' : 'Nē'}</td>
 <td>${admin.created_at}</td>
