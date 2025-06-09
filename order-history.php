@@ -65,7 +65,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id'], $_POST['r
         ]);
         $reviewMessage = "Atsauksme veiksmīgi saglabāta.";
 
-        // Pēc veiksmīgas atsauksmes saglabāšanas pāradresē uz to pašu lapu, lai novērstu POST atkārtotu iesniegšanu
         header("Location: " . strtok($_SERVER['REQUEST_URI'], '?') . "?review_saved=1");
         exit();
 
@@ -87,7 +86,6 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// Iegūst sūtījumus no datubāzes
 try {
     global $pdo;
 
@@ -96,56 +94,49 @@ try {
     $orders = $stmt->fetchColumn();
     $orders = $orders ? json_decode($orders, true) : [];
 
-    // Sort orders by created_at descending (newest first)
     usort($orders, function($a, $b) {
         return strtotime($b['created_at']) - strtotime($a['created_at']);
     });
 
-    // Pieslēdzas atsauksmju datubāzei, lai pārbaudītu esošās atsauksmes
     $reviewCheckStmt = $pdo->prepare('SELECT COUNT(*) FROM reviews WHERE user_id = :user_id AND order_id = :order_id');
     
-foreach ($orders as &$order) {
-    // Debug: Log the address data to verify
-    error_log(print_r($order['address'] ?? null, true));
-
-    // Ensure address data is displayed correctly
-    if (!isset($order['address']) || !is_array($order['address'])) {
-        $order['address'] = [
-            'name' => 'Nav norādīts',
-            'email' => 'Nav norādīts',
-            'phone' => 'Nav norādīts',
-            'address' => 'Nav norādīts',
-            'city' => 'Nav norādīts',
-            'postal_code' => 'Nav norādīts',
-            'country' => 'Nav norādīts',
-            'notes' => ''
-        ];
-    }
-
-    $order['total_price'] = 0;
-
-    // Use saved total_amount if available
-    if (isset($order['total_amount'])) {
-        $order['total_price'] = floatval($order['total_amount']);
-    } else if (isset($order['items'])) {
-        if (is_string($order['items'])) {
-            $items = json_decode($order['items'], true);
-        } else {
-            $items = $order['items'];
+    foreach ($orders as &$order) {
+        if (!isset($order['address']) || !is_array($order['address'])) {
+            $order['address'] = [
+                'name' => 'Nav norādīts',
+                'email' => 'Nav norādīts',
+                'phone' => 'Nav norādīts',
+                'address' => 'Nav norādīts',
+                'city' => 'Nav norādīts',
+                'postal_code' => 'Nav norādīts',
+                'country' => 'Nav norādīts',
+                'notes' => ''
+            ];
         }
-        if (is_array($items)) {
-            foreach ($items as $item) {
-                if (isset($item['cena']) && isset($item['quantity'])) {
-                    $order['total_price'] += floatval($item['cena']) * intval($item['quantity']);
+
+        $order['total_price'] = 0;
+
+        if (isset($order['total_amount'])) {
+            $order['total_price'] = floatval($order['total_amount']);
+        } else if (isset($order['items'])) {
+            if (is_string($order['items'])) {
+                $items = json_decode($order['items'], true);
+            } else {
+                $items = $order['items'];
+            }
+            if (is_array($items)) {
+                foreach ($items as $item) {
+                    if (isset($item['cena']) && isset($item['quantity'])) {
+                        $order['total_price'] += floatval($item['cena']) * intval($item['quantity']);
+                    }
                 }
             }
         }
+        
+        $reviewCheckStmt->execute([':user_id' => $_SESSION['user_id'], ':order_id' => $order['order_id']]);
+        $order['has_review'] = $reviewCheckStmt->fetchColumn() > 0;
     }
-    // Pārbauda, vai šim pasūtījumam jau ir atsauksme
-    $reviewCheckStmt->execute([':user_id' => $_SESSION['user_id'], ':order_id' => $order['order_id']]);
-    $order['has_review'] = $reviewCheckStmt->fetchColumn() > 0;
-}
-unset($order); 
+    unset($order); 
 
 } catch (Exception $e) {
     $orders = [];
@@ -158,652 +149,1066 @@ unset($order);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pasūtījumu Vēsture</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #f9f9f9;
+        :root {
+            --black: #000000;
+            --white: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius-sm: 0.125rem;
+            --radius: 0.25rem;
+            --radius-md: 0.375rem;
+            --radius-lg: 0.5rem;
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--gray-50);
+            color: var(--gray-900);
+            line-height: 1.5;
         }
 
         .container {
             max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin: 1rem auto;
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
         }
 
         h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--black);
+            margin-bottom: 1.5rem;
             text-align: center;
-            color: #333;
-            margin-bottom: 20px;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
         .search-container {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 20px;
-            gap: 10px;
+            position: relative;
+            flex-grow: 1;
+            max-width: 400px;
+        }
+
+        .search-container i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-400);
         }
 
         .search-input {
-            padding: 10px;
-            width: 300px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            width: 100%;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            background-color: var(--white);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--gray-400);
+            box-shadow: 0 0 0 3px rgba(156, 163, 175, 0.1);
+        }
+
+        .sort-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.625rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--black);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--gray-800);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border-color: var(--gray-300);
+            color: var(--gray-800);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--gray-100);
+        }
+
+        .btn-sm {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8125rem;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            background: var(--white);
+            border: 1px solid var(--gray-200);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
+            min-width: 800px;
         }
 
         th {
-            background-color: #f4f4f4;
-            color: #333;
+            background-color: var(--gray-50);
+            color: var(--gray-600);
+            font-weight: 600;
+            text-align: left;
+            padding: 0.75rem 1rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--gray-200);
+            font-size: 0.875rem;
+            vertical-align: middle;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
         }
 
         tr:hover {
-            background-color: #f9f9f9;
+            background-color: var(--gray-50);
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-Gaida-apstiprinājumu {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-Apstiprināts {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-Sagatavo {
+            background-color: #cce5ff;
+            color: #004085;
+        }
+
+        .status-Nosūtīts {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-Piegādāts {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-Atcelts {
+            background-color: #f8d7da;
+            color: #721c24;
         }
 
         .no-orders {
             text-align: center;
-            font-size: 18px;
-            color: #777;
-            margin: 20px 0;
+            padding: 2rem;
+            color: var(--gray-400);
         }
 
-        /* Status colors */
-        .status-Gaida-apstiprinājumu {
-            background-color: #fff3cd;
-            color: #856404;
-            font-weight: bold;
-            padding: 4px 8px;
-            border-radius: 4px;
-            display: inline-block;
-        }
-        .status-Apstiprināts {
-            background-color: #28a745;
-            color: white;
-            font-weight: bold;
-            padding: 4px 8px;
-            border-radius: 4px;
-            display: inline-block;
-        }
-        .status-Sagatavo {
-            background-color: #007bff;
-            color: white;
-            font-weight: bold;
-            padding: 4px 8px;
-            border-radius: 4px;
-            display: inline-block;
-        }
-        .status-Nosūtīts {
-            background-color: #fd7e14;
-            color: white;
-            font-weight: bold;
-            padding: 4px 8px;
-            border-radius: 4px;
-            display: inline-block;
-        }
-        .status-Piegādāts {
-            background-color: #155724;
-            color: white;
-            font-weight: bold;
-            padding: 4px 8px;
-            border-radius: 4px;
-            display: inline-block;
-        }
-        .status-Atcelts {
-            background-color: #dc3545;
-            color: white;
-            font-weight: bold;
-            padding: 4px 8px;
-            border-radius: 4px;
-            display: inline-block;
-        }
-
-        #orderModal {
-            display: none;
+        /* Modal Stils */
+        .modal {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             z-index: 1000;
-            overflow-y: auto;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s;
+            padding: 1rem;
+        }
+
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
         }
 
         .modal-content {
-            background: white;
-            margin: 5% auto;
-            padding: 25px;
-            width: 80%;
-            max-width: 900px;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            position: relative;
+            background-color: var(--white);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            width: 100%;
+            max-width: 800px;
+            max-height: calc(100vh - 2rem);
+            display: flex;
+            flex-direction: column;
+            transform: translateY(10px);
+            transition: transform 0.2s;
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0);
         }
 
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .modal-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--black);
         }
 
         .modal-close {
-            font-size: 28px;
-            font-weight: bold;
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--gray-500);
             cursor: pointer;
-            color: #aaa;
-            transition: color 0.3s;
+            transition: color 0.2s;
+            line-height: 1;
         }
 
         .modal-close:hover {
-            color: #333;
+            color: var(--black);
         }
 
         .modal-body {
-            max-height: none;
-            overflow-y: visible;
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex-grow: 1;
         }
 
-        .modal-summary {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
+        .order-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-card {
+            background-color: var(--gray-50);
+            border-radius: var(--radius-sm);
+            padding: 1rem;
+            border: 1px solid var(--gray-200);
+        }
+
+        .info-label {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .info-value {
+            font-size: 0.9375rem;
+            font-weight: 500;
+            color: var(--black);
+        }
+
+        .section-title {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--black);
+            margin-bottom: 1rem;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
+            gap: 0.5rem;
         }
 
-        .modal-total {
-            font-size: 18px;
-            font-weight: bold;
+        .section-title i {
+            color: var(--gray-400);
         }
 
-        .order-details-table {
-            width: 100%;
-            border-collapse: collapse;
+        .order-items {
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            margin-bottom: 1.5rem;
         }
 
-        .order-details-table th {
-            position: sticky;
-            top: 0;
-            background: #f4f4f4;
-            z-index: 10;
+        .order-item {
+            display: grid;
+            grid-template-columns: 60px 1fr 80px 80px 80px;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--gray-200);
+            gap: 1rem;
         }
 
-        .order-details-table img {
-            max-width: 60px;
-            max-height: 60px;
+        .order-item:last-child {
+            border-bottom: none;
+        }
+
+        .order-item-image {
+            width: 50px;
+            height: 50px;
             object-fit: contain;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--gray-200);
         }
 
-        /* --- RESPONSIVE STYLES --- */
-        @media (max-width: 1000px) {
-            .container {
-                padding: 10px;
-            }
-            .modal-content {
-                width: 98%;
-                padding: 10px;
-            }
+        .order-item-name {
+            font-weight: 500;
+            color: var(--black);
+            font-size: 0.875rem;
         }
 
+        .order-item-price, 
+        .order-item-total {
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        .order-item-quantity {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+
+        .order-totals {
+            background-color: var(--gray-50);
+            border-radius: var(--radius-sm);
+            padding: 1rem;
+            border: 1px solid var(--gray-200);
+        }
+
+        .totals-grid {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 0.75rem;
+        }
+
+        .total-row {
+            display: contents;
+        }
+
+        .total-label {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            text-align: right;
+        }
+
+        .total-value {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--black);
+            text-align: right;
+        }
+
+        .total-row:last-child .total-label,
+        .total-row:last-child .total-value {
+            font-weight: 600;
+            font-size: 0.9375rem;
+            padding-top: 0.25rem;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .review-modal {
+            max-width: 500px;
+        }
+
+        .rating-container {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            justify-content: center;
+        }
+
+        .rating-star {
+            font-size: 1.5rem;
+            color: var(--gray-300);
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .rating-star.active {
+            color: var(--gray-700);
+        }
+
+        .review-textarea {
+            width: 100%;
+            padding: 0.875rem;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-sm);
+            min-height: 120px;
+            margin-bottom: 1.5rem;
+            resize: vertical;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .review-textarea:focus {
+            outline: none;
+            border-color: var(--gray-400);
+            box-shadow: 0 0 0 3px rgba(156, 163, 175, 0.1);
+        }
+
+        .image-upload {
+            margin-bottom: 1.5rem;
+        }
+
+        .image-upload-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+            color: var(--gray-700);
+        }
+
+        .image-preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 0.75rem;
+        }
+
+        .image-preview {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            border: 1px solid var(--gray-200);
+        }
+
+        .image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .image-preview-remove {
+            position: absolute;
+            top: 0.25rem;
+            right: 0.25rem;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            width: 1.25rem;
+            height: 1.25rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+            font-size: 0.75rem;
+        }
+
+        .upload-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1rem;
+            background-color: var(--black);
+            color: var(--white);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background-color 0.2s;
+        }
+
+        .upload-btn:hover {
+            background-color: var(--gray-800);
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .review-content {
+            margin-bottom: 1.5rem;
+        }
+
+        .review-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            justify-content: center;
+        }
+
+        .review-rating-value {
+            font-weight: 600;
+            color: var(--black);
+            font-size: 0.875rem;
+        }
+
+        .review-text {
+            background-color: var(--gray-50);
+            padding: 1rem;
+            border-radius: var(--radius-sm);
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            border: 1px solid var(--gray-200);
+        }
+
+        /* Responsivitāte */
         @media (max-width: 768px) {
             .container {
-                padding: 5px;
+                padding: 1rem;
             }
-            .modal-content {
-                width: 99%;
-                margin: 2% auto;
-                padding: 8px;
-            }
-            .modal-body {
-                max-height: 70vh;
-            }
-            .modal-summary {
+
+            .toolbar {
                 flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
+                align-items: stretch;
             }
-            .modal-total {
-                font-size: 16px;
+
+            .search-container {
+                max-width: 100%;
+            }
+
+            .sort-buttons {
+                justify-content: flex-start;
+            }
+
+            .order-item {
+                grid-template-columns: 50px 1fr;
+                grid-template-rows: auto auto auto;
+                gap: 0.5rem;
+                padding: 0.75rem;
+            }
+
+            .order-item-image {
+                grid-row: span 3;
+                width: 40px;
+                height: 40px;
+            }
+
+            .order-item-name {
+                grid-column: 2;
+            }
+
+            .order-item-quantity, 
+            .order-item-price, 
+            .order-item-total {
+                grid-column: 2;
+                font-size: 0.8125rem;
+            }
+
+            .modal-body {
+                padding: 1rem;
+            }
+
+            .order-info-grid {
+                grid-template-columns: 1fr;
             }
         }
 
-        @media (max-width: 600px) {
-            .container {
-                max-width: 100vw;
-                padding: 2vw 2vw 10vw 2vw;
-                border-radius: 0;
-                box-shadow: none;
+        @media (max-width: 480px) {
+            .btn {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.8125rem;
             }
-            h1 {
-                font-size: 1.2em;
-                margin-bottom: 12px;
+
+            .modal-header {
+                padding: 0.75rem 1rem;
             }
-            .search-container {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 8px;
-                margin-bottom: 10px;
+
+            .order-item {
+                grid-template-columns: 40px 1fr;
+                padding: 0.5rem;
             }
-            .search-input {
-                width: 100%;
-                font-size: 15px;
-                padding: 8px;
+
+            .order-item-name,
+            .order-item-quantity,
+            .order-item-price,
+            .order-item-total {
+                font-size: 0.8125rem;
             }
-            table, thead, tbody, th, td, tr {
-                display: block;
-                width: 100%;
+
+            .totals-grid {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
             }
-            thead {
-                display: none;
+
+            .total-label {
+                text-align: left;
             }
-            #orderTable tr {
-                margin-bottom: 18px;
-                border-radius: 8px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-                background: #fff;
-                border: 1px solid #eee;
-                padding: 10px 0;
+
+            .total-value {
+                text-align: left;
             }
-            #orderTable td {
-                border: none;
-                padding: 6px 10px;
-                font-size: 15px;
-                position: relative;
-            }
-            #orderTable td:before {
-                content: attr(data-label);
-                font-weight: bold;
-                color: #555;
-                display: block;
-                margin-bottom: 2px;
-                font-size: 13px;
-            }
-            #orderTable td:last-child {
-                margin-bottom: 0;
-            }
-            .no-orders {
-                font-size: 15px;
-                margin: 10px 0;
-            }
-            .modal-content {
-                width: 99vw;
-                max-width: 99vw;
-                min-width: 0;
-                padding: 4vw 2vw;
-            }
-            .modal-header h2 {
-                font-size: 1.1em;
-            }
-            .modal-summary {
-                font-size: 14px;
-                padding: 8px;
-            }
-            .modal-total {
-                font-size: 15px;
-            }
-            /* Modal order details table as cards for mobile */
-            .order-details-table {
-                display: block;
-                width: 100%;
-            }
-            .order-details-table thead {
-                display: none;
-            }
-            .order-details-table tbody {
-                display: block;
-                width: 100%;
-            }
-            .order-details-table tr {
-                display: flex;
-                flex-direction: column;
-                background: #fafafa;
-                border-radius: 8px;
-                box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-                margin-bottom: 12px;
-                border: 1px solid #eee;
-                padding: 8px 0;
-            }
-            .order-details-table td {
-                display: flex;
-                align-items: center;
-                padding: 6px 10px;
-                font-size: 14px;
-                border: none;
-                width: 100%;
-                position: relative;
-                background: none;
-            }
-            .order-details-table td[data-label="Attēls"] {
-                justify-content: center;
-                padding-top: 0;
-                padding-bottom: 0;
-            }
-            .order-details-table td[data-label="Attēls"] img {
-                margin: 0 auto;
-                display: block;
-                max-width: 48px;
-                max-height: 48px;
-            }
-            .order-details-table td:before {
-                content: attr(data-label) ": ";
-                font-weight: bold;
-                color: #555;
-                min-width: 90px;
-                display: inline-block;
-                margin-right: 8px;
-                font-size: 13px;
-            }
-            .order-details-table td[data-label="Attēls"]:before {
-                content: "";
-                display: none;
+
+            .modal-footer {
+                padding: 0.75rem 1rem;
             }
         }
     </style>
-    <script>
-        // Add data-labels for mobile table
-        document.addEventListener('DOMContentLoaded', function() {
-            if (window.innerWidth <= 600) {
-                const labels = ["Pasūtījuma ID", "Datums", "Produkti", "Kopējā Cena", "Statuss", "Atsauksme"];
-                document.querySelectorAll("#orderTable tbody tr").forEach(function(row) {
-                    row.querySelectorAll("td").forEach(function(td, i) {
-                        td.setAttribute("data-label", labels[i]);
-                    });
-                });
-            }
-        });
-        // Add data-labels for modal order-details-table for mobile
-        function addModalDataLabels() {
-            if (window.innerWidth <= 600) {
-                const modalLabels = ["Attēls", "Nosaukums", "Daudzums", "Izmērs", "Cena", "Summa"];
-                document.querySelectorAll(".order-details-table tbody tr").forEach(function(row) {
-                    row.querySelectorAll("td").forEach(function(td, i) {
-                        td.setAttribute("data-label", modalLabels[i]);
-                    });
-                });
-            }
-        }
-    </script>
 </head>
 <body>
     <div class="container">
         <h1>Pasūtījumu Vēsture</h1>
-        <div class="search-container" style="display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 20px;">
-            <input type="text" class="search-input" placeholder="Meklēt pēc ID vai datuma..." onkeyup="filterOrders()" style="padding: 8px; font-size: 16px; border: 1px solid #ddd; border-radius: 4px; width: 300px;">
-            <button id="sortPriceBtn" onclick="sortByPrice()" style="padding: 8px 16px; font-size: 16px; cursor: pointer; border: 1px solid #333; background-color: #333; color: white; border-radius: 4px; transition: background-color 0.3s;">Kārtot pēc cenas ↑</button>
-            <button id="sortDateBtn" onclick="sortByDate()" style="padding: 8px 16px; font-size: 16px; cursor: pointer; border: 1px solid #333; background-color: #333; color: white; border-radius: 4px; transition: background-color 0.3s;">Kārtot pēc datuma ↑</button>
+        
+        <div class="toolbar">
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" class="search-input" placeholder="Meklēt pēc ID vai datuma..." onkeyup="filterOrders()">
+            </div>
+            <div class="sort-buttons">
+                <button id="sortDateBtn" onclick="sortByDate()" class="btn btn-outline">
+                    <i class="fas fa-calendar-alt"></i>
+                    Datums
+                </button>
+                <button id="sortPriceBtn" onclick="sortByPrice()" class="btn btn-outline">
+                    <i class="fas fa-euro-sign"></i>
+                    Cena
+                </button>
+            </div>
         </div>
-        <table id="orderTable">
-            <thead>
-                <tr>
-                    <th>Pasūtījuma ID</th>
-                    <th>Datums</th>
-                    <th>Produkti</th>
-                    <th>Kopējā Cena</th>
-                    <th>Statuss</th>
-                    <th>Atsauksme</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (!empty($orders)): ?>
-                <?php foreach ($orders as $index => $order): ?>
-                    <tr id="orderRow-<?= htmlspecialchars($order['order_id']) ?>">
-                        <td><?= htmlspecialchars($order['order_id']) ?></td>
-                        <td><?= htmlspecialchars($order['created_at']) ?></td>
-                        <td>
-                            <button onclick="showOrderDetails(<?= htmlspecialchars(json_encode($order)) ?>)" style="padding: 4px 10px; font-size: 14px; cursor: pointer; border: 1px solid #333; background-color: #333; color: white; border-radius: 4px; transition: background-color 0.3s;">Apskatīt</button>
-                        </td>
-                        <td><?= number_format($order['total_price'] ?? 0, 2) ?> EUR</td>
-                        <td><span class="status-<?= htmlspecialchars(str_replace(' ', '-', $order['status'])) ?>"><?= htmlspecialchars($order['status']) ?></span></td>
-                        <td>
-                        <?php if (!empty($order['has_review'])): ?>
-                            <button onclick="openViewReviewModal('<?= htmlspecialchars($order['order_id']) ?>')" style="padding: 4px 10px; font-size: 14px; cursor: pointer; border: 1px solid #333; background-color: #333; color: white; border-radius: 4px; transition: background-color 0.3s;">Skatīt atsauksmi</button>
-                        <?php elseif ($order['status'] === 'Piegādāts'): ?>
-                            <button onclick="openReviewModal('<?= htmlspecialchars($order['order_id']) ?>')" style="padding: 4px 10px; font-size: 14px; cursor: pointer; border: 1px solid #333; background-color: #333; color: white; border-radius: 4px; transition: background-color 0.3s;">Atstāt atsauksmi</button>
-                        <?php else: ?>
-                            <span style="color: #777; font-size: 0.8em; white-space: nowrap;">Atsauksmi būs iespējams atstāt, kad sūtījums būs piegādāts</span>
-                        <?php endif; ?>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-                <?php else: ?>
+
+        <div class="table-container">
+            <table id="orderTable">
+                <thead>
                     <tr>
-                        <td colspan="6" class="no-orders">Nav atrasti pasūtījumi.</td>
+                        <th>Pasūtījuma ID</th>
+                        <th>Datums</th>
+                        <th>Produkti</th>
+                        <th>Summa</th>
+                        <th>Statuss</th>
+                        <th>Atsauksme</th>
                     </tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
-        <p class="no-orders" style="display: none;">Nav atrasti pasūtījumi.</p>
+                </thead>
+                <tbody>
+                    <?php if (!empty($orders)): ?>
+                    <?php foreach ($orders as $index => $order): ?>
+                        <tr id="orderRow-<?= htmlspecialchars($order['order_id']) ?>">
+                            <td><?= htmlspecialchars($order['order_id']) ?></td>
+                            <td><?= htmlspecialchars($order['created_at']) ?></td>
+                            <td>
+                                <button onclick="showOrderDetails(<?= htmlspecialchars(json_encode($order)) ?>)" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-eye"></i>
+                                    Skatīt
+                                </button>
+                            </td>
+                            <td><?= number_format($order['total_price'] ?? 0, 2) ?> EUR</td>
+                            <td>
+                                <span class="status status-<?= htmlspecialchars(str_replace(' ', '-', $order['status'])) ?>">
+                                    <?= htmlspecialchars($order['status']) ?>
+                                </span>
+                            </td>
+                            <td>
+                            <?php if (!empty($order['has_review'])): ?>
+                                <button onclick="openViewReviewModal('<?= htmlspecialchars($order['order_id']) ?>')" class="btn btn-outline btn-sm">
+                                    <i class="fas fa-star"></i>
+                                    Atsauksme
+                                </button>
+                            <?php elseif ($order['status'] === 'Piegādāts'): ?>
+                                <button onclick="openReviewModal('<?= htmlspecialchars($order['order_id']) ?>')" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-edit"></i>
+                                    Atstāt
+                                </button>
+                            <?php else: ?>
+                                <span style="color: var(--gray-400); font-size: 0.75rem;">Pēc piegādes</span>
+                            <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="6" class="no-orders">Nav atrasti pasūtījumi.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <div id="orderModal">
+    <!-- Pasūtijus Modal -->
+    <div id="orderModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Pasūtījuma Informācija</h2>
-                <span class="modal-close" onclick="closeOrderModal()">&times;</span>
-            </div>
-            
-            <div class="modal-summary">
-                <div>
-                    <strong>Pasūtījuma ID:</strong> <span id="modalOrderId"></span><br>
-                    <strong>Datums:</strong> <span id="modalOrderDate"></span><br>
-                    <strong>Statuss:</strong> <span id="modalOrderStatus"></span>
-                </div>
-                <div class="modal-total" style="line-height: 1.6;">
-                    <div><strong>Preču summa:</strong> <span id="modalItemsPrice">0.00</span> EUR</div>
-                    <div><strong>PVN (21%):</strong> <span id="modalVatAmount">0.00</span> EUR</div>
-                    <div><strong>Piegādes cena:</strong> <span id="modalShippingPrice">0.00</span></div>
-                    <div><strong>Kopējā summa:</strong> <span id="modalTotalPrice">0.00</span> EUR</div>
-                </div>
-            </div>
-
-            <div class="modal-address" style="margin-bottom: 20px;">
-                <h3>Adrese</h3>
-                <div id="modalAddress" style="line-height: 1.5;"></div>
+                <h2 class="modal-title">Pasūtījuma detaļas</h2>
+                <button class="modal-close" onclick="closeOrderModal()">&times;</button>
             </div>
             
             <div class="modal-body">
-                <table class="order-details-table">
-                    <thead>
-                        <tr>
-                            <th>Attēls</th>
-                            <th>Nosaukums</th>
-                            <th>Daudzums</th>
-                            <th>Izmērs</th>
-                            <th>Cena</th>
-                            <th>Summa</th>
-                        </tr>
-                    </thead>
-                    <tbody id="orderDetailsTable">
-                        <!-- Šeit dinamiski tiks ievietota informācija par produktu -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- Atsauksmes Modal -->
-    <div id="reviewModal" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index: 1001; overflow-y: auto;">
-        <div class="modal-content" style="max-width: 600px; margin: 5% auto; padding: 20px; border-radius: 8px; background: white; position: relative;">
-            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h2>Atstāt atsauksmi</h2>
-                <span class="modal-close" style="font-size: 28px; font-weight: bold; cursor: pointer; color: #aaa;" onclick="closeReviewModal()">&times;</span>
-            </div>
-            <form id="reviewForm" method="POST" action="" enctype="multipart/form-data">
-                <input type="hidden" name="order_id" id="reviewOrderId" value="">
-                <label for="starRating" style="display: block; margin-bottom: 5px;">Novērtējums:</label>
-                <div id="starRating" style="font-size: 24px; color: #ccc; margin-bottom: 10px; cursor: pointer;">
-                    <i class="fas fa-star" data-value="1"></i>
-                    <i class="fas fa-star" data-value="2"></i>
-                    <i class="fas fa-star" data-value="3"></i>
-                    <i class="fas fa-star" data-value="4"></i>
-                    <i class="fas fa-star" data-value="5"></i>
-                </div>
-                <input type="hidden" name="rating" id="ratingInput" required>
-                <textarea name="review_text" id="reviewText" rows="5" style="width: 100%; padding: 10px; font-size: 16px;" placeholder="Rakstiet savu atsauksmi šeit..." required></textarea>
-                <label for="reviewImages" style="display: block; margin-top: 10px;">Pievienot attēlus (var būt vairāki):</label>
-                <input type="file" name="review_images[]" id="reviewImages" multiple accept="image/*" style="display: none;">
-                <div id="imagePreviewContainer" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
-                    <div id="addImageBox" style="width: 80px; height: 80px; border: 2px dashed #ccc; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 36px; color: #ccc;">
-                        +
+                <div class="order-info-grid">
+                    <div class="info-card">
+                        <div class="info-label">Pasūtījuma ID</div>
+                        <div class="info-value" id="modalOrderId"></div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-label">Datums</div>
+                        <div class="info-value" id="modalOrderDate"></div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-label">Statuss</div>
+                        <div class="info-value" id="modalOrderStatus"></div>
                     </div>
                 </div>
-                <div style="margin-top: 15px; text-align: right;">
-                    <button type="submit" style="padding: 10px 20px; font-size: 16px; cursor: pointer; border: 1px solid #333; background-color: #333; color: white; border-radius: 4px; transition: background-color 0.3s;">Iesniegt</button>
-                    <button type="button" style="padding: 10px 20px; font-size: 16px; cursor: pointer; margin-left: 10px; border: 1px solid #333; background-color: #fff; color: #333; border-radius: 4px; transition: background-color 0.3s;">Atcelt</button>
+
+                <div class="section-title">
+                    <i class="fas fa-truck"></i>
+                    <span>Piegādes informācija</span>
                 </div>
-            </form>
-            <script>
-                const stars = document.querySelectorAll('#starRating i');
-                const ratingInput = document.getElementById('ratingInput');
-                stars.forEach(star => {
-                    star.addEventListener('click', () => {
-                        const rating = star.getAttribute('data-value');
-                        ratingInput.value = rating;
-                        stars.forEach(s => {
-                            if (s.getAttribute('data-value') <= rating) {
-                                s.style.color = '#ffc107';
-                            } else {
-                                s.style.color = '#ccc';
-                            }
-                        });
-                    });
-                });
-
-                const reviewImagesInput = document.getElementById('reviewImages');
-                const imagePreviewContainer = document.getElementById('imagePreviewContainer');
-                const addImageBox = document.getElementById('addImageBox');
-
-                let selectedFiles = [];
-
-                addImageBox.addEventListener('click', () => {
-                    reviewImagesInput.click();
-                });
-
-                reviewImagesInput.addEventListener('change', () => {
-                    selectedFiles = selectedFiles.concat(Array.from(reviewImagesInput.files));
-                    updateImagePreviews();
-                    reviewImagesInput.value = '';
-                });
-
-                function updateImagePreviews() {
-                    const previews = imagePreviewContainer.querySelectorAll('.image-preview');
-                    previews.forEach(preview => preview.remove());
-
-                    selectedFiles.forEach((file, index) => {
-                        const reader = new FileReader();
-                        reader.onload = e => {
-                            const imgDiv = document.createElement('div');
-                            imgDiv.classList.add('image-preview');
-                            imgDiv.style.position = 'relative';
-                            imgDiv.style.width = '80px';
-                            imgDiv.style.height = '80px';
-                            imgDiv.style.border = '1px solid #ccc';
-                            imgDiv.style.borderRadius = '4px';
-                            imgDiv.style.overflow = 'hidden';
-
-                            const img = document.createElement('img');
-                            img.src = e.target.result;
-                            img.style.width = '100%';
-                            img.style.height = '100%';
-                            img.style.objectFit = 'cover';
-                            imgDiv.appendChild(img);
-
-                            const removeBtn = document.createElement('button');
-                            removeBtn.textContent = '×';
-                            removeBtn.style.position = 'absolute';
-                            removeBtn.style.top = '2px';
-                            removeBtn.style.right = '2px';
-                            removeBtn.style.background = 'rgba(0,0,0,0.5)';
-                            removeBtn.style.color = 'white';
-                            removeBtn.style.border = 'none';
-                            removeBtn.style.borderRadius = '50%';
-                            removeBtn.style.width = '20px';
-                            removeBtn.style.height = '20px';
-                            removeBtn.style.cursor = 'pointer';
-                            removeBtn.addEventListener('click', () => {
-                                selectedFiles.splice(index, 1);
-                                updateImagePreviews();
-                            });
-                            imgDiv.appendChild(removeBtn);
-
-                            imagePreviewContainer.insertBefore(imgDiv, addImageBox);
-                        };
-                        reader.readAsDataURL(file);
-                    });
-                }
-
-                const reviewForm = document.getElementById('reviewForm');
-                reviewForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    const formData = new FormData(reviewForm);
-                    formData.delete('review_images[]');
-
-                    // --- Vienmēr izmantot failus no ievades, ja selectedFiles ir tukšs. ---
-                    let filesToUpload = selectedFiles.length > 0 ? selectedFiles : Array.from(reviewImagesInput.files);
-                    filesToUpload.forEach(file => {
-                        formData.append('review_images[]', file);
-                    });
-
-                    fetch(reviewForm.action, {
-                        method: 'POST',
-                        body: formData,
-                        credentials: 'same-origin'
-                    }).then(response => {
-                        if (response.redirected) {
-                            window.location.href = response.url;
-                        } else {
-                            return response.text().then(text => {
-                                alert('Kļūda iesniedzot atsauksmi.');
-                            });
-                        }
-                    }).catch(() => {
-                        alert('Kļūda iesniedzot atsauksmi.');
-                    });
-                });
-            </script>
+                <div class="info-card" id="modalAddress" style="margin-bottom: 1.5rem;">
+                    <!-- Adrese -->
+                </div>
+                
+                <div class="section-title">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span>Pasūtījuma saturs</span>
+                </div>
+                <div class="order-items">
+                    <div id="orderDetailsTable">
+                        <!-- Pasūtījuma detaļas -->
+                    </div>
+                </div>
+                
+                <div class="order-totals">
+                    <div class="totals-grid">
+                        <div class="total-row">
+                            <div class="total-label">Preču summa:</div>
+                            <div class="total-value" id="modalItemsPrice">0.00 EUR</div>
+                        </div>
+                        <div class="total-row">
+                            <div class="total-label">PVN (21%):</div>
+                            <div class="total-value" id="modalVatAmount">0.00 EUR</div>
+                        </div>
+                        <div class="total-row">
+                            <div class="total-label">Piegādes cena:</div>
+                            <div class="total-value" id="modalShippingPrice">0.00 EUR</div>
+                        </div>
+                        <div class="total-row">
+                            <div class="total-label">Kopējā summa:</div>
+                            <div class="total-value" id="modalTotalPrice">0.00 EUR</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Apskatīt Review Modal -->
-    <div id="viewReviewModal" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index: 1002; overflow-y: auto;">
-        <div class="modal-content" style="max-width: 600px; margin: 5% auto; padding: 20px; border-radius: 8px; background: white; position: relative;">
-            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h2>Jūsu Atsauksme</h2>
-                <span class="modal-close" style="font-size: 28px; font-weight: bold; cursor: pointer; color: #aaa;" onclick="closeViewReviewModal()">&times;</span>
+    <!-- Atsauksmes modal -->
+    <div id="reviewModal" class="modal">
+        <div class="modal-content review-modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Atstāt atsauksmi</h2>
+                <button class="modal-close" onclick="closeReviewModal()">&times;</button>
             </div>
-            <div id="viewReviewContent" style="font-size: 16px; line-height: 1.5;">
-                <p><strong>Novērtējums:</strong> <span id="viewReviewRating"></span></p>
-                <p><strong>Atsauksme:</strong></p>
-                <p id="viewReviewText"></p>
-                <div id="viewReviewImages" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;"></div>
+            
+            <div class="modal-body">
+                <form id="reviewForm" method="POST" action="" enctype="multipart/form-data">
+                    <input type="hidden" name="order_id" id="reviewOrderId" value="">
+                    
+                    <div class="rating-container">
+                        <div class="rating-star" data-value="1"><i class="fas fa-star"></i></div>
+                        <div class="rating-star" data-value="2"><i class="fas fa-star"></i></div>
+                        <div class="rating-star" data-value="3"><i class="fas fa-star"></i></div>
+                        <div class="rating-star" data-value="4"><i class="fas fa-star"></i></div>
+                        <div class="rating-star" data-value="5"><i class="fas fa-star"></i></div>
+                    </div>
+                    <input type="hidden" name="rating" id="ratingInput" required>
+                    
+                    <textarea class="review-textarea" name="review_text" id="reviewText" placeholder="Rakstiet savu atsauksmi šeit..." required></textarea>
+                    
+                    <div class="image-upload">
+                        <label class="image-upload-label">Pievienot attēlu:</label>
+                        <input type="file" name="review_images[]" id="reviewImages" multiple accept="image/*" style="display: none;">
+                        <label for="reviewImages" class="upload-btn">
+                            <i class="fas fa-upload"></i>
+                            Augšupielādēt attēlus
+                        </label>
+                        
+                        <div class="image-preview-container" id="imagePreviewContainer">
+                            <!-- Bildes tiks pievienotas seit -->
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline" onclick="closeReviewModal()">Atcelt</button>
+                        <button type="submit" class="btn btn-primary">Saglabāt</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Apskatīt atsauksmes modal -->
+    <div id="viewReviewModal" class="modal">
+        <div class="modal-content review-modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Jūsu atsauksme</h2>
+                <button class="modal-close" onclick="closeViewReviewModal()">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="review-content">
+                    <div class="review-rating">
+                        <div class="rating-stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <span class="review-rating-value" id="viewReviewRating"></span>
+                    </div>
+                    
+                    <div class="review-text" id="viewReviewText"></div>
+                    
+                    <div class="image-preview-container" id="viewReviewImages">
+                        <!-- Atsauksme attēli -->
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="closeViewReviewModal()">Aizvērt</button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const stars = document.querySelectorAll('.rating-star');
+            const ratingInput = document.getElementById('ratingInput');
+            
+            stars.forEach(star => {
+                star.addEventListener('click', () => {
+                    const rating = star.getAttribute('data-value');
+                    ratingInput.value = rating;
+                    
+                    stars.forEach((s, index) => {
+                        if (index < rating) {
+                            s.classList.add('active');
+                        } else {
+                            s.classList.remove('active');
+                        }
+                    });
+                });
+            });
+            
+            // Inicialize pasūtijuma modal
+            const reviewImagesInput = document.getElementById('reviewImages');
+            const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+            
+            reviewImagesInput.addEventListener('change', function() {
+                imagePreviewContainer.innerHTML = '';
+                
+                if (this.files.length > 5) {
+                    alert('Var augšupielādēt maksimāli 5 attēlus!');
+                    this.value = '';
+                    return;
+                }
+                
+                Array.from(this.files).forEach(file => {
+                    if (!file.type.match('image.*')) {
+                        return;
+                    }
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const imagePreview = document.createElement('div');
+                        imagePreview.className = 'image-preview';
+                        
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        
+                        const removeBtn = document.createElement('button');
+                        removeBtn.className = 'image-preview-remove';
+                        removeBtn.innerHTML = '×';
+                        removeBtn.addEventListener('click', function() {
+                            imagePreview.remove();
+
+                            const dataTransfer = new DataTransfer();
+                            Array.from(reviewImagesInput.files)
+                                .filter(f => f !== file)
+                                .forEach(f => dataTransfer.items.add(f));
+                            reviewImagesInput.files = dataTransfer.files;
+                        });
+                        
+                        imagePreview.appendChild(img);
+                        imagePreview.appendChild(removeBtn);
+                        imagePreviewContainer.appendChild(imagePreview);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            });
+        });
+        
+        // Pasūtījumu tabulas funkcijas
+        function showOrderDetails(order) {
+            const orderDetailsTable = document.getElementById('orderDetailsTable');
+            orderDetailsTable.innerHTML = '';
+            let itemsPrice = 0;
+
+            document.getElementById('modalOrderId').textContent = order.order_id;
+            document.getElementById('modalOrderDate').textContent = order.created_at;
+            document.getElementById('modalOrderStatus').textContent = order.status;
+
+            // Parāda adreses informāciju
+            const addressInfo = order.address || {};
+            const addressHTML = `
+                <div><strong>Vārds:</strong> ${addressInfo.name || 'Nav norādīts'}</div>
+                <div><strong>E-pasts:</strong> ${addressInfo.email || 'Nav norādīts'}</div>
+                <div><strong>Telefons:</strong> ${addressInfo.phone || 'Nav norādīts'}</div>
+                <div><strong>Adrese:</strong> ${addressInfo.address || 'Nav norādīts'}</div>
+                ${addressInfo.address2 ? `<div><strong>Dzīvoklis:</strong> ${addressInfo.address2}</div>` : ''}
+                <div><strong>Pilsēta:</strong> ${addressInfo.city || 'Nav norādīts'}</div>
+                <div><strong>Pasta indekss:</strong> ${addressInfo.postal_code || 'Nav norādīts'}</div>
+                <div><strong>Valsts:</strong> ${addressInfo.country || 'Nav norādīts'}</div>
+                ${addressInfo.notes ? `<div><strong>Piezīmes:</strong> ${addressInfo.notes}</div>` : ''}
+            `;
+            document.getElementById('modalAddress').innerHTML = addressHTML;
+
+            try {
+                let products = order.items;
+                if (typeof products === 'string') {
+                    products = JSON.parse(products);
+                }
+                
+                products.forEach(product => {
+                    const images = product.bilde ? product.bilde.split(',') : [];
+                    const firstImage = images.length > 0 ? images[0].trim() : 'placeholder.jpg';
+
+                    const itemPrice = parseFloat(product.cena) || 0;
+                    const quantity = parseInt(product.quantity) || 0;
+                    const itemTotal = itemPrice * quantity;
+                    itemsPrice += itemTotal;
+
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'order-item';
+                    itemElement.innerHTML = `
+                        <img src="${firstImage}" alt="${product.nosaukums}" class="order-item-image">
+                        <div class="order-item-name">${product.nosaukums}</div>
+                        <div class="order-item-quantity">${quantity} gab.</div>
+                        <div class="order-item-price">${itemPrice.toFixed(2)} EUR</div>
+                        <div class="order-item-total">${itemTotal.toFixed(2)} EUR</div>
+                    `;
+                    orderDetailsTable.appendChild(itemElement);
+                });
+
+                // APrēķina PVN un piegādes maksu
+                const vatAmount = itemsPrice * 0.21;
+                let shippingPrice = 10;
+                let shippingDisplay = "10.00 EUR";
+                if (itemsPrice >= 100) {
+                    shippingPrice = 0;
+                    shippingDisplay = "Bezmaksas";
+                }
+                
+                // Izmanto order.total_amount, ja tas ir pieejams
+                let modalTotalPrice = itemsPrice + vatAmount + shippingPrice;
+                if (order.total_amount) {
+                    modalTotalPrice = parseFloat(order.total_amount);
+                }
+
+                document.getElementById('modalItemsPrice').textContent = itemsPrice.toFixed(2) + ' EUR';
+                document.getElementById('modalVatAmount').textContent = vatAmount.toFixed(2) + ' EUR';
+                document.getElementById('modalShippingPrice').textContent = shippingDisplay;
+                document.getElementById('modalTotalPrice').textContent = modalTotalPrice.toFixed(2) + ' EUR';
+
+                // Parāda modālu
+                document.getElementById('orderModal').classList.add('active');
+                document.body.style.overflow = 'hidden';
+            } catch (error) {
+                console.error('Error parsing order items:', error);
+                alert('Kļūda ielādējot pasūtījuma detaļas.');
+            }
+        }
+
+        function closeOrderModal() {
+            document.getElementById('orderModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Atsauksmes modāļa funkcijas
+        function openReviewModal(orderId) {
+            document.getElementById('reviewOrderId').value = orderId;
+            document.getElementById('reviewModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeReviewModal() {
+            document.getElementById('reviewModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+            // Atiestata formu
+            document.getElementById('reviewForm').reset();
+            document.getElementById('imagePreviewContainer').innerHTML = '';
+            // Atiestata zvaigznes
+            document.querySelectorAll('.rating-star').forEach(star => {
+                star.classList.remove('active');
+            });
+        }
+
+        // Atsauksmes skatīšanas modāļa funkcijas
         function openViewReviewModal(orderId) {
             fetch(`?fetch_review=1&order_id=${orderId}`, { credentials: 'same-origin' })
                 .then(response => {
@@ -815,20 +1220,36 @@ unset($order);
                 .then(data => {
                     document.getElementById('viewReviewRating').textContent = data.rating ? data.rating.toFixed(1) + ' / 5' : 'Nav novērtējuma';
                     document.getElementById('viewReviewText').textContent = data.review_text || 'Nav atsauksmes teksta.';
+                    
+                    // Uzstāda zvaigžņu vērtējuma attēlojumu
+                    const stars = document.querySelectorAll('#viewReviewModal .rating-stars i');
+                    const rating = data.rating ? Math.round(parseFloat(data.rating)) : 0;
+                    stars.forEach((star, index) => {
+                        if (index < rating) {
+                            star.style.color = '#111827';
+                        } else {
+                            star.style.color = '#e5e7eb';
+                        }
+                    });
+                    
+                    // parāda atsauksmes attēlus
                     const imagesContainer = document.getElementById('viewReviewImages');
                     imagesContainer.innerHTML = '';
                     if (data.images && data.images.length > 0) {
                         data.images.forEach(imgPath => {
+                            const imagePreview = document.createElement('div');
+                            imagePreview.className = 'image-preview';
+                            
                             const img = document.createElement('img');
                             img.src = imgPath;
-                            img.style.maxWidth = '100px';
-                            img.style.maxHeight = '100px';
-                            img.style.objectFit = 'cover';
-                            img.style.borderRadius = '4px';
-                            imagesContainer.appendChild(img);
+                            
+                            imagePreview.appendChild(img);
+                            imagesContainer.appendChild(imagePreview);
                         });
                     }
-                    document.getElementById('viewReviewModal').style.display = 'block';
+                    
+                    // parāda modāl
+                    document.getElementById('viewReviewModal').classList.add('active');
                     document.body.style.overflow = 'hidden';
                 })
                 .catch(error => {
@@ -837,19 +1258,11 @@ unset($order);
         }
 
         function closeViewReviewModal() {
-            document.getElementById('viewReviewModal').style.display = 'none';
+            document.getElementById('viewReviewModal').classList.remove('active');
             document.body.style.overflow = 'auto';
         }
 
-        window.onclick = function(event) {
-            const viewReviewModal = document.getElementById('viewReviewModal');
-            if (event.target === viewReviewModal) {
-                closeViewReviewModal();
-            }
-        }
-    </script>
-
-    <script>
+        // tabula filtrēšanas un kārtošanas funkcijas
         function filterOrders() {
             const searchValue = document.querySelector('.search-input').value.toLowerCase();
             const rows = document.querySelectorAll('#orderTable tbody tr');
@@ -862,7 +1275,10 @@ unset($order);
                 if (matches) hasVisibleRows = true;
             });
 
-            document.querySelector('.no-orders').style.display = hasVisibleRows ? 'none' : 'block';
+            const noOrdersMsg = document.querySelector('.no-orders');
+            if (noOrdersMsg) {
+                noOrdersMsg.style.display = hasVisibleRows ? 'none' : 'table-cell';
+            }
         }
 
         let priceSortAsc = true;
@@ -881,8 +1297,9 @@ unset($order);
             priceSortAsc = !priceSortAsc;
 
             const btn = document.getElementById('sortPriceBtn');
-            btn.textContent = `Kārtot pēc cenas ${priceSortAsc ? '↑' : '↓'}`;
-            btn.style.backgroundColor = priceSortAsc ? '#333' : '#000';
+            btn.innerHTML = priceSortAsc ? 
+                '<i class="fas fa-euro-sign"></i> Cena ↑' : 
+                '<i class="fas fa-euro-sign"></i> Cena ↓';
         }
 
         let dateSortAsc = false;
@@ -901,128 +1318,71 @@ unset($order);
             dateSortAsc = !dateSortAsc;
 
             const btn = document.getElementById('sortDateBtn');
-            btn.textContent = `Kārtot pēc datuma ${dateSortAsc ? '↑' : '↓'}`;
-            btn.style.backgroundColor = dateSortAsc ? '#333' : '#000';
+            btn.innerHTML = dateSortAsc ? 
+                '<i class="fas fa-calendar-alt"></i> Datums ↑' : 
+                '<i class="fas fa-calendar-alt"></i> Datums ↓';
         }
 
-        function showOrderDetails(order) {
-            const orderDetailsTable = document.getElementById('orderDetailsTable');
-            orderDetailsTable.innerHTML = '';
-            let itemsPrice = 0;
-
-            document.getElementById('modalOrderId').textContent = order.order_id;
-            document.getElementById('modalOrderDate').textContent = order.created_at;
-            document.getElementById('modalOrderStatus').textContent = order.status;
-
-            // Parādīt pasūtījuma adresi
-            const addressInfo = order.address || {};
-            document.getElementById('modalAddress').innerHTML = `
-                <strong>Vārds:</strong> ${addressInfo.name || 'Nav norādīts'}<br>
-                <strong>E-pasts:</strong> ${addressInfo.email || 'Nav norādīts'}<br>
-                <strong>Telefons:</strong> ${addressInfo.phone || 'Nav norādīts'}<br>
-                <strong>Adrese:</strong> ${addressInfo.address || 'Nav norādīts'}<br>
-                ${addressInfo.address2 ? `<strong>Dzīvoklis:</strong> ${addressInfo.address2}<br>` : ''}
-                <strong>Pilsēta:</strong> ${addressInfo.city || 'Nav norādīts'}<br>
-                <strong>Pasta indekss:</strong> ${addressInfo.postal_code || 'Nav norādīts'}<br>
-                <strong>Valsts:</strong> ${addressInfo.country || 'Nav norādīts'}<br>
-                ${addressInfo.notes ? `<strong>Piezīmes:</strong> ${addressInfo.notes}` : ''}
-            `;
-
-            try {
-                let products = order.items;
-                if (typeof products === 'string') {
-                    products = JSON.parse(products);
-                }
-                products.forEach(product => {
-                    const images = product.bilde ? product.bilde.split(',') : [];
-                    const firstImage = images.length > 0 ? images[0].trim() : 'placeholder.jpg';
-
-                    const itemPrice = parseFloat(product.cena) || 0;
-                    const quantity = parseInt(product.quantity) || 0;
-                    const itemTotal = itemPrice * quantity;
-                    itemsPrice += itemTotal;
-
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td><img src="${firstImage}" alt="${product.nosaukums}" style="max-width: 60px; max-height: 60px; object-fit: contain;"></td>
-                        <td>${product.nosaukums}</td>
-                        <td>${quantity}</td>
-                        <td>${product.size || 'N/A'}</td>
-                        <td>${itemPrice.toFixed(2)} EUR</td>
-                        <td>${itemTotal.toFixed(2)} EUR</td>
-                    `;
-                    orderDetailsTable.appendChild(row);
-                });
-
-                // Aprēķināt PVN un piegādes maksu
-                const vatAmount = itemsPrice * 0.21;
-                let shippingPrice = 10;
-                let shippingDisplay = "10.00 EUR";
-                if (itemsPrice >= 100) {
-                    shippingPrice = 0;
-                    shippingDisplay = "Bezmaksas";
-                }
-                // Izmanto saglabāto kopējo summu, ja tā ir pieejama
-                let modalTotalPrice = itemsPrice + vatAmount + shippingPrice;
-                if (order.total_amount) {
-                    modalTotalPrice = parseFloat(order.total_amount);
-                }
-
-                document.getElementById('modalItemsPrice').textContent = itemsPrice.toFixed(2);
-                document.getElementById('modalVatAmount').textContent = vatAmount.toFixed(2);
-                document.getElementById('modalShippingPrice').textContent = shippingDisplay;
-                document.getElementById('modalTotalPrice').textContent = modalTotalPrice.toFixed(2);
-
-                document.getElementById('orderModal').style.display = 'block';
-                document.body.style.overflow = 'hidden'; 
-                addModalDataLabels();
-            } catch (error) {
-                console.error('Error parsing order items:', error);
-                alert('Kļūda ielādējot pasūtījuma detaļas.');
-            }
-        }
-
-        function closeOrderModal() {
-            document.getElementById('orderModal').style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-
+        // Aizvērt modālus, ja noklikšķina ārpus tiem
         window.onclick = function(event) {
-            const modal = document.getElementById('orderModal');
-            if (event.target === modal) {
+            const orderModal = document.getElementById('orderModal');
+            if (event.target === orderModal) {
                 closeOrderModal();
             }
-        }
-
-        function openReviewModal(orderId) {
-            document.getElementById('reviewOrderId').value = orderId;
-            document.getElementById('reviewModal').style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeReviewModal() {
-            document.getElementById('reviewModal').style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-
-        window.onclick = function(event) {
+            
             const reviewModal = document.getElementById('reviewModal');
             if (event.target === reviewModal) {
                 closeReviewModal();
             }
+            
+            const viewReviewModal = document.getElementById('viewReviewModal');
+            if (event.target === viewReviewModal) {
+                closeViewReviewModal();
+            }
         };
 
-        function closeOrderModal() {
-            document.getElementById('orderModal').style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-
-        window.onclick = function(event) {
-            const modal = document.getElementById('orderModal');
-            if (event.target === modal) {
-                closeOrderModal();
+        // formas iesniegšanas apstrāde
+        document.getElementById('reviewForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!document.getElementById('ratingInput').value) {
+                alert('Lūdzu, novērtējiet produktu!');
+                return;
             }
-        }
+            
+            // Iesniegšanas datu sagatavošana
+            const formData = new FormData(this);
+            
+            // Noņem atsauksmes attēlus no formas datiem
+            formData.delete('review_images[]');
+            
+            const fileInput = document.getElementById('reviewImages');
+            const files = fileInput.files;
+            
+            for (let i = 0; i < files.length; i++) {
+                formData.append('review_images[]', files[i]);
+            }
+            
+            // Nosūta atsauksmes formu ar AJAX uz serveri
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin'
+            }).then(response => {
+                // Ja serveris pāradresē (veiksmīgi saglabāta atsauksme), pāriet uz jauno URL
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    // Ja nav pāradresācijas, parāda kļūdas paziņojumu
+                    return response.text().then(text => {
+                        alert('Kļūda iesniedzot atsauksmi.');
+                    });
+                }
+            }).catch(() => {
+                // Apstrādā tīkla vai servera kļūdu
+                alert('Kļūda iesniedzot atsauksmi.');
+            });
+        });
     </script>
 </body>
 </html>

@@ -18,7 +18,9 @@
                   <div class="field-block"><label for="Last-Name">Uzvārds*</label><input class="text-field w-input" maxlength="256" name="Last-Name" data-name="Last Name" placeholder="Uzvārds" type="text" id="Last-Name" required=""></div>
                 </div>
                 <div class="field-block"><label for="Email">E-pasts*</label><input class="text-field w-input" maxlength="256" name="Email" data-name="Email" placeholder="vissdarbam@email.com" type="email" id="Email" required=""></div>
-                <div class="field-block"><label for="Message">Tava ziņa</label><textarea placeholder="Raksti šeit....." maxlength="5000" data-name="Message" name="Message" id="Message" required="" class="text-area w-input"></textarea></div><input type="submit" data-wait="Lūdzu uzgaidiet.." class="button no-margin w-button" value="Nosūtīt!">
+                <div class="field-block"><label for="Message">Tava ziņa</label><textarea placeholder="Raksti šeit....." maxlength="5000" data-name="Message" name="Message" id="Message" required="" class="text-area w-input"></textarea></div>
+                <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI" style="margin-bottom: 16px;"></div>
+                <input type="submit" data-wait="Lūdzu uzgaidiet.." class="button no-margin w-button" value="Nosūtīt!">
               </form>
               <div id="contact-message" style="margin-top:10px; font-weight:bold;"></div>
               <script>
@@ -32,6 +34,7 @@
   const success = getQueryParam('success');
   const error = getQueryParam('error');
 
+  // Parāda veiksmes vai kļūdas ziņu atkarībā no URL parametriem
   if (success === '1') {
     messageDiv.style.color = 'green';
     messageDiv.textContent = 'Jūsu ziņa ir veiksmīgi nosūtīta! Mēs ar jums sazināsimies drīz.';
@@ -40,21 +43,35 @@
     messageDiv.textContent = 'Radās kļūda, lūdzu mēģiniet vēlreiz.';
   }
 
-  // Paslēpj ziņu pēc 5 sekundēm
+  // Paslēpj ziņu pēc 3 sekundēm un izņem no DOM pēc 0.5 sekundēm
   if (success === '1' || error === '1') {
     setTimeout(() => {
       messageDiv.style.transition = "opacity 0.5s ease";
       messageDiv.style.opacity = 0;
 
-      // Pilnībā izņem no DOM pēc 0.5s (kad izbalē)
+      // Pilnībā izņem no DOM pēc 0.5s
       setTimeout(() => {
         messageDiv.remove();
       }, 500);
-    }, 3000); // 5 sekundes
+    }, 3000); // 3 sekundes
   }
 })();
-</script>
 
+// Captcha validācija pirms formas iesniegšanas
+document.getElementById('email-form').addEventListener('submit', function(e) {
+  var captcha = grecaptcha.getResponse();
+  if (!captcha) {
+    e.preventDefault();
+    var msg = document.getElementById('contact-message');
+    msg.style.color = 'red';
+    msg.textContent = 'Lūdzu, apstipriniet, ka neesat robots.';
+    msg.style.opacity = 1;
+    return false;
+  }
+});
+</script>
+<!-- reCAPTCHA scripts -->
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
             </div>
           </div>
         </div>

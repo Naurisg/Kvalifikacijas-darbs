@@ -530,6 +530,7 @@ function showNextModalImage() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Ielādē jaunākos produktus no servera un attēlo tos lapā
     fetch('fetch_latest_products.php')
         .then(response => response.json())
         .then(data => {
@@ -537,17 +538,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 const container = document.getElementById('latest-products-container');
                 container.innerHTML = ''; 
                 data.products.forEach(product => {
+                    // Izgūst pirmo attēlu vai placeholder, pārbauda vai produkts ir izpārdots
                     const images = product.bilde ? product.bilde.split(',') : [];
                     const firstImage = images.length > 0 ? images[0].trim() : 'images/placeholder.png';
                     const isOutOfStock = parseInt(product.quantity) === 0;
+                    // Izvada produktu karti ar izpārdots birku, ja nepieciešams
                     container.innerHTML += `
                         <div class="product-card" onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">
+                            ${isOutOfStock ? `<div class="out-of-stock-label">Izpārdots!</div>` : ''}
                             <img src="${firstImage}" loading="lazy" alt="${product.nosaukums}">
                             <div class="product-info">
                                 <h3>${product.nosaukums}</h3>
                                 <p>${product.apraksts}</p>
                                 <p class="price">€${product.cena}</p>
-                                ${isOutOfStock ? `<p style="color: red; font-weight: bold;">Izpārdots</p>` : ''}
                                 <div class="product-buttons">
                                     <button class="add-to-cart" onclick="event.stopPropagation(); showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})" ${isOutOfStock ? 'disabled' : ''}>
                                         <i class="fas fa-shopping-cart"></i>
@@ -676,7 +679,7 @@ function buyNow() {
       transform: scale(1.1);
       opacity: 0.8;
     }
-      /* Responsivitate iegūstiet jaunumus epasta */
+    /* Responsivitate iegūstiet jaunumus epasta */
 @media screen and (max-width: 479px) {
   .text-box {
     left: 0 !important;
@@ -689,6 +692,27 @@ function buyNow() {
     margin-left: auto !important;
     margin-right: auto !important;
   }
+}
+
+/* Add out-of-stock label style for index page product cards */
+.out-of-stock-label {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #e53935;
+  color: #fff;
+  font-weight: bold;
+  font-size: 0.95em;
+  padding: 4px 10px;
+  border-radius: 5px;
+  z-index: 2;
+  pointer-events: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+/* Ensure product-card is positioned relative for label */
+.product-card {
+  position: relative;
+  /* ...existing code... */
 }
   </style>
 </body>

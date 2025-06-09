@@ -1,20 +1,21 @@
 <?php
+session_name('admin_session');
 session_start();
 header('Content-Type: application/json');
 
-// Pārbauda, vai lietotājs ir autorizējies
+// Pārbauda, vai lietotājs ir autorizējies (vai ir user_id sesijā)
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(["success" => false, "message" => "Nav autorizācijas"]);
     exit();
 }
 
-// Apstrādā POST pieprasījumu
+// Apstrādā tikai POST pieprasījumus
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     try {
         // Iekļauj datubāzes savienojumu no db_connect.php
         require_once '../db_connect.php';
 
-        // Pārbauda obligātos laukus
+        // Pārbauda, vai visi obligātie lauki ir aizpildīti
         $requiredFields = ['id', 'nosaukums', 'apraksts', 'kategorija', 'cena', 'quantity'];
         foreach ($requiredFields as $field) {
             if (empty($_POST[$field])) {

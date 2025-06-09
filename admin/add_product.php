@@ -238,9 +238,18 @@ require_once 'auth_check.php'; // Pārbauda, vai lietotājs ir autorizēts
                 <label>Bildes:</label>
                 <div class="image-upload-container" id="imageUploadContainer">
                     <div class="add-image-btn" id="addImageBtn">
-                        + Pievienot bildi
+                        <!-- SVG ikona un teksts attēla pievienošanas pogai -->
+                        <span style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                            <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 6px;">
+                                <circle cx="19" cy="19" r="18" stroke="#666" stroke-width="2" fill="none"/>
+                                <rect x="17" y="9" width="4" height="20" rx="2" fill="#666"/>
+                                <rect x="9" y="17" width="20" height="4" rx="2" fill="#666"/>
+                            </svg>
+                            <span style="font-size: 11px; color: #999; font-weight: 400; letter-spacing: 0.5px;">Pievienot bildi</span>
+                        </span>
                     </div>
                 </div>
+                <!-- Slēptais failu ievades lauks attēlu augšupielādei -->
                 <input type="file" id="bildeInput" name="bilde[]" accept="image/*" multiple class="hidden-file-input" />
             </div>
 

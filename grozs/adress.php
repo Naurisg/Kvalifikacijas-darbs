@@ -2,7 +2,7 @@
 session_start();
 include '../header.php';
 
-// Ja lietotājs nav autorizējies
+// Ja lietotājs nav autorizējies, pāradresē uz login lapu
 if (!isset($_SESSION['user_id'])) {
     header('Location: ../login.php');
     exit();
@@ -11,7 +11,7 @@ if (!isset($_SESSION['user_id'])) {
 // Iegūst bagātināto grozu no sesijas
 $cart = $_SESSION['cart'] ?? [];
 
-// Ja grozs ir tukšs — pāradresē atpakaļ
+// Ja grozs ir tukšs — pāradresē atpakaļ uz grozu
 if (empty($cart)) {
     header('Location: grozs.php');
     exit();
@@ -592,6 +592,7 @@ try {
   
   <script src="https://js.stripe.com/v3/"></script>
   <script>
+    // Kad lapa ir ielādēta, aizpilda formas laukus ar lietotāja datiem
     document.addEventListener('DOMContentLoaded', function() {
       const userData = {
         name: "<?php echo htmlspecialchars($userData['name']); ?>",
@@ -608,6 +609,7 @@ try {
       if (phoneField && userData.phone) phoneField.value = userData.phone;
     });
 
+    // Apstrādā piegādes adreses formas iesniegšanu un pāriet uz Stripe maksājumu
     document.getElementById('addressForm').addEventListener('submit', function (e) {
         e.preventDefault();
 
@@ -624,6 +626,7 @@ try {
             notes: document.getElementById('notes').value
         };
 
+        // Nosūta datus uz serveri, lai izveidotu Stripe checkout sesiju
         fetch('create_checkout_session.php', {
             method: 'POST',
             headers: {
@@ -633,6 +636,7 @@ try {
         })
         .then(response => response.json())
         .then(data => {
+            // Ja saņemts Stripe sesijas ID, pāradresē uz maksājumu
             if (data.id) {
                 const stripe = Stripe('pk_test_51QP0wYHs6AycTP1yY0zaKnaw3dgfxaiKEX5OWQSuRo4IQzobUkCd3d347FksWLIrzASGinvz1Sdp4VjnWYfDTwW900N5fxwZIx'); //Stripe public key
                 stripe.redirectToCheckout({ sessionId: data.id });
@@ -641,6 +645,7 @@ try {
             }
         })
         .catch(error => {
+            // Apstrādā kļūdu gadījumā, ja neizdodas izveidot maksājumu
             console.error('Error:', error);
             alert('Kļūda izveidojot maksājumu.');
         });

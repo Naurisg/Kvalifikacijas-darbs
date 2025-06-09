@@ -66,21 +66,25 @@
       if (recaptchaDiv.style.display !== 'none') {
         recaptchaResponse = grecaptcha.getResponse();
         if (!recaptchaResponse) {
+          // Ja nav aizpildīts captcha, parāda paziņojumu
           notificationDiv.textContent = 'Lūdzu, apstipriniet, ka neesat robots.';
           notificationDiv.style.display = 'block';
           return;
         }
         formData.append('g-recaptcha-response', recaptchaResponse);
       }
+      // Nosūta AJAX pieprasījumu uz process-login.php ar ievadītajiem datiem
       fetch('process-login.php', {
         method: 'POST',
         body: formData
       })
       .then(response => response.json())
       .then(data => {
+        // Ja autorizācija veiksmīga, pāradresē uz sākumlapu
         if (data.success) {
           window.location.href = 'index';
         } else {
+          // Ja kļūda, palielina kļūdu skaitu un parāda captcha pēc 2 mēģinājumiem
           failedAttempts++;
           if (failedAttempts >= 2) {
             recaptchaDiv.style.display = 'block';
@@ -90,6 +94,7 @@
         }
       })
       .catch(error => {
+        // Apstrādā neparedzētu kļūdu
         console.error('Error:', error);
         notificationDiv.textContent = 'Neplānota kļūda. Mēģiniet vēlreiz vēlāk.';
         notificationDiv.style.display = 'block';

@@ -7,6 +7,7 @@ Apstrādā administratora paroles atiestatīšanas saiti, pārbauda tokenu, ļau
 session_start();
 require_once '../../db_connect.php';
 
+// Pārbauda, vai pieprasījums ir GET (paroles atiestatīšanas saites atvēršana)
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $token = $_GET['token'] ?? '';
     if (!$token) {
@@ -15,6 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
 
     try {
+        // Meklē tokenu datubāzē un pārbauda tā derīguma termiņu
         $stmt = $pdo->prepare('SELECT email, expires_at FROM password_resets_admin WHERE token = :token');
         $stmt->execute([':token' => $token]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -32,6 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             exit;
         }
 
+        // Saglabā e-pastu un tokenu sesijā, lai izmantotu POST pieprasījumā
         $_SESSION['reset_email'] = $result['email'];
         $_SESSION['reset_token'] = $token;
 
@@ -74,6 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             </div>
         </body>
         <script>
+            // Parāda/slēpj jauno paroli
             document.getElementById('toggle-new-password').addEventListener('click', function() {
                 const passwordField = document.getElementById('new_password');
                 const eyeIcon = document.getElementById('eye-icon-new');
@@ -85,6 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     eyeIcon.src = '../../images/eye-icon.png';
                 }
             });
+            // Parāda/slēpj apstiprinājuma paroli
             document.getElementById('toggle-confirm-password').addEventListener('click', function() {
                 const passwordField = document.getElementById('confirm_password');
                 const eyeIcon = document.getElementById('eye-icon-confirm');
@@ -105,6 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         exit;
     }
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Pārbauda, vai sesijā ir nepieciešamie dati
     if (!isset($_SESSION['reset_email'], $_SESSION['reset_token'])) {
         echo "Sesija ir beigusies vai piekļuve nav derīga.";
         exit;
@@ -113,11 +119,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $new_password = $_POST['new_password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
 
+    // Pārbauda paroles garumu
     if (strlen($new_password) < 8) {
         echo "Parolei jābūt vismaz 8 rakstzīmju garai.";
         exit;
     }
 
+    // Pārbauda, vai paroles sakrīt
     if ($new_password !== $confirm_password) {
         $error_message = "Paroles nesakrīt. Lūdzu, mēģiniet vēlreiz.";
         ?>
@@ -166,6 +174,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 </div>
             </div>
             <script>
+                // Parāda/slēpj jauno paroli
                 document.getElementById('toggle-new-password').addEventListener('click', function() {
                     const passwordField = document.getElementById('new_password');
                     const eyeIcon = document.getElementById('eye-icon-new');
@@ -177,6 +186,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         eyeIcon.src = '../../images/eye-icon.png';
                     }
                 });
+                // Parāda/slēpj apstiprinājuma paroli
                 document.getElementById('toggle-confirm-password').addEventListener('click', function() {
                     const passwordField = document.getElementById('confirm_password');
                     const eyeIcon = document.getElementById('eye-icon-confirm');
@@ -266,6 +276,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     </div>
                 </div>
                 <script>
+                    // Parāda/slēpj jauno paroli
                     document.getElementById('toggle-new-password').addEventListener('click', function() {
                         const passwordField = document.getElementById('new_password');
                         const eyeIcon = document.getElementById('eye-icon-new');
@@ -277,6 +288,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                             eyeIcon.src = '../../images/eye-icon.png';
                         }
                     });
+                    // Parāda/slēpj apstiprinājuma paroli
                     document.getElementById('toggle-confirm-password').addEventListener('click', function() {
                         const passwordField = document.getElementById('confirm_password');
                         const eyeIcon = document.getElementById('eye-icon-confirm');

@@ -5,21 +5,23 @@ require_once 'db_connect.php';
 
 // Pārbauda, vai pieprasījums ir POST
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Iegūst ievadītos datus no formas
     $email = $_POST['Email'] ?? null;
     $name = $_POST['field'] ?? null; 
     $password = $_POST['Password'] ?? null;
     $accept_privacy_policy = isset($_POST['Checkbox']) ? 1 : 0;
 
+    // Pārbauda, vai visi nepieciešamie lauki ir aizpildīti
     if (empty($email) || empty($name) || empty($password)) {
         echo json_encode(["success" => false, "message" => "Aizpildiet visus laukus."]);
         exit();
     }
 
-    // hasho paroles
+    // Hasho lietotāja paroli
     $hashed_password = password_hash($password, PASSWORD_BCRYPT);
 
     try {
-        // Pārbauda, vai e-pasts jau eksistē
+        // Pārbauda, vai e-pasts jau eksistē datubāzē
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM clients WHERE email = :email");
         $stmt->execute([':email' => $email]);
         $emailExists = $stmt->fetchColumn();
@@ -29,7 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             exit();
         }
 
-        // Sagatavo SQL vaicājumu, lai ievietotu jaunu klientu
+        // Sagatavo SQL vaicājumu, lai ievietotu jaunu klientu datubāzē
         $sql = "INSERT INTO clients (email, name, password, accept_privacy_policy, cart) VALUES (:email, :name, :password, :accept_privacy_policy, :cart)";
         $stmt = $pdo->prepare($sql);
 

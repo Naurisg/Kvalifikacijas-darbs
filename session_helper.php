@@ -3,13 +3,14 @@ require_once 'db_connect.php';
 
 // Drošas sesijas startēšanas funkcija
 function secure_session_start() {
+    // Nosaka, vai izmantot drošu (HTTPS) savienojumu
     $secure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
     $httponly = true;
 
-    // Izmanto stingro režīmu, lai novērstu neinicializētu sesijas ID izmantošanu
+    // Aktivizē stingro režīmu, lai novērstu neinicializētu sesijas ID izmantošanu
     ini_set('session.use_strict_mode', 1);
 
-    // sesijas sīkdatnes parametri
+    // Uzstāda sesijas sīkdatnes parametrus
     session_set_cookie_params([
         'lifetime' => 0,
         'path' => '/',
@@ -20,9 +21,25 @@ function secure_session_start() {
     ]);
 
     session_start();
+
+    // Sasaista sesiju ar lietotāja pārlūka aģentu un IP adresi
+    if (!isset($_SESSION['user_agent'])) {
+        $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        $_SESSION['user_ip'] = $_SERVER['REMOTE_ADDR'] ?? '';
+    } else {
+        // Ja mainās pārlūka aģents vai IP, iespējams sesijas nolaupīšanas mēģinājums
+        if ($_SESSION['user_agent'] !== ($_SERVER['HTTP_USER_AGENT'] ?? '') ||
+            $_SESSION['user_ip'] !== ($_SERVER['REMOTE_ADDR'] ?? '')) {
+            // Iespējama sesijas nolaupīšanas mēģinājums
+            $_SESSION = array();
+            session_destroy();
+            header("Location: log-in.php");
+            exit();
+        }
+    }
 }
 
-// Aizstāj session_start() izsaukumus šajā failā ar secure_session_start()
+// Funkcija, kas pārbauda, vai lietotājs ir ielogojies un eksistē datubāzē
 function validate_session_user() {
     global $pdo;
     secure_session_start();
@@ -35,7 +52,7 @@ function validate_session_user() {
     $user_id = $_SESSION['user_id'];
 
     try {
-        // Sagatavo vaicājumu, lai pārbaudītu, vai lietotāja ID eksistē
+        // Sagatavo vaicājumu, lai pārbaudītu, vai lietotāja ID eksistē datubāzē
         $stmt = $pdo->prepare('SELECT id FROM clients WHERE id = :id');
         $stmt->bindParam(':id', $user_id, PDO::PARAM_INT);
         $stmt->execute();

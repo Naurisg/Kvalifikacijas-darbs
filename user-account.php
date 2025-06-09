@@ -1,20 +1,23 @@
 <?php
-//Atspējo kešošanu jutīgām lapām, lai novērstu novecojuša satura rādīšanu un sesiju problēmas.
+// Atspējo kešošanu jutīgām lapām, lai novērstu novecojuša satura rādīšanu un sesiju problēmas.
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 
+// Iekļauj sesijas palīgfunkciju un pārbauda, vai lietotājs ir ielogojies
 include 'session_helper.php';
 validate_session_user();
 
+// Iekļauj galvenes failu
 include 'header.php'; // Pievieno header
 
 $user_id = $_SESSION['user_id'];
 
+// Savienojums ar datubāzi
 require_once 'db_connect.php'; // savienojums ar datubāzi
 
 try {
-    // Use $pdo instead of creating a new PDO connection
+    // Izgūst lietotāja datus no datubāzes pēc ID
     $stmt = $pdo->prepare('SELECT email, name, phone, password FROM clients WHERE id = :id');
     $stmt->execute([':id' => $user_id]);
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -27,12 +30,14 @@ try {
     $popup_message = null; 
     $popup_type = null; 
 
+    // Apstrādā formas iesniegšanu profila datu maiņai
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $new_name = $_POST['name'];
         $new_phone = $_POST['phone'];
         $old_password = $_POST['old_password'];
         $new_password = $_POST['new_password'];
 
+        // Ja tiek mainīta parole
         if (!empty($new_password)) {
             if (strlen($new_password) < 8) {
                 $popup_message = "Jaunā parole nevar būt īsāka par 8 burtiem vai cipariem!";
@@ -42,6 +47,7 @@ try {
                     $popup_message = "Jaunā parole nevar būt tāda pati kā vecā parole!";
                     $popup_type = "error";
                 } else {
+                    // Atjaunina vārdu, telefonu un paroli
                     $update_query = $pdo->prepare('UPDATE clients SET name = :name, phone = :phone, password = :password WHERE id = :id');
                     $update_query->execute([
                         ':name' => $new_name,
@@ -57,6 +63,7 @@ try {
                 $popup_type = "error";
             }
         } else {
+            // Atjaunina tikai vārdu un telefonu
             $update_query = $pdo->prepare('UPDATE clients SET name = :name, phone = :phone WHERE id = :id');
             $update_query->execute([
                 ':name' => $new_name,
@@ -67,7 +74,7 @@ try {
             $popup_type = "success";
         }
 
-        // Atjauno jauna lietotāja datus
+        // Atjauno lietotāja datus pēc izmaiņām
         $stmt = $pdo->prepare('SELECT email, name, phone, password FROM clients WHERE id = :id');
         $stmt->execute([':id' => $user_id]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -78,6 +85,7 @@ try {
         $hashed_password = $result['password'];
     }
 } catch (PDOException $e) {
+    // Apstrādā datubāzes kļūdu
     $popup_message = "Datubāzes kļūda: " . $e->getMessage();
     $popup_type = "error";
 }

@@ -1,4 +1,5 @@
 <?php
+session_name('admin_session');
 session_start();
 // Pārbauda, vai lietotājs ir pieteicies sistēmā
 if (!isset($_SESSION['user_id'])) {
@@ -212,6 +213,7 @@ if (!isset($_SESSION['user_id'])) {
 <body>
     <div class="form-container">
         <h2>Labot Produktu</h2>
+        <!-- Forma produkta datu labojumiem -->
         <form id="editProductForm" enctype="multipart/form-data">
             <!-- Lauks produkta nosaukuma ievadei -->
             <div class="form-group">
@@ -267,7 +269,14 @@ if (!isset($_SESSION['user_id'])) {
             <div class="form-group">
                 <label>Bildes:</label>
                 <div class="image-upload-container" id="imageUploadContainer">
-                    <div class="add-image-btn" id="addImageBtn">+ Pievienot bildi</div>
+<span id="addImageBtn" style="display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; width: 120px; height: 120px; border: 2px dashed #999; border-radius: 8px; background-color: #f0f0f0; color: #666; margin-top: 15px;">
+    <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 6px;">
+        <circle cx="19" cy="19" r="18" stroke="#666" stroke-width="2" fill="none"/>
+        <rect x="17" y="9" width="4" height="20" rx="2" fill="#666"/>
+        <rect x="9" y="17" width="20" height="4" rx="2" fill="#666"/>
+    </svg>
+    <span style="font-size: 11px; color: #999; font-weight: 400; letter-spacing: 0.5px;">Pievienot bildi</span>
+</span>
                 </div>
                 <input type="file" id="bildeInput" name="bilde[]" accept="image/*" multiple class="hidden-file-input" />
             </div>
@@ -281,6 +290,7 @@ if (!isset($_SESSION['user_id'])) {
     </div>
 
     <script>
+        // --- Svarīgo mainīgo definēšana ---
         const addImageBtn = document.getElementById('addImageBtn');
         const bildeInput = document.getElementById('bildeInput');
         const imageUploadContainer = document.getElementById('imageUploadContainer');
@@ -352,6 +362,7 @@ if (!isset($_SESSION['user_id'])) {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    // Aizpilda formas laukus ar produkta datiem
                     document.getElementById('nosaukums').value = data.product.nosaukums;
                     document.getElementById('apraksts').value = data.product.apraksts;
                     document.getElementById('kategorija').value = data.product.kategorija;
@@ -414,6 +425,7 @@ if (!isset($_SESSION['user_id'])) {
 
         // Jaunu failu izvēles apstrāde
         bildeInput.addEventListener('change', (e) => {
+            // Pievieno izvēlētos failus masīvam
             const files = Array.from(e.target.files);
             selectedFiles = [...selectedFiles, ...files];
             updateImagePreviews();
@@ -493,6 +505,7 @@ if (!isset($_SESSION['user_id'])) {
             // Pievieno noņemtos attēlus JSON formātā
             formData.append('removedImages', JSON.stringify(removedImages));
 
+            // Nosūta datus serverim, lai atjauninātu produktu
             fetch('update_product.php', {
                 method: 'POST',
                 body: formData

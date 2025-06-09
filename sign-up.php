@@ -27,10 +27,12 @@
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
+  <!-- Notifikācijas bloks, kurā parādās kļūdas vai veiksmes ziņojumi -->
   <div id="notification"></div>
   
   <div class="w-users-userformpagewrap full-page-wrapper">
     <div class="w-users-usersignupformwrapper admin-form-card">
+      <!-- Reģistrācijas forma -->
       <form id="registrationForm" method="post" action="register.php">
         <div class="w-users-userformheader form-card-header">
           <h2 class="heading h3">Reģistrācija</h2>
@@ -60,15 +62,17 @@
 
   <script src="https://d3e54v103j8qbb.cloudfront.net/js/jquery-3.5.1.min.dc5e7f18c8.js" type="text/javascript" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
   <script>
+    // Apstrādā reģistrācijas formas iesniegšanu ar AJAX
     const form = document.getElementById('registrationForm');
     const notification = document.getElementById('notification');
 
     form.addEventListener('submit', function(event) {
       event.preventDefault();
 
+      // Pārbauda paroles garumu
       const passwordField = document.getElementById('wf-sign-up-password');
       if (passwordField.value.length < 8) {
-        notification.style.backgroundColor = '#f44336'; // Error krāsa
+        notification.style.backgroundColor = '#f44336'; // Kļūdas krāsa
         notification.textContent = 'Parolei jābūt vismaz 8 cipariem vai burtiem garai!';
         notification.style.display = 'block';
         return; // Apstādina formu, ja parole ir pārāk īsa
@@ -76,7 +80,7 @@
 
       // Pārbauda, vai reCAPTCHA ir apstiprināta
       if (grecaptcha.getResponse() === "") {
-        notification.style.backgroundColor = '#f44336'; // Error krāsa
+        notification.style.backgroundColor = '#f44336'; // Kļūdas krāsa
         notification.textContent = 'Lūdzu, apstipriniet, ka neesat robots!';
         notification.style.display = 'block';
         return; // Apstādina formu, ja reCAPTCHA nav apstiprināta
@@ -84,6 +88,7 @@
 
       const formData = new FormData(form);
 
+      // Nosūta reģistrācijas datus uz serveri ar AJAX
       fetch('register.php', {
         method: 'POST',
         body: formData
@@ -91,6 +96,7 @@
       .then(response => response.json())
       .then(data => {
         if (data.success) {
+          // Veiksmīgas reģistrācijas gadījumā rāda atpakaļskaitīšanu un pāradresē uz log-in.php
           let countdown = 3; // Sāk skaitīt no 3
           notification.style.backgroundColor = '#4CAF50';
           notification.textContent = `Reģistrācija veiksmīga! Jūs tiksiet pārvirzīts pēc ${countdown} sekundēm.`;
@@ -106,12 +112,14 @@
             }
           }, 1000); 
         } else {
+          // Ja kļūda, parāda kļūdas ziņu
           notification.style.backgroundColor = '#f44336'; 
           notification.textContent = data.message;
           notification.style.display = 'block';
         }
       })
       .catch(error => {
+        // Ja servera kļūda, rāda kļūdas ziņu
         notification.style.backgroundColor = '#f44336'; 
         notification.textContent = 'Lietotājs ar šādu e-pastu jau eksistē!';
         notification.style.display = 'block';

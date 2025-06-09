@@ -1,4 +1,5 @@
 <?php
+  // Iekļauj galvenes failu
   include '../header.php';
 ?>
 <!DOCTYPE html>
@@ -36,6 +37,18 @@
 
         .carousel-btn:hover {
             background-color: #555;
+        }
+
+        .out-of-stock-label {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(255, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -75,9 +88,11 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Saglabā visus produktus un pašreiz izvēlēto produktu
         let allProducts = [];
         let currentProduct = null;
         
+        // Ielādē produktus no servera pēc kategorijas
         fetch('fetch_category_products.php?category=Apgerbs')
             .then(response => response.json())
             .then(data => {
@@ -87,12 +102,14 @@
                 }
             });
 
+        // Meklēšanas, cenas un izmēru filtru notikumu klausītāji
         document.querySelector('.search-bar').addEventListener('input', () => filterProducts());
         document.querySelector('.price-range').addEventListener('input', () => filterProducts());
         document.querySelectorAll('.size-filter').forEach(checkbox => {
             checkbox.addEventListener('change', () => filterProducts());
         });
 
+        // Filtrē produktus pēc meklēšanas, cenas un izmēra
         function filterProducts() {
             const searchTerm = document.querySelector('.search-bar').value.toLowerCase();
             const maxPrice = parseFloat(document.querySelector('.price-range').value);
@@ -112,10 +129,12 @@
                 `<span>€0</span> - <span>€${maxPrice}</span>`;
         }
 
+        // Attēlo produktus lapā
         function displayProducts(products) {
             const container = document.getElementById('products-container');
             container.innerHTML = '';
 
+            // Izveido modālo logu, ja tāda vēl nav
             if (!document.getElementById('product-modal')) {
                 document.body.insertAdjacentHTML('beforeend', `
                     <div id="product-modal" class="modal" style="display: none;">
@@ -127,6 +146,7 @@
                 `);
             }
 
+            // Izvada katru produktu kā karti
             products.forEach(product => {
                 const images = product.bilde.split(',');
                 const firstImage = images.length > 0 ? images[0].trim() : 'images/placeholder.png';
@@ -134,12 +154,12 @@
 
                 container.innerHTML += `
                     <div class="product-card">
+                        ${isOutOfStock ? `<div class="out-of-stock-label">Izpārdots!</div>` : ''}
                         <img src="../${firstImage}" alt="${product.nosaukums}" onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">
                         <div class="product-info">
                             <h3 onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">${product.nosaukums}</h3>
                             <p onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">${product.apraksts}</p>
-                            <p class="price" onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">€${product.cena}</p>
-                            ${isOutOfStock ? `<p style="color: red; font-weight: bold;">Izpārdots</p>` : ''}
+                            <p class="price" onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})">€${product.cena} <span style="font-size: 0.75em; color: #888;">+PVN 21%</span></p>
                             <div class="product-buttons">
                                 <button class="add-to-cart" onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')}, true)" ${isOutOfStock ? 'disabled' : ''}>
                                     <i class="fas fa-shopping-cart"></i>
@@ -153,6 +173,7 @@
         }
     });
 
+    // Parāda produkta modālo logu ar detalizētu informāciju
     function showProductModal(product, focusOnAddToCart = false) {
         const modal = document.getElementById('product-modal');
         const modalBody = modal.querySelector('.modal-body');
@@ -175,7 +196,7 @@
                 <div class="modal-product-info">
                     <h2>${product.nosaukums}</h2>
                     <p class="modal-description">${product.apraksts}</p>
-                    <p class="modal-price">€${product.cena}</p>
+                    <p class="modal-price">€${product.cena} <span style="font-size: 0.75em; color: #888;">+PVN 21%</span></p>
                     ${isOutOfStock ? `<p style="color: red; font-weight: bold;">Izpārdots</p>` : ''}
                     <p><strong>Pieejamie izmēri:</strong> ${product.sizes ? product.sizes.split(',').map(size => size.trim()).join(', ') : 'Nav pieejami'}</p>
                     <p><strong>Pieejamais daudzums:</strong> ${product.quantity}</p>
@@ -207,6 +228,7 @@
         }
     }
 
+    // Parāda iepriekšējo attēlu modālajā logā
     function showPrevModalImage() {
         const carousel = document.querySelector('.modal-carousel .carousel-images');
         const images = carousel.querySelectorAll('.carousel-image');
@@ -216,6 +238,7 @@
         images[currentIndex].style.display = 'block';
     }
 
+    // Parāda nākamo attēlu modālajā logā
     function showNextModalImage() {
         const carousel = document.querySelector('.modal-carousel .carousel-images');
         const images = carousel.querySelectorAll('.carousel-image');
@@ -225,6 +248,7 @@
         images[currentIndex].style.display = 'block';
     }
 
+    // Aizver modālo logu, ja tiek uzspiests uz aizvēršanas pogas vai ārpus modāla
     document.addEventListener('click', function(event) {
         const modal = document.getElementById('product-modal');
         if (event.target.classList.contains('close-modal') || event.target === modal) {
@@ -232,6 +256,7 @@
         }
     });
 
+    // Pievieno produktu grozam no modāla
     function addToCart() {
         if (!currentProduct) return;
         
@@ -271,6 +296,7 @@
         });
     }
 
+    // Pievieno produktu grozam un pāriet uz pirkuma lapu
     function buyNow() {
         if (!currentProduct) return;
         
@@ -308,10 +334,13 @@
             alert('Kļūda pievienojot produktu grozam.');
         });
     }
+
+    // Atbild par filtru sānpaneli uz mobilajām ierīcēm
     document.addEventListener('DOMContentLoaded', function() {
         const filterToggleBtn = document.getElementById('filter-toggle-btn');
         const filtersSidebar = document.querySelector('.filters-sidebar');
 
+        // Funkcija, kas atjaunina filtra pogas redzamību atkarībā no ekrāna platuma
         function updateFilterButtonVisibility() {
             if (window.innerWidth <= 600) {
                 filterToggleBtn.style.display = 'inline-block';
@@ -324,6 +353,7 @@
             }
         }
 
+        // Filtra pogas klikšķa apstrāde
         filterToggleBtn.addEventListener('click', () => {
             if (filtersSidebar.style.display === 'none') {
                 filtersSidebar.style.display = 'block';
@@ -336,14 +366,17 @@
         updateFilterButtonVisibility();
     });
 
+    // Atbild par filtra aizvēršanas pogu uz mobilajām ierīcēm
     document.addEventListener('DOMContentLoaded', function() {
         const filterCloseBtn = document.getElementById('filter-close-btn');
         const filtersSidebar = document.querySelector('.filters-sidebar');
 
+        // Aizver filtru sānpaneli
         filterCloseBtn.addEventListener('click', () => {
             filtersSidebar.style.display = 'none';
         });
 
+        // Funkcija, kas atjaunina aizvēršanas pogas redzamību atkarībā no ekrāna platuma
         function updateCloseButtonVisibility() {
             if (window.innerWidth <= 600) {
                 filterCloseBtn.style.display = 'inline-block';

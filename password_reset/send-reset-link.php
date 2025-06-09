@@ -5,12 +5,14 @@ use PHPMailer\PHPMailer\Exception;
 require '../vendor/autoload.php';
 require_once '../db_connect.php';
 
+// Apstrādā tikai POST pieprasījumus
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode(['error' => 'Metode nav atļauta']);
     exit;
 }
 
+// Validē e-pasta adresi
 $email = filter_var($_POST['Email'] ?? '', FILTER_VALIDATE_EMAIL);
 if (!$email) {
     echo json_encode(['error' => 'Nederīga e-pasta adrese']);
@@ -18,16 +20,18 @@ if (!$email) {
 }
 
 try {
+    // Pārbauda, vai klients ar šo e-pastu eksistē
     $stmt = $pdo->prepare('SELECT id FROM clients WHERE email = :email');
     $stmt->execute([':email' => $email]);
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
+    // Ja klients nav atrasts, neatklāj šo faktu, bet rāda vispārīgu ziņu
     if (!$result) {
         echo json_encode(['message' => 'Ja atradām kontu, kas saistīts ar šo e-pasta adresi, mēs nosūtījām saiti paroles atiestatīšanai.']);
         exit;
     }
 
-    // Pārbauda, vai paroles atiestatīšanas tokens tika ģenerēts nesen (pēdējo 5 minūšu laikā)
+    // Pārbauda, vai nesen jau tika ģenerēts paroles atiestatīšanas tokens (2 minūšu limits)
     $checkRecentToken = $pdo->prepare('SELECT expires_at FROM password_resets WHERE email = :email ORDER BY expires_at DESC LIMIT 1');
     $checkRecentToken->execute([':email' => $email]);
     $recentTokenResult = $checkRecentToken->fetch(PDO::FETCH_ASSOC);
@@ -49,6 +53,7 @@ try {
         }
     }
 
+    // Ģenerē jaunu tokenu un derīguma termiņu
     $token = bin2hex(random_bytes(16));
     $expires_at = (new DateTime('+1 hour'))->format('Y-m-d H:i:s');
 
@@ -64,12 +69,14 @@ try {
         ':expires_at' => $expires_at
     ]);
 
+    // Izveido paroles atiestatīšanas saiti
     $reset_link = sprintf(
         '%s/Vissdarbam/password_reset/reset-password-process.php?token=%s',
         (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'],
         $token
     );
 
+    // Sagatavo un nosūta e-pastu ar PHPMailer
     $mail = new PHPMailer(true);
     try {
         $mail->SMTPDebug = 0; 

@@ -1,11 +1,12 @@
 <?php
-// Pārbauda, vai lietotājs ir ielogojies
+// Pārbauda, vai lietotājs ir ielogojies un pielāgo header saites atkarībā no statusa
 echo '<script>
 document.addEventListener("DOMContentLoaded", function() {
   fetch("/Vissdarbam/check-login-status.php")
     .then(response => response.json())
     .then(data => {
       if (data.loggedIn) {
+        // Ja lietotājs ir ielogojies, maina "Ienākt" uz "Izlogoties" un rāda profilu/grozu
         const loginLink = document.querySelector(".header-login-link");
         if (loginLink) {
           loginLink.innerHTML = \'<img src="/Vissdarbam/images/logout.png" alt="Izlogoties" class="header-icon"><span class="nav-text">Izlogoties</span>\';
@@ -14,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         document.querySelector(".profile-link").style.display = "inline-flex";
         document.querySelector(".cart-link").style.display = "inline-flex";
-        // Paslēpt reģistrēties pogu, ja ielogojies
+        // Paslēpj reģistrēties pogu, ja ielogojies
         var regLink = document.getElementById("registerLink");
         if (regLink) regLink.style.display = "none";
       } else {
@@ -28,6 +29,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 </script>';
+// Nosaka pašreizējo lapu, lai izceltu aktīvo izvēlni
 $current_page = basename($_SERVER['PHP_SELF']);
 ?>
 
@@ -475,7 +477,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
   </style>
 </head>
 <body>
-  <!-- Sānu izvēlnes -->
+  <!-- Sānu izvēlne ar profila, groza un pasūtījumu saitēm (redzamas tikai ielogotam lietotājam) -->
   <div id="sidebar">
     <div class="content">
       <span id="closeSidebar" class="close-btn" title="Aizvērt">&times;</span>
@@ -496,7 +498,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
     </div>
   </div>
   
-  <!-- Galvenes navigācija -->
+  <!-- Galvenes navigācija ar saitēm uz galvenajām lapām un lietotāja darbībām -->
   <div data-collapse="small" data-animation="default" data-duration="400" data-easing="ease" data-easing2="ease" role="banner" class="nav-bar w-nav">
     <div class="nav-container w-container">
       <div class="logo-div">

@@ -1,4 +1,5 @@
 <?php
+// Iekļauj failu, kas pārbauda, vai lietotājs ir autentificēts (autorizācijas pārbaude)
 require_once 'auth_check.php';
 ?>
 
@@ -118,6 +119,7 @@ require_once 'auth_check.php';
 <body>
     <div class="container">
         <h2>Rediģēt Klienta Datus</h2>
+        <!-- Forma klienta datu rediģēšanai -->
         <form method="POST" action="">
             <div class="form-group">
                 <label for="email">E-pasts:</label>
@@ -143,10 +145,13 @@ require_once 'auth_check.php';
     </div>
 
     <script>
+        // Kad lapa ir ielādēta, aizpilda formas laukus ar esošajiem klienta datiem
         document.addEventListener('DOMContentLoaded', function() {
+            // Iegūst klienta ID no URL parametriem
             const urlParams = new URLSearchParams(window.location.search);
             const clientId = urlParams.get('id');
 
+            // Pieprasa klienta datus no servera un aizpilda formu
             fetch(`get_client_details.php?id=${clientId}`)
                 .then(response => response.json())
                 .then(data => {
@@ -156,12 +161,14 @@ require_once 'auth_check.php';
                     }
                 });
 
+            // Apstrādā formas iesniegšanu, nosūtot izmaiņas serverim
             document.querySelector('form').addEventListener('submit', function(e) {
                 e.preventDefault();
 
                 const formData = new FormData(this);
                 formData.append('id', clientId);
 
+                // Nosūta datus uz serveri, lai saglabātu izmaiņas
                 fetch('update_client.php', {
                     method: 'POST',
                     body: formData

@@ -5,17 +5,17 @@ session_start();
 
 header('Content-Type: application/json');
 
-// Autorizācijas pārbaude
+// Autorizācijas pārbaude - vai lietotājs ir ielogojies
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(['error' => 'Neautorizēts pieprasījums.']);
     exit();
 }
 
-// Stripe slepenā atslēga (izmanto savu)
+// Stripe slepenā atslēga
 \Stripe\Stripe::setApiKey('sk_test_51QP0wYHs6AycTP1yyPSwfq6pYdkUGT9w6yLf2gsZdEsgfIxnsTqkwRJnqZZoF1H4f42axHvNyqHIj7enkqtMEp1100Zzk0WPsE');
 
 try {
-    // Dynamically build base URL for redirects
+    // Dinamiski izveido bāzes URL priekš pāradresācijām
     $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
     $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
     $baseUrl = $scheme . '://' . $host . '/Vissdarbam';
@@ -23,19 +23,21 @@ try {
     // Groza dati no sesijas
     $cart = $_SESSION['cart'] ?? [];
 
+    // Ja grozs ir tukšs, izmet kļūdu
     if (empty($cart)) {
         throw new Exception('Grozs ir tukšs.');
     }
 
-    // Saņem adreses informāciju no fetch POST
+    // Saņem adreses informāciju no fetch POST (JSON formātā)
     $rawData = file_get_contents('php://input');
     $addressData = json_decode($rawData, true);
 
+    // Pārbauda, vai adreses dati ir korekti
     if (!$addressData) {
         throw new Exception('Nederīga adreses informācija.');
     }
 
-    // Stripe line_items sagatavošana
+    // Stripe line_items sagatavošana (katram groza produktam)
     $lineItems = [];
     $totalPrice = 0;
 
@@ -44,6 +46,7 @@ try {
         $cena = isset($product['cena']) ? (float)$product['cena'] : 0.0;
         $quantity = isset($product['quantity']) ? (int)$product['quantity'] : 1;
 
+        // Pārbauda, vai cena un daudzums ir derīgi
         if ($cena <= 0 || $quantity <= 0) {
             throw new Exception("Nederīga cena vai daudzums priekš: $name");
         }
@@ -62,11 +65,12 @@ try {
         $totalPrice += $cena * $quantity;
     }
 
-    // PVN un piegāde
+    // PVN un piegādes aprēķins
     $pvn = $totalPrice * 0.21;
     $delivery = ($totalPrice >= 100) ? 0 : 10;
     $finalTotal = $totalPrice + $pvn + $delivery;
 
+    // Pievieno PVN kā atsevišķu rindu Stripe grozā
     if ($pvn > 0) {
         $lineItems[] = [
             'price_data' => [
@@ -78,6 +82,7 @@ try {
         ];
     }
 
+    // Pievieno piegādes maksu kā atsevišķu rindu Stripe grozā
     if ($delivery > 0) {
         $lineItems[] = [
             'price_data' => [
@@ -89,7 +94,7 @@ try {
         ];
     }
 
-    // Stripe Checkout sesijas izveide
+    // Stripe Checkout sesijas izveide ar visiem datiem
     $session = \Stripe\Checkout\Session::create([
         'payment_method_types' => ['card'],
         'line_items' => $lineItems,
@@ -110,6 +115,7 @@ try {
         ]
     ]);
 
+    // Atgriež Stripe sesijas ID klientam
     echo json_encode(['id' => $session->id]);
 } catch (Exception $e) {
     // Logē kļūdu uz failu (lokālai izstrādei)

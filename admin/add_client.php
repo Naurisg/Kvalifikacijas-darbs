@@ -1,25 +1,30 @@
 <?php
 require_once 'auth_check.php';
-
 require_once '../db_connect.php';
 
+// Apstrādā POST pieprasījumu (formas iesniegšanu)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
+        // Iegūst ievadītos datus no formas
         $email = $_POST['email'];
         $name = $_POST['name'];
         $password = $_POST['password'];
+        // Pārbauda, vai lietotājs ir piekritis privātuma politikai
         $accept_privacy_policy = isset($_POST['accept_privacy_policy']) && $_POST['accept_privacy_policy'] === '1' ? 1 : 0;
 
-        //Pārbauda vai visi lauki ir aizpildīti
+        // Pārbauda, vai e-pasts jau eksistē klientu tabulā
         $checkStmt = $pdo->prepare("SELECT COUNT(*) FROM clients WHERE email = :email");
         $checkStmt->execute(['email' => $email]);
         if ($checkStmt->fetchColumn() > 0) {
             $error_message = "Šis e-pasts jau ir reģistrēts!";
         } elseif (strlen($password) < 8) {
+            // Pārbauda paroles garumu
             $error_message = "Parolei jābūt vismaz 8 simbolus garai.";
         } elseif (!$accept_privacy_policy) {
+            // Pārbauda, vai piekrišana privātuma politikai ir atzīmēta
             $error_message = "Lai pievienotu klientu, jāpiekrīt privātuma politikai.";
         } else {
+            // Šifrē paroli un pievieno klientu datubāzē
             $passwordHash = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare("INSERT INTO clients (email, name, password, accept_privacy_policy) VALUES (:email, :name, :password, :accept_privacy_policy)");
             $stmt->execute([
@@ -28,11 +33,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'password' => $passwordHash,
                 'accept_privacy_policy' => $accept_privacy_policy
             ]);
-            // Pārvirza uz administrācijas paneli
-            header("Location: admin-panelis.php?success=1");
-            exit;
+            $success_message = "Klients veiksmīgi pievienots!";
         }
     } catch(PDOException $e) {
+        // Kļūdas apstrāde
         $error_message = "Kļūda: " . $e->getMessage();
     }
 }
@@ -44,6 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pievienot jaunu klientu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         body {
             background-color: #f5f5f5;
@@ -81,7 +86,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-weight: 600;
         }
 
-        /*Checkbox stils */
         .checkbox-label {
             display: inline;
             font-weight: 400;
@@ -108,6 +112,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             outline: none;
             border-color: #666;
             background: white;
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-wrapper i {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
         }
 
         .button-group {
@@ -169,7 +186,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <h2>Pievienot jaunu klientu</h2>
         
         <?php if (isset($success_message)): ?>
-            <div class="message success"><?php echo $success_message; ?></div>
+            <div class="message success" style="background-color: #e7f5e7; color: #2e7d32; border-left: 5px solid #2e7d32;">
+                <?php echo $success_message; ?>
+                <br>
+                <span id="redirect-countdown">Pāradresācija pēc <span id="countdown">2</span> sekundēm...</span>
+            </div>
+            <script>
+                let seconds = 2;
+                const countdownSpan = document.getElementById('countdown');
+                const interval = setInterval(function() {
+                    seconds--;
+                    countdownSpan.textContent = seconds;
+                    if (seconds <= 0) {
+                        clearInterval(interval);
+                        window.location.href = 'admin-panelis.php';
+                    }
+                }, 1000);
+            </script>
         <?php endif; ?>
         
         <?php if (isset($error_message)): ?>
@@ -189,7 +222,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             <div class="form-group">
                 <label for="password">Parole:</label>
-                <input type="password" id="password" name="password" required>
+                <div class="password-wrapper">
+                    <input type="password" id="password" name="password" required>
+                    <i class="fas fa-eye" id="togglePassword"></i>
+                </div>
             </div>
             
             <div class="form-group">
@@ -203,5 +239,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </form>
     </div>
+
+    <script>
+        const togglePassword = document.getElementById("togglePassword");
+        const passwordInput = document.getElementById("password");
+
+        togglePassword.addEventListener("click", function () {
+            const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+            passwordInput.setAttribute("type", type);
+            this.classList.toggle("fa-eye");
+            this.classList.toggle("fa-eye-slash");
+        });
+    </script>
 </body>
 </html>

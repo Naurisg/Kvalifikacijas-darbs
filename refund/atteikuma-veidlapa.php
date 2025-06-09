@@ -14,6 +14,7 @@ include '../header.php';
         <p>Ja vēlaties atteikties no pasūtījuma saskaņā ar Patērētāju tiesību aizsardzības likumu, lejupielādējiet šo atteikuma veidlapu, aizpildiet to un nosūtiet to uz mūsu e-pastu (vissdarbam@gmail.com) vai juridisko adresi (Brīvības iela 56, Liepāja, LV-3401).</p>
 
         <div class="download-btn">
+            <!-- Poga veidlapas lejupielādei -->
             <a href="atteikuma-veidlapa.docx" download>⬇ Lejupielādēt Word veidlapu</a>
         </div>
     </div>

@@ -144,12 +144,14 @@ include 'header.php';
 </div>
 
 <script>
+  // Kad lapa ielādēta, pievieno notikumus attēlu modālim
   document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('imageModal');
     const modalImg = document.getElementById('modalImage');
     const modalClose = document.getElementById('modalClose');
     const thumbs = document.querySelectorAll('.review-images img');
 
+    // Uzklikšķinot uz atsauksmes attēla, atver modāli ar lielu attēlu
     thumbs.forEach(function(thumb) {
       thumb.addEventListener('click', function() {
         modal.style.display = 'block';
@@ -157,11 +159,13 @@ include 'header.php';
       });
     });
 
+    // Aizver modāli, ja uzspiež uz aizvēršanas pogas
     modalClose.addEventListener('click', function() {
       modal.style.display = 'none';
       modalImg.src = '';
     });
 
+    // Aizver modāli, ja uzspiež ārpus attēla
     modal.addEventListener('click', function(e) {
       if (e.target === modal) {
         modal.style.display = 'none';

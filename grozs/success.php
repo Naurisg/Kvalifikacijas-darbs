@@ -1,8 +1,10 @@
 <?php
+date_default_timezone_set('Europe/Riga'); // Latvijas laika josla
 require '../vendor/autoload.php';
 require_once '../db_connect.php';
 session_start();
 
+// Pārbauda, vai lietotājs ir autorizējies (ir user_id sesijā)
 if (!isset($_SESSION['user_id'])) {
     echo '<div style="display:flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; text-align: center;">';
     echo '<h1>Unauthorized</h1>';
@@ -11,6 +13,7 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+// Pārbauda, vai ir norādīta Stripe sesijas ID
 if (!isset($_GET['session_id'])) {
     echo '<div style="display:flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; text-align: center;">';
     echo '<h1>Pieeja nav atļauta</h1>';
@@ -19,6 +22,7 @@ if (!isset($_GET['session_id'])) {
     exit();
 }
 
+// Uzstāda Stripe slepeno atslēgu
 \Stripe\Stripe::setApiKey('sk_test_51QP0wYHs6AycTP1yyPSwfq6pYdkUGT9w6yLf2gsZdEsgfIxnsTqkwRJnqZZoF1H4f42axHvNyqHIj7enkqtMEp1100Zzk0WPsE'); // Aizstājiet ar savu slepeno atslēgu
 
 try {
@@ -31,7 +35,7 @@ try {
         throw new Exception('Maksājums nav pabeigts. Lūdzu, aizpildiet maksājumu, lai turpinātu.');
     }
 
-    // Iegūst lietotāja datus
+    // Iegūst lietotāja datus no datubāzes
     $stmt = $pdo->prepare('SELECT cart, orders FROM clients WHERE id = :user_id');
     $stmt->execute([':user_id' => $_SESSION['user_id']]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -40,11 +44,11 @@ try {
         throw new Exception('Lietotājs nav atrasts.');
     }
 
+    // Iegūst groza saturu un pasūtījumus
     $cart = $user['cart'] ? json_decode($user['cart'], true) : [];
     if (empty($cart)) {
         throw new Exception('Grozs ir tukšs.');
     }
-
     $orders = $user['orders'] ? json_decode($user['orders'], true) : [];
 
     // Pievieno groza vienumiem informāciju no produktu tabulas
@@ -62,7 +66,7 @@ try {
     }
     $cart = $enrichedCart;
 
-    // Iegūst adreses datus no sesijas metadatiem
+    // Iegūst adreses datus no Stripe sesijas metadatiem
     $address = [
         'name' => $session->metadata->name,
         'email' => $session->metadata->email,
@@ -90,7 +94,6 @@ try {
     $orderId = uniqid('order_');
 
     // Atjaunina produktu daudzumu datubāzē pēc veiksmīga maksājuma
-    // Izmanto PDO, lai droši atjauninātu datubāzi
     foreach ($cart as $product) {
         $productId = isset($product['id']) ? $product['id'] : null;
         $quantityBought = isset($product['quantity']) ? intval($product['quantity']) : 0;
@@ -105,7 +108,7 @@ try {
                 $currentQuantity = intval($currentProduct['quantity']);
                 $newQuantity = max(0, $currentQuantity - $quantityBought);
 
-                // Atjaunina daudzumu
+                // Atjaunina daudzumu produktam
                 $updateStmt = $pdo->prepare("UPDATE products SET quantity = :quantity WHERE id = :id");
                 $updateStmt->execute([
                     ':quantity' => $newQuantity,
@@ -115,7 +118,7 @@ try {
         }
     }
 
-    // Izveido jaunu pasūtījumu
+    // Izveido jaunu pasūtījuma ierakstu
     $newOrder = [
         'order_id' => $orderId,
         'items' => $cart,
@@ -138,6 +141,7 @@ try {
     // Notīra sesijas grozu
     unset($_SESSION['cart']);
 
+    // Parāda veiksmīga maksājuma lapu ar automātisku pāradresāciju
     echo '<!DOCTYPE html>
     <html lang="lv">
     <head>
@@ -221,6 +225,7 @@ try {
     </body>
     </html>';
 } catch (Exception $e) {
+    // Apstrādā kļūdu un parāda kļūdas lapu ar kļūdas ziņu
     echo '<!DOCTYPE html>
     <html lang="lv">
     <head>

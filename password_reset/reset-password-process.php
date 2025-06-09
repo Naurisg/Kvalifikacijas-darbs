@@ -7,6 +7,7 @@ Apstrādā lietotāja paroles atiestatīšanas saiti, pārbauda tokenu, ļauj ie
 session_start();
 require_once '../db_connect.php';
 
+// Ja pieprasījums ir GET, pārbauda tokenu un parāda paroles maiņas formu
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $token = $_GET['token'] ?? '';
     if (!$token) {
@@ -15,6 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
 
     try {
+        // Pārbauda, vai tokens eksistē un nav beidzies
         $stmt = $pdo->prepare('SELECT email, expires_at FROM password_resets WHERE token = :token');
         $stmt->execute([':token' => $token]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -32,6 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             exit;
         }
 
+        // Saglabā e-pastu un tokenu sesijā, lai izmantotu POST pieprasījumā
         $_SESSION['reset_email'] = $result['email'];
         $_SESSION['reset_token'] = $token;
 
@@ -104,7 +107,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         echo "Servera kļūda: " . $e->getMessage();
         exit;
     }
+// Ja pieprasījums ir POST, apstrādā paroles maiņu
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Pārbauda, vai sesijā ir saglabāts e-pasts un tokens
     if (!isset($_SESSION['reset_email'], $_SESSION['reset_token'])) {
         echo "Sesija ir beigusies vai piekļuve nav derīga.";
         exit;
@@ -113,11 +118,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $new_password = $_POST['new_password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
 
+    // Pārbauda paroles garumu
     if (strlen($new_password) < 8) {
         echo "Parolei jābūt vismaz 8 rakstzīmju garai.";
         exit;
     }
 
+    // Pārbauda, vai paroles sakrīt
     if ($new_password !== $confirm_password) {
         $error_message = "Paroles nesakrīt. Lūdzu, mēģiniet vēlreiz.";
         ?>
@@ -199,6 +206,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $token = $_SESSION['reset_token'];
 
     try {
+        // Pārbauda, vai tokens vēl ir derīgs un vai parole nav tāda pati kā iepriekš
         $stmt = $pdo->prepare('SELECT expires_at, password FROM password_resets INNER JOIN clients ON password_resets.email = clients.email WHERE password_resets.token = :token AND password_resets.email = :email');
         $stmt->execute([':token' => $token, ':email' => $email]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -216,6 +224,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             exit;
         }
 
+        // Pārbauda, vai jaunā parole nav tāda pati kā vecā
         if (password_verify($new_password, $result['password'])) {
             $error_message = "Jaunā parole nevar būt tāda pati kā pašreizējā parole.";
             ?>
@@ -293,16 +302,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             exit;
         }
 
+        // Šifrē jauno paroli un atjaunina klienta paroli datubāzē
         $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
         $update = $pdo->prepare('UPDATE clients SET password = :password WHERE email = :email');
         $update->execute([':password' => $hashed_password, ':email' => $email]);
 
+        // Dzēš izmantoto tokenu no datubāzes
         $delete = $pdo->prepare('DELETE FROM password_resets WHERE token = :token');
         $delete->execute([':token' => $token]);
 
+        // Notīra sesiju
         unset($_SESSION['reset_email'], $_SESSION['reset_token']);
         session_destroy();
 
+        // Parāda veiksmīgas paroles atiestatīšanas ziņu
         ?>
         <!DOCTYPE html>
         <html>
@@ -347,6 +360,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         exit;
     }
 } else {
+    // Ja metode nav atļauta
     http_response_code(405);
     echo "Metode nav atļauta.";
 }

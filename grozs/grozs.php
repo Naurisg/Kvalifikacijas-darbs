@@ -3,27 +3,28 @@ session_start();
 include '../header.php';
 require_once '../db_connect.php';
 
+// Pārbauda, vai lietotājs ir autorizējies (ir user_id sesijā)
 if (!isset($_SESSION['user_id'])) {
     echo '<p>Lūdzu, piesakieties, lai apskatītu savu grozu.</p>';
     exit();
 }
 
 try {
-    // Izmanto PDO, lai izveidotu savienojumu ar datubāzi
-    // Vienmēr izmanto drošu savienojumu ar datubāzi
+    // Iegūst lietotāja grozu no datubāzes
     $stmt = $pdo->prepare('SELECT cart FROM clients WHERE id = :user_id');
     $stmt->execute([':user_id' => $_SESSION['user_id']]);
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
+    // Ja grozs nav tukšs, pārvērš to par masīvu
     $cart = $result['cart'] ? json_decode($result['cart'], true) : [];
 
-    // Pievieno groza vienumiem informāciju no MySQL produktu tabulas
+    // Pievieno groza vienumiem informāciju no produktu tabulas
     $enrichedCart = [];
     $totalPrice = 0;
 
     $soldOutExists = false; // Pārbaude, vai kāds produkts ir izpārdots
 
-    // Izrēķina katra produkta kopējo daudzumu grozā
+    // Izrēķina katra produkta kopējo daudzumu grozā (ja ir vairākas rindas ar vienu produktu)
     $productTotals = [];
     foreach ($cart as $item) {
         $productTotals[$item['id']] = ($productTotals[$item['id']] ?? 0) + ($item['quantity'] ?? 1);
@@ -31,6 +32,7 @@ try {
 
     $enrichedCart = [];
     foreach ($cart as $index => $item) {
+        // Iegūst produkta detaļas no datubāzes
         $stmtProd = $pdo->prepare('SELECT nosaukums, cena, bilde, sizes, quantity AS stock_quantity FROM products WHERE id = :id');
         $stmtProd->execute([':id' => $item['id']]);
         $productDetails = $stmtProd->fetch(PDO::FETCH_ASSOC);
@@ -51,6 +53,7 @@ try {
                 $soldOutExists = true;
             }
 
+            // Apvieno groza datus ar produktu datiem
             $mergedItem = array_merge($item, $productDetails);
             $mergedItem['sold_out'] = $isSoldOut;
             $mergedItem['max_for_this_line'] = $maxForThisLine;
@@ -61,6 +64,7 @@ try {
     $cart = $enrichedCart;
     $_SESSION['cart'] = $cart; // Atjaunina grozu sesijā
 } catch (PDOException $e) {
+    // Apstrādā datubāzes kļūdu
     echo '<p>Kļūda ielādējot grozu: ' . htmlspecialchars($e->getMessage()) . '</p>';
     exit();
 }
@@ -310,47 +314,9 @@ $totalItems = count($cart);
       <p class="cart-empty">Grozs ir tukšs.</p>
     <?php endif; ?>
   </div>
-  <div class="footer">
-    <div class="footer-container w-container">
-      <div class="w-layout-grid footer-grid">
-        <div id="w-node-b8d7be4a-ce45-83ab-5947-02d204c8bff0-cf3fcb86" class="footerlogobloks">
-          <a data-ix="logo" href="../index.html" class="footer-logo w-nav-brand"> 
-            <img src="../images/Logo.png" width="130" sizes="130px" srcset="../images/Logo-p-500.png 500w, ../images/Logo-p-800.png 800w, ../images/Logo.png 960w" alt="">
-          </a>
-          <p class="text small">
-            <strong>Piedāvājam piegādi tajā pašā dienā</strong><br>
-            <strong>Tālruņa numurs:</strong> 29 702 132<br>
-            <strong>Epasts:</strong> vissdarbam@gmail.com<br>
-            <strong>Adrese:</strong> Brīvības iela 56, Liepāja, LV-3401<br><br>
-          </p>
-        </div>
-        <div class="footer-links-container">
-          <h5 class="footer-header">Mājas lapa</h5>
-          <a href="../index.html" class="footer-link">Sākums</a> 
-          <a href="../precu-katalogs.html" class="footer-link">Preču Katalogs</a>
-          <a href="../par-mums.html" class="footer-link">Logo uzdruka</a>
-          <a href="../logo-uzdruka.html" class="footer-link">Par mums</a>
-          <a href="../kontakti.html" class="footer-link">Kontakti</a>
-        </div>
-        <div class="footer-links-container">
-          <h5 class="footer-header">Darba Laiki</h5>
-          <p class="paragraph-14">
-            Pirmdiena 09–17<br>
-            Otrdiena 9-17<br>
-            Trešdiena 09–17<br>
-            Ceturtdiena 09–17<br>
-            Piektdiena 09–17<br>
-            Sestdiena Slēgts<br>
-            Svētdiena Slēgts
-          </p>
-        </div>
-      </div>
-    </div>
-    <section>
-      <div class="text-block-2">© 2024 Majors-J. All Rights Reserved.</div>
-    </section>
-  </div>
+  <?php include '../footer.php'; ?>
   <script>
+    // Noņem produktu no groza pēc indeksa
     function removeFromCart(index) {
       fetch('remove_from_cart.php', { 
         method: 'POST',
@@ -420,6 +386,7 @@ $totalItems = count($cart);
       });
     }
 
+    // Notīra visu grozu
     function clearCart() {
       fetch('clear_cart.php', {
         method: 'POST',

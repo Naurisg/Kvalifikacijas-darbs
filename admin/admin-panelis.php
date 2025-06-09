@@ -1,16 +1,21 @@
 <?php
+// Sāk sesiju ar īpašu sesijas nosaukumu priekš admina
+session_name('admin_session');
 session_start();
+// Pārbauda, vai lietotājs ir ielogojies, ja nav - pāradresē uz admina login lapu
 if (!isset($_SESSION['user_id'])) {
     header("Location: adminlogin.html");
     exit();
 }
 
+// Iegūst lietotāja lomu un admina ID no sesijas
 $user_role = $_SESSION['user_role'] ?? '';
 $admin_id = $_SESSION['user_id'] ?? '';
 
 require_once '../db_connect.php';
 
 try {
+    // Iegūst admina vārdu no datubāzes pēc ID
     $stmt = $pdo->prepare('SELECT name FROM admin_signup WHERE id = :id');
     $stmt->execute(['id' => $admin_id]);
     $admin = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -232,89 +237,179 @@ try {
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 10000;
             overflow-y: auto;
+            transition: opacity 0.3s ease;
         }
 
         .modal-content {
-            background: white;
-            margin: 5% auto;
-            padding: 25px;
-            width: 80%;
-            max-width: 900px;
+            background: #fff;
+            margin: 2% auto;
+            padding: 20px 25px;
+            width: 85%;
+            max-width: 700px;
             border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
             position: relative;
+            font-family: 'Arial', sans-serif;
+            color: #222;
+            font-size: 14px;
+            line-height: 1.4;
         }
 
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .modal-header h2 {
+            font-weight: 700;
+            font-size: 1.4rem;
+            color: #000;
+            margin: 0;
+            letter-spacing: 0.02em;
         }
 
         .modal-close {
             font-size: 28px;
-            font-weight: bold;
+            font-weight: 700;
             cursor: pointer;
-            color: #aaa;
-            transition: color 0.3s;
+            color: #555;
+            transition: color 0.3s ease, transform 0.3s ease;
+            user-select: none;
         }
 
         .modal-close:hover {
-            color: #333;
+            color: #000;
+            transform: rotate(90deg);
         }
 
         .modal-body {
-            max-height: 60vh;
+            max-height: 50vh;
             overflow-y: auto;
+            padding-right: 8px;
+            scrollbar-width: thin;
+            scrollbar-color: #888 transparent;
+        }
+
+        .modal-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb {
+            background-color: #888;
+            border-radius: 3px;
         }
 
         .modal-summary {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
+            background: #f5f5f5;
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.05);
+            color: #333;
+            font-size: 13px;
+        }
+
+        .modal-summary > div:first-child {
+            line-height: 1.3;
+        }
+
+        .modal-summary strong {
+            color: #000;
+            font-weight: 600;
         }
 
         .modal-total {
-            font-size: 18px;
-            font-weight: bold;
+            font-size: 16px;
+            font-weight: 700;
+            color: #000;
+            text-align: right;
+            min-width: 140px;
+            line-height: 1.3;
+        }
+
+        .modal-total div {
+            margin-bottom: 4px;
+        }
+
+        .modal-address {
+            background: #fafafa;
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.03);
+            color: #333;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .modal-address h3 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            font-weight: 700;
+            color: #000;
+            font-size: 1.1rem;
+            letter-spacing: 0.02em;
         }
 
         .order-details-table {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0 6px;
+            font-size: 13px;
+            color: #222;
+            box-shadow: 0 1px 6px rgba(0, 0, 0, 0.07);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .order-details-table thead tr {
+            background: #333;
+            color: #fff;
+            font-weight: 600;
+            font-size: 13px;
+            letter-spacing: 0.04em;
         }
 
         .order-details-table th {
-            position: sticky;
-            top: 0;
-            background: #f4f4f4;
-            color: black;
-            z-index: 10;
-            padding: 12px;
+            padding: 10px 12px;
             text-align: left;
-            border-bottom: 1px solid #ddd;
+            border-bottom: none;
+        }
+
+        .order-details-table tbody tr {
+            background: #fff;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+            border-radius: 6px;
+            transition: background-color 0.25s ease;
+        }
+
+        .order-details-table tbody tr:hover {
+            background: #f0f0f0;
         }
 
         .order-details-table td {
-            padding: 12px;
+            padding: 10px 12px;
             text-align: left;
-            border-bottom: 1px solid #ddd;
+            border-bottom: none;
+            vertical-align: middle;
         }
 
         .order-details-table img {
-            max-width: 60px;
-            max-height: 60px;
-            object-fit: contain;
+            max-width: 50px;
+            max-height: 50px;
+            object-fit: cover;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         @media (max-width: 768px) {
@@ -960,11 +1055,13 @@ fetch('get_products.php')
 </div>
 
 <script>
+// Kad lapa ielādējas, parāda pēdējo skatīto tabulu
 document.addEventListener('DOMContentLoaded', function() {
     const lastTable = localStorage.getItem('lastTable') || 'admin';
     showTable(lastTable);
 });
 
+// Funkcija, kas parāda izvēlēto tabulu un slēpj pārējās
 function showTable(table) {
     localStorage.setItem('lastTable', table);
     const adminTable = document.getElementById("admin-table");
@@ -1032,18 +1129,22 @@ function showTable(table) {
     }
 }
 
+// Funkcija, kas pāradresē uz admin pievienošanas lapu
 function addNewAdmin() {
     window.location.href = 'add_admin.php';
 }
 
+// Funkcija, kas pāradresē uz klienta pievienošanas lapu
 function addNewClient() {
     window.location.href = 'add_client.php';
 }
 
+// Funkcija, kas pāradresē uz produkta pievienošanas lapu
 function addNewProduct() {
     window.location.href = 'add_product.php';
 }
 
+// Funkcija, kas dzēš produktu pēc ID
 function deleteProduct(id) {
     if (confirm('Vai tiešām vēlaties dzēst šo produktu?')) {
         fetch('delete_product.php', {
@@ -1059,18 +1160,18 @@ function deleteProduct(id) {
         .then(data => {
             if (data.success) {
                 alert('Produkts veiksmīgi dzēsts');
-                //Noņemam rindu no tabulas bez lapas pārlādēšanas
+                //Noņem rindu no tabulas bez lapas pārlādēšanas
                 const table = document.getElementById('product-table');
                 const rows = table.getElementsByTagName('tr');
                 for (let i = 1; i < rows.length; i++) {
                     const row = rows[i];
-                    // Assume first cell is product ID
+
                     if (row.cells[0] && row.cells[0].textContent == id) {
                         row.remove();
                         break;
                     }
                 }
-                // Nav jāatsvaidzināt lapa, jo rinda ir noņemta
+                // Nav jāatsvaidzina lapa, jo rinda ir noņemta
             } else {
                 alert('Kļūda dzēšot produktu: ' + data.message);
             }
@@ -1082,6 +1183,7 @@ function deleteProduct(id) {
     }
 }
 
+// Funkcija, kas dzēš abonentu pēc ID
 function deleteSubscriber(id) {
     if (confirm('Vai tiešām vēlaties dzēst šo abonentu?')) {
         fetch('delete_subscriber.php', {
@@ -1107,6 +1209,7 @@ function deleteSubscriber(id) {
     }
 }
 
+// Funkcija, kas pārslēdz admina apstiprinājuma statusu
 function toggleApproved(id, currentStatus) {
     const newStatus = currentStatus === 1 ? 0 : 1;
     fetch('update_approved.php', {
@@ -1283,6 +1386,7 @@ function filterOrders() {
     }
 }
 
+// Ielādē pasūtījumus no servera un attēlo tabulā
 function loadOrders() {
     fetch('get_orders.php')
     .then(response => response.json())
@@ -1330,6 +1434,7 @@ function loadOrders() {
 
 let currentOrderId = null;
 
+// Parāda izvēlētā pasūtījuma detaļas modālajā logā
 function showOrderDetails(order) {
     currentOrderId = order.id;
     const orderDetailsTable = document.getElementById('orderDetailsTable');
@@ -1407,11 +1512,13 @@ function showOrderDetails(order) {
     }
 }
 
+// Aizver pasūtījuma modālo logu
 function closeOrderModal() {
     document.getElementById('orderModal').style.display = 'none';
     document.body.style.overflow = 'auto';
 }
 
+// Atjaunina pasūtījuma statusu datubāzē
 function updateOrderStatus() {
     const newStatus = document.getElementById('modalOrderStatus').value;
     
@@ -1446,6 +1553,7 @@ function updateOrderStatus() {
     });
 }
 
+// Dzēš pasūtījumu pēc ID
 function deleteOrder(orderId, clientName) {
     if (confirm(`Vai tiešām vēlaties dzēst pasūtījumu #${orderId} no klienta ${clientName}?`)) {
         fetch('delete_order.php', {
@@ -1476,7 +1584,7 @@ function deleteOrder(orderId, clientName) {
     }
 }
 
-// Admin ieladejas
+// Ielādē adminus no servera un attēlo tabulā
 fetch('get_admins.php')
 .then(response => response.json())
 .then(data => {
@@ -1513,6 +1621,7 @@ fetch('get_admins.php')
     }
 });
 
+// Funkcija, kas atjaunina admina lomu
 function updateRole(id, newRole) {
 fetch('update_role.php', {
     method: 'POST',
@@ -1534,7 +1643,7 @@ fetch('update_role.php', {
 });
 }
 
-
+// Funkcija, kas atjaunina admina apstiprinājuma statusu
 function updateApproved(adminId, approved) {
     const formData = new FormData();
     formData.append('id', adminId);
@@ -1560,6 +1669,7 @@ function updateApproved(adminId, approved) {
     });
 }
 
+// Funkcija, kas dzēš administratoru pēc ID
 function deleteAdmin(adminId) {
     if (confirm('Vai tiešām vēlaties dzēst šo administratoru?')) {
         fetch('delete_admin.php', {
@@ -1585,6 +1695,7 @@ function deleteAdmin(adminId) {
     }
 }
 
+// Ielādē klientus no servera un attēlo tabulā
 fetch('get_clients.php')
 .then(response => response.json())
 .then(data => {
@@ -1618,6 +1729,7 @@ fetch('get_clients.php')
     alert('Kļūda ielādējot klientus');
 });
 
+// Ielādē produktus no servera un attēlo tabulā
 fetch('get_products.php')
     .then(response => response.json())
     .then(data => {
@@ -1657,6 +1769,7 @@ fetch('get_products.php')
         }
     });
 
+// Ielādē abonentus no servera un attēlo tabulā
 fetch('get_subscribers.php')
     .then(response => response.json())
     .then(data => {
@@ -1678,6 +1791,7 @@ subscribers.forEach(subscriber => {
         }
     });
 
+// Ielādē kontaktus no servera un attēlo tabulā
 fetch('get_contacts.php')
 .then(response => response.json())
 .then(data => {
@@ -1701,6 +1815,7 @@ contacts.forEach(contact => {
     }
 });
 
+// Funkcija, kas dzēš kontaktu pēc ID
 function deleteContact(contactId) {
     if (confirm('Vai tiešām vēlaties dzēst šo kontaktu?')) {
         fetch('delete_contact.php', {
@@ -1726,7 +1841,7 @@ function deleteContact(contactId) {
     }
 }
 
- // Aizver modal logu nospiežot ārpus tā
+// Aizver pasūtījuma modālo logu, ja tiek uzspiests ārpus tā
 window.onclick = function(event) {
     const modal = document.getElementById('orderModal');
     if (event.target === modal) {
@@ -1736,6 +1851,7 @@ window.onclick = function(event) {
 
 let soldOutActive = false;
 
+// Funkcija, kas pārslēdz izpārdoto produktu skatījumu
 function toggleSoldOut() {
     soldOutActive = !soldOutActive;
     const btn = document.getElementById('soldOutBtn');
@@ -1749,9 +1865,10 @@ function toggleSoldOut() {
 </script>
 
 <script>
+// Pievieno event listeneri atsauksmju meklēšanas laukam
 document.getElementById('reviewsSearchInput').addEventListener('keyup', filterReviews);
 
-// Funkcija, kas parāda izvēlēto tabulu un slēpj citas
+// Funkcija, kas parāda izvēlēto tabulu un slēpj citas (atsauksmju sadaļai)
 function showTable(table) {
     localStorage.setItem('lastTable', table);
     const adminTable = document.getElementById("admin-table");
@@ -1819,7 +1936,7 @@ function showTable(table) {
     }
 }
 
-// Ielādē atsauksmes no servera un parāda tabulā
+// Ielādē atsauksmes no servera un attēlo tabulā
 function loadReviews() {
     fetch('get_reviews.php')
     .then(response => response.json())
