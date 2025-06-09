@@ -1,3 +1,13 @@
+Mājas lapa:
+Vissdarbam.lv
+
+Admin:
+vissdarbam.lv/Vissdarbam/admin/adminlogin.html
+login:
+email: admin@admin.com
+password: admin123
+
+
 TO DO:
 - [X] Izveidot plānu projektam
 - [X] Izveidot datubāzi mājas lapai
@@ -30,7 +40,7 @@ TO DO:
 - [x] Izdomāt design krāsas mājas lapai
 - [x] Izveidot admin login
 - [x] Pievienot iespēju atstāt atsauksmi par katru produktu
-- [ ] izveidot kad ja role ir moderators viņš neredz admin tabulu
+- [x] izveidot kad ja role ir moderators viņš neredz admin tabulu
 - [x] Izveidot moderatora reģistrešanos lapu
 - [x] Izveidot kad lietotājs var rediģēt savu profilu
 - [x] Izveidot kad logins strada ar datiem no datubāzes
@@ -46,8 +56,8 @@ TO DO:
 - [x] Pievienot search bar pie produktiem iekš jau kādas no kategorijām
 - [x] pievienotas preces grozam nepazud pēc page reload
 - [x] Pievienot opciju nopirkt preci mājas lapā
-- [ ] Iespejams pievienot opciju kad nopērkot klients preci tam atnāk pavadzīme epastā vai kads paziņojums par pirkumu
+- [x] Iespejams pievienot opciju kad nopērkot klients preci tam atnāk pavadzīme epastā vai kads paziņojums par pirkumu
 - [x] Tests payment metodei
 - [x] Test host
-- [ ] FUll WEB TEST
+- [x] FUll WEB TEST
 - [x] Pievienot hostingam
