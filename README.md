@@ -1,5 +1,5 @@
 Mājas lapa:
-Vissdarbam.lv
+https://Vissdarbam.lv
 
 Admin:
 vissdarbam.lv/Vissdarbam/admin/adminlogin.html
