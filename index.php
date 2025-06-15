@@ -263,6 +263,69 @@
       transform: rotate(-45deg);
       -webkit-transform: rotate(-45deg);
     }
+
+      #backToTop {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      background-color: white;
+      border: 2px solid black;
+      border-radius: 50%;
+      font-size: 24px;
+      color: black;
+      text-align: center;
+      line-height: 46px;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      z-index: 1000;
+    }
+
+    #backToTop:hover {
+      transform: scale(1.1);
+      opacity: 0.8;
+    }
+    /* Responsivitate iegūstiet jaunumus epasta */
+  @media screen and (max-width: 479px) {
+  .text-box {
+    left: 0 !important;
+    padding-left: 0 !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  .email-form.center-align input.button {
+    display: block !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
+
+.out-of-stock-label {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #e53935;
+  color: #fff;
+  font-weight: bold;
+  font-size: 0.95em;
+  padding: 4px 10px;
+  border-radius: 5px;
+  z-index: 2;
+  pointer-events: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.product-card {
+  position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.product-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
   </style>
 </head>
 <body>
@@ -485,13 +548,16 @@ function showProductModal(product) {
                 <p class="modal-description">${product.apraksts}</p>
                 <p class="modal-price">€${product.cena}</p>
                 <p><strong>Pieejamie izmēri:</strong> ${product.sizes ? product.sizes.split(',').map(size => size.trim()).join(', ') : 'Nav pieejami'}</p>
+                <p><strong>Pieejamais daudzums:</strong> ${product.quantity}</p>
                 ${isOutOfStock ? `<p style="color: red; font-weight: bold;">Izpārdots</p>` : ''}
-                <div>
-                    <label for="size-select">Izvēlieties izmēru:</label>
-                    <select id="size-select" ${isOutOfStock ? 'disabled' : ''}>
-                        ${product.sizes ? product.sizes.split(',').map(size => `<option value="${size.trim()}">${size.trim()}</option>`).join('') : '<option disabled>Nav pieejami</option>'}
-                    </select>
-                </div>
+                ${product.sizes ? 
+                '<div>' +
+                    '<label for="size-select">Izvēlieties izmēru:</label>' +
+                    '<select id="size-select" ' + (isOutOfStock ? 'disabled' : '') + '>' +
+                        product.sizes.split(',').map(size => '<option value="' + size.trim() + '">' + size.trim() + '</option>').join('') +
+                    '</select>' +
+                '</div>'
+                : ''}
                 <div>
                     <label for="quantity-input">Daudzums:</label>
                     <input type="number" id="quantity-input" min="1" max="${product.quantity}" value="1" ${isOutOfStock ? 'disabled' : ''}>
@@ -655,65 +721,6 @@ function buyNow() {
     });
 }
   </script>
-  <style>
-    #backToTop {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 50px;
-      height: 50px;
-      background-color: white;
-      border: 2px solid black;
-      border-radius: 50%;
-      font-size: 24px;
-      color: black;
-      text-align: center;
-      line-height: 46px;
-      cursor: pointer;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      transition: opacity 0.3s ease, transform 0.3s ease;
-      z-index: 1000;
-    }
 
-    #backToTop:hover {
-      transform: scale(1.1);
-      opacity: 0.8;
-    }
-    /* Responsivitate iegūstiet jaunumus epasta */
-@media screen and (max-width: 479px) {
-  .text-box {
-    left: 0 !important;
-    padding-left: 0 !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-  }
-  .email-form.center-align input.button {
-    display: block !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-  }
-}
-
-/* Add out-of-stock label style for index page product cards */
-.out-of-stock-label {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  background: #e53935;
-  color: #fff;
-  font-weight: bold;
-  font-size: 0.95em;
-  padding: 4px 10px;
-  border-radius: 5px;
-  z-index: 2;
-  pointer-events: none;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-}
-/* Ensure product-card is positioned relative for label */
-.product-card {
-  position: relative;
-  /* ...existing code... */
-}
-  </style>
 </body>
 </html>

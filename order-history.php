@@ -1,9 +1,13 @@
 <?php
+// Sāk sesiju, lai pārvaldītu lietotāja autentifikāciju
 session_start();
 
+// Ielādē datubāzes savienojuma failu
 require_once 'db_connect.php';
 
+// Ja tiek pieprasīta atsauksmes ielāde AJAX veidā
 if (isset($_GET['fetch_review']) && $_GET['fetch_review'] == '1' && isset($_GET['order_id'])) {
+    // Pārbauda, vai lietotājs ir autorizēts
     if (!isset($_SESSION['user_id'])) {
         http_response_code(403);
         echo json_encode(['error' => 'Unauthorized']);
@@ -12,6 +16,7 @@ if (isset($_GET['fetch_review']) && $_GET['fetch_review'] == '1' && isset($_GET[
     try {
         global $pdo;
 
+        // Atlasa atsauksmi no datubāzes pēc lietotāja un pasūtījuma ID
         $stmt = $pdo->prepare('SELECT review_text, images, rating FROM reviews WHERE user_id = :user_id AND order_id = :order_id');
         $stmt->execute([
             ':user_id' => $_SESSION['user_id'],
@@ -33,11 +38,13 @@ if (isset($_GET['fetch_review']) && $_GET['fetch_review'] == '1' && isset($_GET[
     exit();
 }
 
+// Apstrādā atsauksmes iesniegšanu (POST pieprasījums)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id'], $_POST['review_text'], $_POST['rating'])) {
     try {
         global $pdo;
 
         $uploadedImages = [];
+        // Apstrādā augšupielādētos attēlus, ja tādi ir
         if (!empty($_FILES['review_images']['name'][0])) {
             $uploadDir = 'review_images/';
             if (!is_dir($uploadDir)) {
@@ -55,6 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id'], $_POST['r
         }
         $imagesJson = json_encode($uploadedImages);
 
+        // Saglabā atsauksmi datubāzē
         $insertStmt = $pdo->prepare('INSERT INTO reviews (user_id, order_id, review_text, images, rating) VALUES (:user_id, :order_id, :review_text, :images, :rating)');
         $insertStmt->execute([
             ':user_id' => $_SESSION['user_id'],
@@ -65,10 +73,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id'], $_POST['r
         ]);
         $reviewMessage = "Atsauksme veiksmīgi saglabāta.";
 
+        // Pāradresē uz to pašu lapu ar parametru
         header("Location: " . strtok($_SERVER['REQUEST_URI'], '?') . "?review_saved=1");
         exit();
 
     } catch (Exception $e) {
+        // Apstrādā kļūdas gadījumus, piemēram, ja atsauksme jau ir iesniegta
         if (strpos($e->getMessage(), 'UNIQUE constraint failed') !== false) {
             $reviewMessage = "Jau esat atstājis atsauksmi par šo pasūtījumu.";
         } else {
@@ -77,10 +87,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id'], $_POST['r
     }
 }
 
+// Iekļauj lapas galveni
 include 'header.php';
 
+// Ielādē datubāzes savienojumu vēlreiz (ja nepieciešams)
 require_once 'db_connect.php';
 
+// Pārbauda, vai lietotājs ir autorizēts, ja nav - pāradresē uz login lapu
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit();
@@ -89,18 +102,22 @@ if (!isset($_SESSION['user_id'])) {
 try {
     global $pdo;
 
+    // Atlasa lietotāja pasūtījumus no datubāzes
     $stmt = $pdo->prepare('SELECT orders FROM clients WHERE id = :user_id');
     $stmt->execute([':user_id' => $_SESSION['user_id']]);
     $orders = $stmt->fetchColumn();
     $orders = $orders ? json_decode($orders, true) : [];
 
+    // Kārto pasūtījumus pēc datuma (jaunākie sākumā)
     usort($orders, function($a, $b) {
         return strtotime($b['created_at']) - strtotime($a['created_at']);
     });
 
+    // Sagatavo SQL vaicājumu, lai pārbaudītu, vai ir atsauksme par konkrēto pasūtījumu
     $reviewCheckStmt = $pdo->prepare('SELECT COUNT(*) FROM reviews WHERE user_id = :user_id AND order_id = :order_id');
     
     foreach ($orders as &$order) {
+        // Ja nav adreses informācijas, aizpilda ar noklusētām vērtībām
         if (!isset($order['address']) || !is_array($order['address'])) {
             $order['address'] = [
                 'name' => 'Nav norādīts',
@@ -114,16 +131,19 @@ try {
             ];
         }
 
+        // Aprēķina pasūtījuma kopējo cenu
         $order['total_price'] = 0;
 
         if (isset($order['total_amount'])) {
             $order['total_price'] = floatval($order['total_amount']);
         } else if (isset($order['items'])) {
+            // Ja preču saraksts ir kā teksts, pārveido uz masīvu
             if (is_string($order['items'])) {
                 $items = json_decode($order['items'], true);
             } else {
                 $items = $order['items'];
             }
+            // Saskaita katra produkta cenu reizinātu ar daudzumu
             if (is_array($items)) {
                 foreach ($items as $item) {
                     if (isset($item['cena']) && isset($item['quantity'])) {
@@ -133,12 +153,14 @@ try {
             }
         }
         
+        // Pārbauda, vai par šo pasūtījumu jau ir atsauksme
         $reviewCheckStmt->execute([':user_id' => $_SESSION['user_id'], ':order_id' => $order['order_id']]);
         $order['has_review'] = $reviewCheckStmt->fetchColumn() > 0;
     }
-    unset($order); 
+    unset($order); // Atbrīvo mainīgo pēc foreach
 
 } catch (Exception $e) {
+    // Ja rodas kļūda, atgriež tukšu pasūtījumu masīvu
     $orders = [];
 }
 ?>
@@ -1147,7 +1169,12 @@ try {
                     itemElement.className = 'order-item';
                     itemElement.innerHTML = `
                         <img src="${firstImage}" alt="${product.nosaukums}" class="order-item-image">
-                        <div class="order-item-name">${product.nosaukums}</div>
+                        <div class="order-item-name">
+                            ${product.nosaukums}
+                            <div style="font-size:0.85em;color:#666;">
+                                Izmērs: ${product.size ? product.size : 'Nav norādīts'}
+                            </div>
+                        </div>
                         <div class="order-item-quantity">${quantity} gab.</div>
                         <div class="order-item-price">${itemPrice.toFixed(2)} EUR</div>
                         <div class="order-item-total">${itemTotal.toFixed(2)} EUR</div>
@@ -1243,6 +1270,7 @@ try {
                             const img = document.createElement('img');
                             img.src = imgPath;
                             
+
                             imagePreview.appendChild(img);
                             imagesContainer.appendChild(imagePreview);
                         });

@@ -145,9 +145,20 @@ $current_page = basename($_SERVER['PHP_SELF']);
       transition: all 0.2s ease;
     }
     
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      padding: 12px 15px;
+      border-radius: 8px;
+      color: #333;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
     .sidebar-link:hover {
       background-color: #f5f5f5;
       transform: translateX(5px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
     
     .sidebar-link.active {
@@ -255,7 +266,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
       color: #555;
       text-decoration: none;
       font-weight: 500;
-      transition: all 0.2s;
+      transition: all 0.3s ease;
       border-radius: 6px;
       font-size: 14px;
     }
@@ -263,6 +274,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
     .nav-link:hover {
       color: #000;
       background-color: #f5f5f5;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
     
     .user-actions {
@@ -279,12 +291,13 @@ $current_page = basename($_SERVER['PHP_SELF']);
       align-items: center;
       padding: 6px;
       border-radius: 50%;
-      transition: all 0.2s;
+      transition: all 0.3s ease;
     }
     
     .user-action-link:hover {
       background-color: #f5f5f5;
-      transform: scale(1.1);
+      transform: scale(1.15);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
     
     .user-action-link .nav-text {

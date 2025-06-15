@@ -54,9 +54,9 @@
             <button id="filter-close-btn" aria-label="Close Filters" style="display:none;">Aizvērt</button>
             <div class="filter-section">
                 <h3>Cenas filtrs</h3>
-                <input type="range" class="price-range" min="0" max="200" step="10">
+                <input type="range" class="price-range" min="0" max="300" step="10">
                 <div class="price-values">
-                    <span>€0</span> - <span>€200</span>
+                    <span>€0</span> - <span>€300</span>
                 </div>
             </div>
             
@@ -72,7 +72,10 @@
                 <label><input type="checkbox" class="size-filter" value="43"> 43</label><br>
                 <label><input type="checkbox" class="size-filter" value="44"> 44</label><br>
                 <label><input type="checkbox" class="size-filter" value="45"> 45</label><br>
-                <label><input type="checkbox" class="size-filter" value="46"> 46</label>
+                <label><input type="checkbox" class="size-filter" value="46"> 46</label><br>
+                <label><input type="checkbox" class="size-filter" value="47"> 47</label><br>
+                <label><input type="checkbox" class="size-filter" value="48"> 48</label><br>
+                <label><input type="checkbox" class="size-filter" value="49"> 49</label>
             </div>
         </aside>
 

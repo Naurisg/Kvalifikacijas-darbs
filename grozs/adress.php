@@ -613,6 +613,14 @@ try {
     document.getElementById('addressForm').addEventListener('submit', function (e) {
         e.preventDefault();
 
+        // Disable button and show loading
+        const submitBtn = document.querySelector('.checkout-button');
+        submitBtn.disabled = true;
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Notiek apstrāde...';
+        submitBtn.style.opacity = '0.7';
+        submitBtn.style.cursor = 'not-allowed';
+
         // Iegūst formu datus
         const formData = {
             name: document.getElementById('name').value,
@@ -642,12 +650,20 @@ try {
                 stripe.redirectToCheckout({ sessionId: data.id });
             } else {
                 alert(data.error || 'Kļūda izveidojot maksājumu.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+                submitBtn.style.opacity = '';
+                submitBtn.style.cursor = '';
             }
         })
         .catch(error => {
             // Apstrādā kļūdu gadījumā, ja neizdodas izveidot maksājumu
             console.error('Error:', error);
             alert('Kļūda izveidojot maksājumu.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+            submitBtn.style.opacity = '';
+            submitBtn.style.cursor = '';
         });
     });
   </script>

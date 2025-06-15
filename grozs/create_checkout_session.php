@@ -28,6 +28,22 @@ try {
         throw new Exception('Grozs ir tukšs.');
     }
 
+    // Papildina groza produktus ar datiem no datubāzes
+    $enrichedCart = [];
+    foreach ($cart as $item) {
+        $stmtProd = $pdo->prepare('SELECT nosaukums, cena FROM products WHERE id = :id');
+        $stmtProd->execute([':id' => $item['id']]);
+        $productDetails = $stmtProd->fetch(PDO::FETCH_ASSOC);
+        if ($productDetails) {
+            $enrichedItem = array_merge($item, $productDetails);
+            $enrichedCart[] = $enrichedItem;
+        } else {
+            // Ja produkts nav atrasts, pievieno ar noklusējuma vērtībām
+            $enrichedCart[] = array_merge($item, ['nosaukums' => 'Nezināms produkts', 'cena' => 0]);
+        }
+    }
+    $cart = $enrichedCart;
+
     // Saņem adreses informāciju no fetch POST (JSON formātā)
     $rawData = file_get_contents('php://input');
     $addressData = json_decode($rawData, true);

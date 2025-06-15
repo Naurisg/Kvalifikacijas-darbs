@@ -216,9 +216,6 @@
                     <p class="modal-description">${product.apraksts}</p>
                     <p class="modal-price">€${product.cena} <span style="font-size: 0.75em; color: #888;">+PVN 21%</span></p>
                     ${isOutOfStock ? `<p style="color: red; font-weight: bold;">Izpārdots</p>` : ''}
-                    <p><strong>Tips:</strong> ${product.type || 'Nav norādīts'}</p>
-                    <p><strong>Krāsa:</strong> ${product.color || 'Nav norādīts'}</p>
-                    <p><strong>Papildaprīkojums:</strong> ${product.features ? product.features.replace(/,/g, ', ') : 'Nav'}</p>
                     <p><strong>Pieejamie izmēri:</strong> ${product.sizes ? product.sizes.replace(/,/g, ', ') : 'Nav pieejami'}</p>
                     <p><strong>Pieejamais daudzums:</strong> ${product.quantity}</p>
                     <div>

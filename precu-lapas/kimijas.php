@@ -68,13 +68,6 @@
                 </div>
             </div>
             
-            <div class="filter-section">
-                <h3>Izmēri</h3>
-                <label><input type="checkbox" class="size-filter" value="1L"> 1L</label><br>
-                <label><input type="checkbox" class="size-filter" value="5L"> 5L</label><br>
-                <label><input type="checkbox" class="size-filter" value="10L"> 10L</label><br>
-                <label><input type="checkbox" class="size-filter" value="20L"> 20L</label>
-            </div>
         </aside>
 
         <main class="products-section">
@@ -205,10 +198,7 @@
                     <p><strong>Pieejamie izmēri:</strong> ${product.sizes ? product.sizes.replace(/,/g, ', ') : 'Nav pieejami'}</p>
                     <p><strong>Pieejamais daudzums:</strong> ${product.quantity}</p>
                     <div>
-                        <label for="size-select">Izvēlieties tilpumu:</label>
-                        <select id="size-select" ${isOutOfStock ? 'disabled' : ''}>
-                            ${product.sizes ? product.sizes.split(',').map(size => `<option value="${size}">${size}</option>`).join('') : '<option disabled>Nav pieejami</option>'}
-                        </select>
+
                     </div>
                     <div>
                         <label for="quantity-input">Daudzums:</label>

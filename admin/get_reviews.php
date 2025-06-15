@@ -1,5 +1,6 @@
 <?php
-// Sāk sesiju, lai pārbaudītu autorizāciju
+// Sāk sesiju ar tādu pašu nosaukumu kā admin panelī
+session_name('admin_session');
 session_start();
 
 // Pārbauda, vai lietotājs ir autorizēts (ir user_id sesijā)
@@ -13,8 +14,8 @@ try {
     // Iekļauj datubāzes savienojumu no db_connect.php
     require_once '../db_connect.php';
 
-    // Atlasa visas atsauksmes no datubāzes
-    $stmt = $pdo->prepare('SELECT review_id AS id, user_id, order_id, review_text, images, rating FROM reviews');
+    // Atlasa visas atsauksmes no datubāzes, iekļaujot created_at
+    $stmt = $pdo->prepare('SELECT review_id AS id, user_id, order_id, review_text, images, rating, created_at FROM reviews');
     $stmt->execute();
     $reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -43,7 +44,7 @@ try {
             'review_text' => $review['review_text'],
             'images' => $images,
             'rating' => floatval($review['rating']),
-            'created_at' => '', // Ja nepieciešams, var papildināt ar datumu
+            'created_at' => $review['created_at'] ?? '', // Pievieno datumu
         ];
     }
 

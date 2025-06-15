@@ -67,6 +67,8 @@
             <li>Klients izvēlas preci, pievieno to grozam un aizpilda pasūtījuma formu.</li>
             <li>Pēc pasūtījuma apstiprinājuma un apmaksas Pārdevējs nosūta apstiprinājumu uz Klienta e-pastu.</li>
             <li>Preces tiek piegādātas ar kurjeru vai pakomātu starpniecību 1–5 darba dienu laikā.</li>
+            <li>Piegādes maksa ir 10 EUR, ja pasūtījuma kopsumma ir mazāka par 100 EUR.</li>
+            <li>Pasūtījumiem virs 100 EUR piegāde ir bez maksas.</li>
         </ul>
 
         <h2>3. Atgriešanas politika</h2>

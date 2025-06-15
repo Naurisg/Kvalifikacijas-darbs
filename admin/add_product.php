@@ -423,7 +423,7 @@ require_once 'auth_check.php'; // Pārbauda, vai lietotājs ir autorizēts
 
         const sizesForCategories = {
             cimdi: ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'],
-            apavi: ['35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47', '48'],
+            apavi: ['35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47', '48', '49'],
             apgerbs: ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL'],
             'drosibas-sistemas': ['S', 'M', 'L', 'XL', '2XL'],
             gazmaskas: ['S', 'M', 'L', 'XL'],
